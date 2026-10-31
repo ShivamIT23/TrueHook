@@ -7,3 +7,39 @@ TrueHook is an open-source webhook delivery platform designed to make sending, r
 It provides a centralized platform to register webhook endpoints, dispatch events, automatically retry failed deliveries, verify webhook signatures, and monitor delivery attempts through a developer-friendly dashboard.
 
 Built with reliability and scalability in mind, TrueHook aims to solve the challenges of webhook delivery so developers can focus on building products instead of managing webhook infrastructure.
+
+## Tech Stack
+
+- Go
+- Next.js
+- TypeScript
+- PostgreSQL
+- NATS JetStream
+- pnpm
+
+## Getting Started
+
+### Prerequisites
+
+- Go
+- Node.js
+- pnpm
+- Docker Desktop
+
+### Start infrastructure
+
+docker compose up -d
+
+### Start API
+
+cd services/api
+go run ./cmd/api
+
+### Start worker
+
+cd services/worker
+go run ./cmd/worker
+
+### Start dashboard
+
+pnpm dev
