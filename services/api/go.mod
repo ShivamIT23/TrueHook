@@ -2,7 +2,11 @@ module github.com/ShivamIT23/TrueHook/services/api
 
 go 1.26.4
 
+require github.com/ShivamIT23/TrueHook/services/config v0.0.0
+
 require (
+	github.com/golang-jwt/jwt/v5 v5.3.1 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/pgx/v5 v5.12.0 // indirect
@@ -15,3 +19,5 @@ require (
 	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
 )
+
+replace github.com/ShivamIT23/TrueHook/services/config => ../config

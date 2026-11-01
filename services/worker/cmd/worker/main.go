@@ -3,26 +3,20 @@ package main
 import (
 	"context"
 	"log"
-	"os"
 
-	"github.com/joho/godotenv"
+	"github.com/ShivamIT23/TrueHook/services/worker/internal/config"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
 
 func main() {
-	for _, envPath := range []string{".env", "../../.env", "../../../.env", "../../../../.env"} {
-		if err := godotenv.Load(envPath); err == nil {
-			break
-		}
-	}
+	cfg := config.LoadConfig()
 
-	natsURL := os.Getenv("NATS_URL")
-	if natsURL == "" {
+	if cfg.NATS_URL == "" {
 		log.Fatal("NATS_URL is required")
 	}
 
-	nc, err := nats.Connect(natsURL)
+	nc, err := nats.Connect(cfg.NATS_URL)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -36,8 +30,8 @@ func main() {
 	_, err = js.CreateOrUpdateStream(
 		context.Background(),
 		jetstream.StreamConfig{
-			Name:     "WEBHOOK_DELIVERIES",
-			Subjects: []string{"webhooks.deliver"},
+			Name:     cfg.StreamName,
+			Subjects: []string{cfg.DeliverySubject},
 			Storage:  jetstream.FileStorage,
 		},
 	)
@@ -46,7 +40,7 @@ func main() {
 	}
 
 	log.Println("TrueHook worker connected to NATS")
-	log.Println("WEBHOOK_DELIVERIES stream is ready")
+	log.Printf("%s stream is ready\n", cfg.StreamName)
 
 	select {}
 }

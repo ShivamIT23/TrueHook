@@ -2,19 +2,19 @@ package errors
 
 import "time"
 
-type DBError struct {
+type Error struct {
 	Timestamp time.Time `json:"timestamp"`
 	Message   string    `json:"message"`
 	Detail    any       `json:"detail"`
 	Code      string    `json:"code"`
 }
 
-func (d *DBError) Error() string {
+func (d *Error) Error() string {
 	return d.Message
 }
 
-func NewDBError(message string, detail any, code string) *DBError {
-	return &DBError{
+func NewError(message string, detail any, code string) *Error {
+	return &Error{
 		Timestamp: time.Now(),
 		Message:   message,
 		Detail:    detail,
