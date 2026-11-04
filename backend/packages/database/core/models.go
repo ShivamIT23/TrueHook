@@ -9,10 +9,11 @@ import (
 )
 
 type Application struct {
-	ID        pgtype.UUID
-	UserID    pgtype.UUID
-	Name      string
-	CreatedAt pgtype.Timestamptz
+	ID          pgtype.UUID
+	UserID      pgtype.UUID
+	Name        string
+	Description pgtype.Text
+	CreatedAt   pgtype.Timestamptz
 }
 
 type Delivery struct {

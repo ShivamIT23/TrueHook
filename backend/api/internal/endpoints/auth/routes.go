@@ -1,13 +1,13 @@
 package auth
 
-import "net/http"
+import (
+	"net/http"
 
-type Handler struct {
-	service Service
-}
+	handlers "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/auth"
+)
 
 // RegisterRoutes registers the authentication HTTP endpoints.
-func RegisterRoutes(mux *http.ServeMux, handler *Handler) {
+func RegisterRoutes(mux *http.ServeMux, handler *handlers.Handler) {
 	// Standard versioned routes
 	mux.HandleFunc("POST /api/v1/auth/signup", handler.Signup)
 	mux.HandleFunc("POST /api/v1/auth/signin", handler.Signin)

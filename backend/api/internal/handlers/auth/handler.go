@@ -20,6 +20,7 @@ func NewHandler(service authTypes.Service) *Handler {
 // Signup handles user registration.
 // POST /api/v1/auth/signup
 func (h *Handler) Signup(w http.ResponseWriter, r *http.Request) {
+
 	// Limit request body to 1 MB to prevent memory exhaustion
 	r.Body = http.MaxBytesReader(w, r.Body, 1024*1024)
 

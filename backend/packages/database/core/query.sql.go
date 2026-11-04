@@ -11,6 +11,34 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createApplication = `-- name: CreateApplication :one
+INSERT INTO applications (
+  user_id, name, description
+) VALUES (
+  $1, $2, $3
+)
+RETURNING id, user_id, name, description, created_at
+`
+
+type CreateApplicationParams struct {
+	UserID      pgtype.UUID
+	Name        string
+	Description pgtype.Text
+}
+
+func (q *Queries) CreateApplication(ctx context.Context, arg CreateApplicationParams) (Application, error) {
+	row := q.db.QueryRow(ctx, createApplication, arg.UserID, arg.Name, arg.Description)
+	var i Application
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Name,
+		&i.Description,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (
   email, password_hash
@@ -37,6 +65,21 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
+const deleteApplication = `-- name: DeleteApplication :exec
+DELETE FROM applications
+WHERE id = $1 AND user_id = $2
+`
+
+type DeleteApplicationParams struct {
+	ID     pgtype.UUID
+	UserID pgtype.UUID
+}
+
+func (q *Queries) DeleteApplication(ctx context.Context, arg DeleteApplicationParams) error {
+	_, err := q.db.Exec(ctx, deleteApplication, arg.ID, arg.UserID)
+	return err
+}
+
 const deleteUser = `-- name: DeleteUser :exec
 DELETE FROM users
 WHERE id = $1
@@ -45,6 +88,70 @@ WHERE id = $1
 func (q *Queries) DeleteUser(ctx context.Context, id pgtype.UUID) error {
 	_, err := q.db.Exec(ctx, deleteUser, id)
 	return err
+}
+
+const getApplicationById = `-- name: GetApplicationById :one
+SELECT id, user_id, name, description, created_at FROM applications
+WHERE id = $1 AND user_id = $2 LIMIT 1
+`
+
+type GetApplicationByIdParams struct {
+	ID     pgtype.UUID
+	UserID pgtype.UUID
+}
+
+func (q *Queries) GetApplicationById(ctx context.Context, arg GetApplicationByIdParams) (Application, error) {
+	row := q.db.QueryRow(ctx, getApplicationById, arg.ID, arg.UserID)
+	var i Application
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Name,
+		&i.Description,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getApplicationByName = `-- name: GetApplicationByName :one
+SELECT id, user_id, name, description, created_at FROM applications
+WHERE name = $1 AND user_id = $2 LIMIT 1
+`
+
+type GetApplicationByNameParams struct {
+	Name   string
+	UserID pgtype.UUID
+}
+
+func (q *Queries) GetApplicationByName(ctx context.Context, arg GetApplicationByNameParams) (Application, error) {
+	row := q.db.QueryRow(ctx, getApplicationByName, arg.Name, arg.UserID)
+	var i Application
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Name,
+		&i.Description,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getApplicationsByUserId = `-- name: GetApplicationsByUserId :one
+SELECT id, user_id, name, description, created_at FROM applications
+WHERE user_id = $1 LIMIT 1
+`
+
+func (q *Queries) GetApplicationsByUserId(ctx context.Context, userID pgtype.UUID) (Application, error) {
+	row := q.db.QueryRow(ctx, getApplicationsByUserId, userID)
+	var i Application
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Name,
+		&i.Description,
+		&i.CreatedAt,
+	)
+	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
@@ -81,6 +188,37 @@ func (q *Queries) GetUserById(ctx context.Context, id pgtype.UUID) (User, error)
 	return i, err
 }
 
+const listApplications = `-- name: ListApplications :many
+SELECT id, user_id, name, description, created_at FROM applications
+ORDER BY name
+`
+
+func (q *Queries) ListApplications(ctx context.Context) ([]Application, error) {
+	rows, err := q.db.Query(ctx, listApplications)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Application
+	for rows.Next() {
+		var i Application
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.Name,
+			&i.Description,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listUsers = `-- name: ListUsers :many
 SELECT id, email, password_hash, created_at FROM users
 ORDER BY email
@@ -109,6 +247,29 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateApplication = `-- name: UpdateApplication :exec
+UPDATE applications
+  set name = $3 , description = $4
+WHERE id = $1 AND user_id=$2
+`
+
+type UpdateApplicationParams struct {
+	ID          pgtype.UUID
+	UserID      pgtype.UUID
+	Name        string
+	Description pgtype.Text
+}
+
+func (q *Queries) UpdateApplication(ctx context.Context, arg UpdateApplicationParams) error {
+	_, err := q.db.Exec(ctx, updateApplication,
+		arg.ID,
+		arg.UserID,
+		arg.Name,
+		arg.Description,
+	)
+	return err
 }
 
 const updateUser = `-- name: UpdateUser :exec

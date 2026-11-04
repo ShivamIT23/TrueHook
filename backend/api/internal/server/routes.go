@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 
+	authRoutes "github.com/ShivamIT23/TrueHook/backend/api/internal/endpoints/auth"
 	authHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/auth"
 	"github.com/ShivamIT23/TrueHook/backend/packages/common/response"
 )
@@ -29,6 +30,11 @@ func NewRouter(cfg RouterConfig) *http.ServeMux {
 			"status": "healthy",
 		})
 	})
+
+	// Register Auth module routes
+	if cfg.AuthHandler != nil {
+		authRoutes.RegisterRoutes(mux, cfg.AuthHandler)
+	}
 
 	return mux
 }

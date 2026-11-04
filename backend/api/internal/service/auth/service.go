@@ -5,12 +5,12 @@ import (
 	"errors"
 	"net/mail"
 	"strings"
-	"time"
 
-	"github.com/ShivamIT23/TrueHook/backend/api/internal/lib/jwt"
+	TrueHookJWT "github.com/ShivamIT23/TrueHook/backend/api/internal/lib"
 	authTypes "github.com/ShivamIT23/TrueHook/backend/api/internal/types/auth"
 	"github.com/ShivamIT23/TrueHook/backend/packages/database/core"
-	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -37,12 +37,12 @@ func (s *service) Signup(ctx context.Context, req authTypes.SignupRequest) (*aut
 	}
 
 	// Check if user already exists
-	existingUser, err := s.repo.GetUserByEmail(ctx, email)
-	if err != nil && !errors.Is(err, authTypes.ErrUserNotFound) {
-		return nil, err
-	}
-	if existingUser != nil {
+	_, err := s.repo.GetUserByEmail(ctx, email)
+	if err == nil {
 		return nil, authTypes.ErrEmailTaken
+	}
+	if !errors.Is(err, pgx.ErrNoRows) {
+		return nil, err
 	}
 
 	// Hash password with bcrypt
@@ -51,30 +51,32 @@ func (s *service) Signup(ctx context.Context, req authTypes.SignupRequest) (*aut
 		return nil, err
 	}
 
-	newUser := &authTypes.User{
-		ID:           uuid.New(),
+	newUser := core.CreateUserParams{
 		Email:        email,
 		PasswordHash: string(hashedBytes),
-		CreatedAt:    time.Now().UTC(),
 	}
 
-	if err := s.repo.CreateUser(ctx, newUser); err != nil {
-		if errors.Is(err, authTypes.ErrUserAlreadyExists) {
+	res, err := s.repo.CreateUser(ctx, newUser)
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 			return nil, authTypes.ErrEmailTaken
 		}
 		return nil, err
 	}
 
-	token, err := jwt.GenerateToken(newUser.ID, newUser.Email, s.jwtSecret)
+	userId := core.PgUUIDToUUID(res.ID)
+
+	token, err := TrueHookJWT.GenerateToken(userId, newUser.Email, s.jwtSecret)
 	if err != nil {
 		return nil, err
 	}
 
 	return &authTypes.AuthResponse{
 		User: authTypes.UserResponse{
-			ID:        newUser.ID,
-			Email:     newUser.Email,
-			CreatedAt: newUser.CreatedAt,
+			ID:        userId,
+			Email:     res.Email,
+			CreatedAt: core.TimestampToTime(res.CreatedAt),
 		},
 		Token: token,
 	}, nil
@@ -88,27 +90,29 @@ func (s *service) Signin(ctx context.Context, req authTypes.SigninRequest) (*aut
 
 	user, err := s.repo.GetUserByEmail(ctx, email)
 	if err != nil {
-		if errors.Is(err, authTypes.ErrUserNotFound) {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, authTypes.ErrInvalidCredentials
 		}
 		return nil, err
 	}
+
+	userId := core.PgUUIDToUUID(user.ID)
 
 	// Constant-time hash verification via bcrypt
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
 		return nil, authTypes.ErrInvalidCredentials
 	}
 
-	token, err := jwt.GenerateToken(user.ID, user.Email, s.jwtSecret)
+	token, err := TrueHookJWT.GenerateToken(userId, user.Email, s.jwtSecret)
 	if err != nil {
 		return nil, err
 	}
 
 	return &authTypes.AuthResponse{
 		User: authTypes.UserResponse{
-			ID:        user.ID,
+			ID:        userId,
 			Email:     user.Email,
-			CreatedAt: user.CreatedAt,
+			CreatedAt: core.TimestampToTime(user.CreatedAt),
 		},
 		Token: token,
 	}, nil

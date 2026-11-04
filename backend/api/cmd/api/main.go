@@ -27,7 +27,10 @@ func main() {
 	pool, err := database.Connect(ctx, cfg.DATABASE_URL)
 	if err != nil {
 		log.Fatalf("Database connection failed: %v", err)
+	} else {
+		log.Println("Connected to the database")
 	}
+
 	defer database.Close(pool)
 
 	// 3. Run database migrations

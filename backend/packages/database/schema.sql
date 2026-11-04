@@ -1,21 +1,21 @@
-
-CREATE TABLE users (
-    id UUID PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE applications (
-    id UUID PRIMARY KEY,
-    user_id UUID NOT NULL REFERENCES users(id),
+CREATE TABLE IF NOT EXISTS applications (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
+    description TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE endpoints (
-    id UUID PRIMARY KEY,
-    application_id UUID NOT NULL REFERENCES applications(id),
+CREATE TABLE IF NOT EXISTS endpoints (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    application_id UUID NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
     url TEXT NOT NULL,
     secret_encrypted TEXT NOT NULL,
     enabled BOOLEAN DEFAULT TRUE,
@@ -23,18 +23,18 @@ CREATE TABLE endpoints (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE events (
-    id UUID PRIMARY KEY,
-    application_id UUID NOT NULL REFERENCES applications(id),
+CREATE TABLE IF NOT EXISTS events (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    application_id UUID NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
     event_type VARCHAR(255) NOT NULL,
     payload JSONB NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE deliveries (
-    id UUID PRIMARY KEY,
-    event_id UUID NOT NULL REFERENCES events(id),
-    endpoint_id UUID NOT NULL REFERENCES endpoints(id),
+CREATE TABLE IF NOT EXISTS deliveries (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    event_id UUID NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+    endpoint_id UUID NOT NULL REFERENCES endpoints(id) ON DELETE CASCADE,
     status VARCHAR(30) NOT NULL DEFAULT 'pending',
     attempts INTEGER DEFAULT 0,
     next_attempt_at TIMESTAMPTZ,
@@ -42,9 +42,9 @@ CREATE TABLE deliveries (
     UNIQUE(event_id, endpoint_id)
 );
 
-CREATE TABLE delivery_attempts (
-    id UUID PRIMARY KEY,
-    delivery_id UUID NOT NULL REFERENCES deliveries(id),
+CREATE TABLE IF NOT EXISTS delivery_attempts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    delivery_id UUID NOT NULL REFERENCES deliveries(id) ON DELETE CASCADE,
     attempt_number INTEGER NOT NULL,
     request_headers JSONB,
     response_status INTEGER,
@@ -54,16 +54,26 @@ CREATE TABLE delivery_attempts (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE processed_webhooks (
+CREATE TABLE IF NOT EXISTS processed_webhooks (
     event_id VARCHAR(100) PRIMARY KEY,
     processed_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE outbox (
-    id UUID PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS outbox (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     aggregate_id UUID NOT NULL,
     event_type VARCHAR(255) NOT NULL,
     payload JSONB NOT NULL,
     published_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_applications_user_id ON applications(user_id);
+CREATE INDEX IF NOT EXISTS idx_endpoints_application_id ON endpoints(application_id);
+CREATE INDEX IF NOT EXISTS idx_events_application_id ON events(application_id);
+CREATE INDEX IF NOT EXISTS idx_deliveries_event_id ON deliveries(event_id);
+CREATE INDEX IF NOT EXISTS idx_deliveries_endpoint_id ON deliveries(endpoint_id);
+CREATE INDEX IF NOT EXISTS idx_deliveries_status_next_attempt ON deliveries(status, next_attempt_at);
+CREATE INDEX IF NOT EXISTS idx_delivery_attempts_delivery_id ON delivery_attempts(delivery_id);
+CREATE INDEX IF NOT EXISTS idx_outbox_published_at ON outbox(published_at);
