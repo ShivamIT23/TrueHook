@@ -1,9 +1,10 @@
-package auth
+package application
 
 import (
 	"context"
 	"errors"
 	"time"
+	"net/http"
 
 	"github.com/google/uuid"
 )
@@ -11,7 +12,8 @@ import (
 type Service interface {
 	CreateApplication(ctx context.Context, req CreateApplicationRequest) (*ApplicationResponse, error)
 	UpdateApplication(ctx context.Context, req UpdateApplicationRequest) (*ApplicationResponse, error)
-	GetApplication(ctx context.Context, req GetApplicationRequest) (*ApplicationResponse, error)
+	GetApplication(ctx context.Context, req *http.Request) (*ApplicationResponse, error)
+	GetAllApplication(ctx context.Context) (*ApplicationResponse, error)
 	DeleteApplication(ctx context.Context, req DeleteApplicationRequest) (*ApplicationResponse, error)
 }
 
@@ -40,10 +42,6 @@ type UpdateApplicationRequest struct {
 	Description string `json:"description"`
 }
 
-// GetApplicationRequest defines the expected payload for retrieving an application.
-type GetApplicationRequest struct {
-	Id string `json:"id"`
-}
 
 // DeleteApplicationRequest defines the expected payload for application deletion.
 type DeleteApplicationRequest struct {
@@ -54,6 +52,7 @@ var (
 	ErrApplicationNotFound      = errors.New("application not found")
 	ErrApplicationAlreadyExists = errors.New("application with this name already exists")
 	ErrInvalidName              = errors.New("a valid application name is required")
+	ErrInvalidId                = errors.New("a valid id is required")
 	ErrInvalidDescription       = errors.New("description must be at least 10 characters long")
 	ErrNotAuthorized            = errors.New("not authorized to perform this action")
 )

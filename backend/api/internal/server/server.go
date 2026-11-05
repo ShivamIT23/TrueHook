@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/ShivamIT23/TrueHook/backend/api/internal/config"
+	TureHookMiddleware "github.com/ShivamIT23/TrueHook/backend/api/internal/middleware"
 )
 
 type Server struct {
@@ -21,7 +22,7 @@ type Server struct {
 
 // New constructs a production-ready HTTP server with timeout protection and middleware.
 func New(cfg *config.Config, handler http.Handler) *Server {
-	chain := Logger(Recovery(CORS(cfg.AllowedOrigins)(handler)))
+	chain := TureHookMiddleware.Logger(TureHookMiddleware.Recovery(TureHookMiddleware.CORS(cfg.AllowedOrigins)(handler)))
 
 	return &Server{
 		cfg: cfg,

@@ -38,7 +38,7 @@ WHERE name = $1 AND user_id = $2 LIMIT 1;
 
 -- name: GetApplicationsByUserId :one
 SELECT * FROM applications
-WHERE user_id = $1 LIMIT 1;
+WHERE user_id = $1;
 
 -- name: ListApplications :many
 SELECT * FROM applications

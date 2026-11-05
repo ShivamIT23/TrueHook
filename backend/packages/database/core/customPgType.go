@@ -16,6 +16,13 @@ func NewUUID() pgtype.UUID {
 	}
 }
 
+func UUIDTOPgUUID(id uuid.UUID) pgtype.UUID {
+	return pgtype.UUID{
+		Bytes: id,
+		Valid: true,
+	}
+}
+
 func NewTimestamp() pgtype.Timestamptz {
 	return pgtype.Timestamptz{
 		Time:  time.Now(),

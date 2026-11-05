@@ -138,7 +138,7 @@ func (q *Queries) GetApplicationByName(ctx context.Context, arg GetApplicationBy
 
 const getApplicationsByUserId = `-- name: GetApplicationsByUserId :one
 SELECT id, user_id, name, description, created_at FROM applications
-WHERE user_id = $1 LIMIT 1
+WHERE user_id = $1
 `
 
 func (q *Queries) GetApplicationsByUserId(ctx context.Context, userID pgtype.UUID) (Application, error) {

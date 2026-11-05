@@ -5,8 +5,10 @@ import (
 	"log"
 
 	"github.com/ShivamIT23/TrueHook/backend/api/internal/config"
+	applicationHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/application"
 	authHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/auth"
 	"github.com/ShivamIT23/TrueHook/backend/api/internal/server"
+	applicationService "github.com/ShivamIT23/TrueHook/backend/api/internal/service/application"
 	authService "github.com/ShivamIT23/TrueHook/backend/api/internal/service/auth"
 	"github.com/ShivamIT23/TrueHook/backend/packages/database"
 	"github.com/ShivamIT23/TrueHook/backend/packages/database/core"
@@ -55,9 +57,14 @@ func main() {
 
 	authHandler := authHandler.NewHandler(newAuthService)
 
+	newApplicationService := applicationService.NewService(dbQueries)
+
+	applicationHandler := applicationHandler.NewHandler(newApplicationService)
+
 	// 5.. Assemble HTTP Router
 	router := server.NewRouter(server.RouterConfig{
-		AuthHandler: authHandler,
+		AuthHandler:        authHandler,
+		ApplicationHandler: applicationHandler,
 	})
 
 	// 6. Start HTTP Server with Graceful Shutdown
