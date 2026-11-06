@@ -19,7 +19,7 @@ func NewHandler(service authTypes.Service) *Handler {
 
 // Signup handles user registration.
 // POST /api/v1/auth/signup
-func (h *Handler) Signup(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Limit request body to 1 MB to prevent memory exhaustion
 	r.Body = http.MaxBytesReader(w, r.Body, 1024*1024)
@@ -50,7 +50,7 @@ func (h *Handler) Signup(w http.ResponseWriter, r *http.Request) {
 
 // Signin handles user authentication.
 // POST /api/v1/auth/signin
-func (h *Handler) Signin(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) SigninHandler(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, 1024*1024)
 
 	var req authTypes.SigninRequest

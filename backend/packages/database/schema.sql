@@ -13,20 +13,43 @@ CREATE TABLE IF NOT EXISTS applications (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS event_types (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    application_id UUID NOT NULL
+        REFERENCES applications(id) ON DELETE CASCADE,
+
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    UNIQUE (application_id, name)
+);
+
 CREATE TABLE IF NOT EXISTS endpoints (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     application_id UUID NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
     url TEXT NOT NULL,
     secret_encrypted TEXT NOT NULL,
-    enabled BOOLEAN DEFAULT TRUE,
-    subscribed_events JSONB DEFAULT '[]',
+    enabled BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS endpoint_event_types (
+    endpoint_id UUID NOT NULL
+        REFERENCES endpoints(id) ON DELETE CASCADE,
+
+    event_type_id UUID NOT NULL
+        REFERENCES event_types(id) ON DELETE CASCADE,
+
+    PRIMARY KEY (endpoint_id, event_type_id)
 );
 
 CREATE TABLE IF NOT EXISTS events (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     application_id UUID NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
-    event_type VARCHAR(255) NOT NULL,
+    event_type_id UUID NOT NULL REFERENCES event_types(id),
     payload JSONB NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );

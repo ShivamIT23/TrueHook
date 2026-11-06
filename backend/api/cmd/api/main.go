@@ -7,9 +7,11 @@ import (
 	"github.com/ShivamIT23/TrueHook/backend/api/internal/config"
 	applicationHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/application"
 	authHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/auth"
+	eventTypeHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/event-type"
 	"github.com/ShivamIT23/TrueHook/backend/api/internal/server"
 	applicationService "github.com/ShivamIT23/TrueHook/backend/api/internal/service/application"
 	authService "github.com/ShivamIT23/TrueHook/backend/api/internal/service/auth"
+	eventTypeService "github.com/ShivamIT23/TrueHook/backend/api/internal/service/event-type"
 	"github.com/ShivamIT23/TrueHook/backend/packages/database"
 	"github.com/ShivamIT23/TrueHook/backend/packages/database/core"
 	customNats "github.com/ShivamIT23/TrueHook/backend/packages/nats"
@@ -61,10 +63,15 @@ func main() {
 
 	applicationHandler := applicationHandler.NewHandler(newApplicationService)
 
+	newEventTypeService := eventTypeService.NewService(dbQueries)
+
+	eventTypeHandler := eventTypeHandler.NewHandler(newEventTypeService)
+
 	// 5.. Assemble HTTP Router
 	router := server.NewRouter(server.RouterConfig{
 		AuthHandler:        authHandler,
 		ApplicationHandler: applicationHandler,
+		EventTypeHandler: eventTypeHandler,
 	})
 
 	// 6. Start HTTP Server with Graceful Shutdown

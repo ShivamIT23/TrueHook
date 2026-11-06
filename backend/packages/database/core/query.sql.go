@@ -39,6 +39,34 @@ func (q *Queries) CreateApplication(ctx context.Context, arg CreateApplicationPa
 	return i, err
 }
 
+const createEventType = `-- name: CreateEventType :one
+INSERT INTO event_types (
+  application_id, name, description
+) VALUES (
+  $1, $2, $3
+)
+RETURNING id, application_id, name, description, created_at
+`
+
+type CreateEventTypeParams struct {
+	ApplicationID pgtype.UUID
+	Name          string
+	Description   pgtype.Text
+}
+
+func (q *Queries) CreateEventType(ctx context.Context, arg CreateEventTypeParams) (EventType, error) {
+	row := q.db.QueryRow(ctx, createEventType, arg.ApplicationID, arg.Name, arg.Description)
+	var i EventType
+	err := row.Scan(
+		&i.ID,
+		&i.ApplicationID,
+		&i.Name,
+		&i.Description,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (
   email, password_hash
@@ -77,6 +105,25 @@ type DeleteApplicationParams struct {
 
 func (q *Queries) DeleteApplication(ctx context.Context, arg DeleteApplicationParams) error {
 	_, err := q.db.Exec(ctx, deleteApplication, arg.ID, arg.UserID)
+	return err
+}
+
+const deleteEventType = `-- name: DeleteEventType :exec
+DELETE FROM event_types et
+USING applications a
+WHERE et.id = $1
+  AND et.application_id = a.id
+  AND a.user_id = $2
+RETURNING id, application_id, name, description, created_at
+`
+
+type DeleteEventTypeParams struct {
+	ID     pgtype.UUID
+	UserID pgtype.UUID
+}
+
+func (q *Queries) DeleteEventType(ctx context.Context, arg DeleteEventTypeParams) error {
+	_, err := q.db.Exec(ctx, deleteEventType, arg.ID, arg.UserID)
 	return err
 }
 
@@ -136,22 +183,93 @@ func (q *Queries) GetApplicationByName(ctx context.Context, arg GetApplicationBy
 	return i, err
 }
 
-const getApplicationsByUserId = `-- name: GetApplicationsByUserId :one
+const getApplicationsByUserId = `-- name: GetApplicationsByUserId :many
 SELECT id, user_id, name, description, created_at FROM applications
 WHERE user_id = $1
 `
 
-func (q *Queries) GetApplicationsByUserId(ctx context.Context, userID pgtype.UUID) (Application, error) {
-	row := q.db.QueryRow(ctx, getApplicationsByUserId, userID)
-	var i Application
+func (q *Queries) GetApplicationsByUserId(ctx context.Context, userID pgtype.UUID) ([]Application, error) {
+	rows, err := q.db.Query(ctx, getApplicationsByUserId, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Application
+	for rows.Next() {
+		var i Application
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.Name,
+			&i.Description,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getEventTypeById = `-- name: GetEventTypeById :one
+SELECT id, application_id, name, description, created_at FROM event_types
+WHERE id = $1 LIMIT 1
+`
+
+func (q *Queries) GetEventTypeById(ctx context.Context, id pgtype.UUID) (EventType, error) {
+	row := q.db.QueryRow(ctx, getEventTypeById, id)
+	var i EventType
 	err := row.Scan(
 		&i.ID,
-		&i.UserID,
+		&i.ApplicationID,
 		&i.Name,
 		&i.Description,
 		&i.CreatedAt,
 	)
 	return i, err
+}
+
+const getEventTypesByApplicationId = `-- name: GetEventTypesByApplicationId :many
+SELECT et.id, et.application_id, et.name, et.description, et.created_at
+FROM event_types et
+JOIN applications a
+    ON et.application_id = a.id
+WHERE et.application_id = $1
+  AND a.user_id = $2
+`
+
+type GetEventTypesByApplicationIdParams struct {
+	ApplicationID pgtype.UUID
+	UserID        pgtype.UUID
+}
+
+func (q *Queries) GetEventTypesByApplicationId(ctx context.Context, arg GetEventTypesByApplicationIdParams) ([]EventType, error) {
+	rows, err := q.db.Query(ctx, getEventTypesByApplicationId, arg.ApplicationID, arg.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []EventType
+	for rows.Next() {
+		var i EventType
+		if err := rows.Scan(
+			&i.ID,
+			&i.ApplicationID,
+			&i.Name,
+			&i.Description,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
@@ -264,6 +382,35 @@ type UpdateApplicationParams struct {
 
 func (q *Queries) UpdateApplication(ctx context.Context, arg UpdateApplicationParams) error {
 	_, err := q.db.Exec(ctx, updateApplication,
+		arg.ID,
+		arg.UserID,
+		arg.Name,
+		arg.Description,
+	)
+	return err
+}
+
+const updateEventType = `-- name: UpdateEventType :exec
+UPDATE event_types et
+SET
+    name = $3,
+    description = $4
+FROM applications a
+WHERE et.id = $1
+  AND et.application_id = a.id
+  AND a.user_id = $2
+RETURNING a.id, user_id, a.name, a.description, a.created_at, et.id, application_id, et.name, et.description, et.created_at
+`
+
+type UpdateEventTypeParams struct {
+	ID          pgtype.UUID
+	UserID      pgtype.UUID
+	Name        string
+	Description pgtype.Text
+}
+
+func (q *Queries) UpdateEventType(ctx context.Context, arg UpdateEventTypeParams) error {
+	_, err := q.db.Exec(ctx, updateEventType,
 		arg.ID,
 		arg.UserID,
 		arg.Name,

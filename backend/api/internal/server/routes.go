@@ -4,10 +4,12 @@ import (
 	"net/http"
 
 	"github.com/ShivamIT23/TrueHook/backend/api/internal/config"
-	"github.com/ShivamIT23/TrueHook/backend/api/internal/endpoints/application"
+	applicationRoutes "github.com/ShivamIT23/TrueHook/backend/api/internal/endpoints/application"
 	authRoutes "github.com/ShivamIT23/TrueHook/backend/api/internal/endpoints/auth"
+	eventTypeRoutes "github.com/ShivamIT23/TrueHook/backend/api/internal/endpoints/event-type"
 	applicationHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/application"
 	authHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/auth"
+	eventTypeHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/event-type"
 	"github.com/ShivamIT23/TrueHook/backend/packages/common/response"
 )
 
@@ -15,6 +17,7 @@ import (
 type RouterConfig struct {
 	AuthHandler        *authHandler.Handler
 	ApplicationHandler *applicationHandler.Handler
+	EventTypeHandler   *eventTypeHandler.Handler
 }
 
 // NewRouter builds the root http.ServeMux with health checks and module routes.
@@ -40,7 +43,8 @@ func NewRouter(cfg RouterConfig) *http.ServeMux {
 	// Register Auth module routes
 	if cfg.AuthHandler != nil {
 		authRoutes.RegisterRoutes(mux, cfg.AuthHandler)
-		application.RegisterRoutes(mux, cfg.ApplicationHandler, jwt_secret)
+		applicationRoutes.ApplicationRoutes(mux, cfg.ApplicationHandler, jwt_secret)
+		eventTypeRoutes.EventTypeRoutes(mux, cfg.EventTypeHandler, jwt_secret)
 	}
 
 	return mux

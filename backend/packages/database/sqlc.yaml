@@ -1,4 +1,7 @@
 version: "2"
+cloud:
+  # Replace <PROJECT_ID> with your project ID from the sqlc Cloud dashboard
+  project: "01M6RQ2MG0CBF11X1J1K1T3Q52"
 sql:
   - engine: "postgresql"
     queries: "query.sql"

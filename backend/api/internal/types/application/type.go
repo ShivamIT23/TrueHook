@@ -3,9 +3,10 @@ package application
 import (
 	"context"
 	"errors"
-	"time"
 	"net/http"
+	"time"
 
+	"github.com/ShivamIT23/TrueHook/backend/packages/database/core"
 	"github.com/google/uuid"
 )
 
@@ -13,8 +14,8 @@ type Service interface {
 	CreateApplication(ctx context.Context, req CreateApplicationRequest) (*ApplicationResponse, error)
 	UpdateApplication(ctx context.Context, req UpdateApplicationRequest) (*ApplicationResponse, error)
 	GetApplication(ctx context.Context, req *http.Request) (*ApplicationResponse, error)
-	GetAllApplication(ctx context.Context) (*ApplicationResponse, error)
-	DeleteApplication(ctx context.Context, req DeleteApplicationRequest) (*ApplicationResponse, error)
+	GetAllApplication(ctx context.Context) (*ApplicationsResponse, error)
+	DeleteApplication(ctx context.Context, req *http.Request) (*ApplicationResponse, error)
 }
 
 type Handler struct {
@@ -29,6 +30,10 @@ type ApplicationResponse struct {
 	CreatedAt   time.Time `json:"created_at"`
 }
 
+type ApplicationsResponse struct {
+	Applications []core.Application
+}
+
 // CreateApplicationRequest defines the expected payload for creating an application.
 type CreateApplicationRequest struct {
 	Name        string `json:"name"`
@@ -41,7 +46,6 @@ type UpdateApplicationRequest struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 }
-
 
 // DeleteApplicationRequest defines the expected payload for application deletion.
 type DeleteApplicationRequest struct {

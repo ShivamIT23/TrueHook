@@ -12,6 +12,7 @@ type Config struct {
 	POSTGRES_PASSWORD string
 	POSTGRES_DB       string
 	DATABASE_URL      string
+	SQLC_AUTH_TOKEN   string
 	NATS_URL          string
 	GoProd            bool
 	SkipTLSVerify     bool
@@ -45,6 +46,8 @@ func LoadConfig() *Config {
 
 	defaultDBURL := "postgres://" + postgresUser + ":" + postgresPassword + "@localhost:5432/" + postgresDB + "?sslmode=disable"
 	dbURL := GetEnv("DATABASE_URL", defaultDBURL)
+
+	sqlcAuthToken := GetEnv("SQLC_AUTH_TOKEN", "niobvsoibdvs")
 
 	natsURL := GetEnv("NATS_URL", "nats://localhost:4222")
 
@@ -110,6 +113,7 @@ func LoadConfig() *Config {
 		POSTGRES_PASSWORD: postgresPassword,
 		POSTGRES_DB:       postgresDB,
 		DATABASE_URL:      dbURL,
+		SQLC_AUTH_TOKEN:   sqlcAuthToken,
 		NATS_URL:          natsURL,
 		GoProd:            goProd,
 		SkipTLSVerify:     skipTLSVerify,

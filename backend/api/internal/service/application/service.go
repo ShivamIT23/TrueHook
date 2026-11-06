@@ -3,7 +3,6 @@ package application
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 
 	TureHookMiddleware "github.com/ShivamIT23/TrueHook/backend/api/internal/middleware"
@@ -22,7 +21,6 @@ type service struct {
 
 const (
 	UserIDContextKey contextKey = "user_id"
-	EmailContextKey  contextKey = "email"
 )
 
 func NewService(repo *core.Queries) applicationTypes.Service {
@@ -114,10 +112,10 @@ func (s *service) UpdateApplication(ctx context.Context, req applicationTypes.Up
 	}
 	// Check if application already exists
 	result, err := s.repo.GetApplicationById(ctx, checkApplication)
-	if err == nil {
-		return nil, applicationTypes.ErrApplicationAlreadyExists
+	if err != nil {
+		return nil, applicationTypes.ErrApplicationNotFound
 	}
-	if !errors.Is(err, pgx.ErrNoRows) {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, err
 	}
 
@@ -139,14 +137,14 @@ func (s *service) UpdateApplication(ctx context.Context, req applicationTypes.Up
 
 	return &applicationTypes.ApplicationResponse{
 		ID:          core.PgUUIDToUUID(result.ID),
-		Name:        result.Name,
-		Description: result.Description.String,
+		Name:        req.Name,
+		Description: req.Description,
 		CreatedAt:   core.TimestampToTime(result.CreatedAt),
 	}, nil
 }
 
-func (s *service) DeleteApplication(ctx context.Context, req applicationTypes.DeleteApplicationRequest) (*applicationTypes.ApplicationResponse, error) {
-	id := req.Id
+func (s *service) DeleteApplication(ctx context.Context, req *http.Request) (*applicationTypes.ApplicationResponse, error) {
+	id := req.PathValue("id")
 	if id == "" {
 		return nil, applicationTypes.ErrInvalidId
 	}
@@ -171,10 +169,11 @@ func (s *service) DeleteApplication(ctx context.Context, req applicationTypes.De
 	}
 	// Check if user already exists
 	result, err := s.repo.GetApplicationById(ctx, checkApplication)
-	if err == nil {
-		return nil, applicationTypes.ErrApplicationAlreadyExists
+
+	if err != nil {
+		return nil, applicationTypes.ErrApplicationNotFound
 	}
-	if !errors.Is(err, pgx.ErrNoRows) {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, err
 	}
 
@@ -228,7 +227,7 @@ func (s *service) GetApplication(ctx context.Context, req *http.Request) (*appli
 	result, err := s.repo.GetApplicationById(ctx, checkApplication)
 
 	if err != nil {
-		return nil, applicationTypes.ErrApplicationAlreadyExists
+		return nil, applicationTypes.ErrApplicationNotFound
 	}
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, err
@@ -242,11 +241,9 @@ func (s *service) GetApplication(ctx context.Context, req *http.Request) (*appli
 	}, nil
 }
 
-func (s *service) GetAllApplication(ctx context.Context) (*applicationTypes.ApplicationResponse, error) {
+func (s *service) GetAllApplication(ctx context.Context) (*applicationTypes.ApplicationsResponse, error) {
 
 	user_id, getIdErr := TureHookMiddleware.GetUserID(ctx)
-
-	fmt.Println("user_id", user_id)
 
 	userId := core.UUIDTOPgUUID(user_id)
 
@@ -255,6 +252,7 @@ func (s *service) GetAllApplication(ctx context.Context) (*applicationTypes.Appl
 	}
 
 	result, retreval_err := s.repo.GetApplicationsByUserId(ctx, userId)
+
 	if retreval_err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(retreval_err, &pgErr) && pgErr.Code == "23505" {
@@ -263,11 +261,8 @@ func (s *service) GetAllApplication(ctx context.Context) (*applicationTypes.Appl
 		return nil, retreval_err
 	}
 
-	return &applicationTypes.ApplicationResponse{
-		ID:          core.PgUUIDToUUID(result.ID),
-		Name:        result.Name,
-		Description: result.Description.String,
-		CreatedAt:   core.TimestampToTime(result.CreatedAt),
+	return &applicationTypes.ApplicationsResponse{
+		Applications: result,
 	}, nil
 }
 

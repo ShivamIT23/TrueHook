@@ -39,20 +39,32 @@ type DeliveryAttempt struct {
 }
 
 type Endpoint struct {
-	ID               pgtype.UUID
-	ApplicationID    pgtype.UUID
-	Url              string
-	SecretEncrypted  string
-	Enabled          pgtype.Bool
-	SubscribedEvents []byte
-	CreatedAt        pgtype.Timestamptz
+	ID              pgtype.UUID
+	ApplicationID   pgtype.UUID
+	Url             string
+	SecretEncrypted string
+	Enabled         bool
+	CreatedAt       pgtype.Timestamptz
+}
+
+type EndpointEventType struct {
+	EndpointID  pgtype.UUID
+	EventTypeID pgtype.UUID
 }
 
 type Event struct {
 	ID            pgtype.UUID
 	ApplicationID pgtype.UUID
-	EventType     string
+	EventTypeID   pgtype.UUID
 	Payload       []byte
+	CreatedAt     pgtype.Timestamptz
+}
+
+type EventType struct {
+	ID            pgtype.UUID
+	ApplicationID pgtype.UUID
+	Name          string
+	Description   pgtype.Text
 	CreatedAt     pgtype.Timestamptz
 }
 
