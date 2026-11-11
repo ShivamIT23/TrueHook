@@ -455,7 +455,7 @@ export function EndpointsManager({
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-2">
                             <Key className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                            <span className="font-mono text-[11px] text-muted-foreground max-w-[160px] truncate">
+                            <span className="font-mono text-[11px] text-muted-foreground max-w-40 truncate">
                               {isSecretRevealed
                                 ? ep.secret_encrypted || "whsec_..."
                                 : maskSecret(ep.secret_encrypted)}
