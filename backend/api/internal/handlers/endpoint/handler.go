@@ -166,3 +166,98 @@ func (h *Handler) DeleteEndpointHandler(w http.ResponseWriter, r *http.Request) 
 
 	response.Success(w, http.StatusOK, "Endpoint deleted successfully", endpointResp)
 }
+
+// GetEndpointEventTypesHandler returns event types subscribed by an endpoint.
+// GET /api/v1/application/{application_id}/endpoint/{endpoint_id}/event-types
+func (h *Handler) GetEndpointEventTypesHandler(w http.ResponseWriter, r *http.Request) {
+	applicationId := r.PathValue("application_id")
+	endpointId := r.PathValue("endpoint_id")
+	if applicationId == "" || endpointId == "" {
+		response.Fail(w, http.StatusBadRequest, "application_id and endpoint_id are required", nil, "INVALID_REQUEST")
+		return
+	}
+
+	eventTypes, err := h.service.GetEndpointEventTypes(r.Context(), applicationId, endpointId)
+	if err != nil {
+		switch {
+		case errors.Is(err, endpointTypes.ErrNotAuthorized):
+			response.Fail(w, http.StatusUnauthorized, "Not authorized", nil, "UNAUTHORIZED")
+		case errors.Is(err, endpointTypes.ErrEndpointNotFound):
+			response.Fail(w, http.StatusNotFound, "Endpoint not found", nil, "ENDPOINT_NOT_FOUND")
+		case errors.Is(err, endpointTypes.ErrInvalidId):
+			response.Fail(w, http.StatusBadRequest, "Invalid ID format", nil, "INVALID_ID")
+		default:
+			response.Fail(w, http.StatusInternalServerError, err.Error(), nil, "INTERNAL_ERROR")
+		}
+		return
+	}
+
+	response.Success(w, http.StatusOK, "Endpoint event types retrieved successfully", map[string]interface{}{
+		"event_types": eventTypes,
+	})
+}
+
+// AddEndpointEventTypeHandler subscribes an endpoint to an event type.
+// POST /api/v1/application/{application_id}/endpoint/{endpoint_id}/event-types
+func (h *Handler) AddEndpointEventTypeHandler(w http.ResponseWriter, r *http.Request) {
+	applicationId := r.PathValue("application_id")
+	endpointId := r.PathValue("endpoint_id")
+	if applicationId == "" || endpointId == "" {
+		response.Fail(w, http.StatusBadRequest, "application_id and endpoint_id are required", nil, "INVALID_REQUEST")
+		return
+	}
+
+	var body struct {
+		EventTypeId string `json:"event_type_id"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.EventTypeId == "" {
+		response.Fail(w, http.StatusBadRequest, "Valid event_type_id is required", nil, "INVALID_REQUEST_BODY")
+		return
+	}
+
+	err := h.service.AddEndpointEventType(r.Context(), applicationId, endpointId, body.EventTypeId)
+	if err != nil {
+		switch {
+		case errors.Is(err, endpointTypes.ErrNotAuthorized):
+			response.Fail(w, http.StatusUnauthorized, "Not authorized", nil, "UNAUTHORIZED")
+		case errors.Is(err, endpointTypes.ErrEndpointNotFound):
+			response.Fail(w, http.StatusNotFound, "Endpoint not found", nil, "ENDPOINT_NOT_FOUND")
+		case errors.Is(err, endpointTypes.ErrInvalidId):
+			response.Fail(w, http.StatusBadRequest, "Invalid ID format", nil, "INVALID_ID")
+		default:
+			response.Fail(w, http.StatusInternalServerError, err.Error(), nil, "INTERNAL_ERROR")
+		}
+		return
+	}
+
+	response.Success(w, http.StatusOK, "Endpoint subscribed to event type successfully", nil)
+}
+
+// RemoveEndpointEventTypeHandler unsubscribes an endpoint from an event type.
+// DELETE /api/v1/application/{application_id}/endpoint/{endpoint_id}/event-types/{event_type_id}
+func (h *Handler) RemoveEndpointEventTypeHandler(w http.ResponseWriter, r *http.Request) {
+	applicationId := r.PathValue("application_id")
+	endpointId := r.PathValue("endpoint_id")
+	eventTypeId := r.PathValue("event_type_id")
+	if applicationId == "" || endpointId == "" || eventTypeId == "" {
+		response.Fail(w, http.StatusBadRequest, "application_id, endpoint_id, and event_type_id are required", nil, "INVALID_REQUEST")
+		return
+	}
+
+	err := h.service.RemoveEndpointEventType(r.Context(), applicationId, endpointId, eventTypeId)
+	if err != nil {
+		switch {
+		case errors.Is(err, endpointTypes.ErrNotAuthorized):
+			response.Fail(w, http.StatusUnauthorized, "Not authorized", nil, "UNAUTHORIZED")
+		case errors.Is(err, endpointTypes.ErrEndpointNotFound):
+			response.Fail(w, http.StatusNotFound, "Endpoint not found", nil, "ENDPOINT_NOT_FOUND")
+		case errors.Is(err, endpointTypes.ErrInvalidId):
+			response.Fail(w, http.StatusBadRequest, "Invalid ID format", nil, "INVALID_ID")
+		default:
+			response.Fail(w, http.StatusInternalServerError, err.Error(), nil, "INTERNAL_ERROR")
+		}
+		return
+	}
+
+	response.Success(w, http.StatusOK, "Endpoint unsubscribed from event type successfully", nil)
+}

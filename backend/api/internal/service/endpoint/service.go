@@ -104,11 +104,26 @@ func (s *service) CreateEndpoint(ctx context.Context, req endpointTypes.CreateEn
 		return nil, creation_err
 	}
 
+	for _, etIDStr := range req.EventTypeIds {
+		if etID, err := core.StringToPGUUID(etIDStr); err == nil {
+			_ = s.repo.AddEndpointEventType(ctx, core.AddEndpointEventTypeParams{
+				EndpointID:  result.ID,
+				EventTypeID: etID,
+			})
+		}
+	}
+
+	rawEventTypes, _ := s.repo.GetEventTypesByEndpointId(ctx, result.ID)
+	safeEventTypes, eventTypeIds := formatSafeEventTypes(rawEventTypes)
+
 	return &endpointTypes.EndpointResponse{
 		ID:              core.PgUUIDToUUID(result.ID),
+		ApplicationID:   core.PgUUIDToUUID(result.ApplicationID),
 		Url:             result.Url,
 		SecretEncrypted: result.SecretEncrypted,
 		Enabled:         result.Enabled,
+		EventTypes:      safeEventTypes,
+		EventTypeIds:    eventTypeIds,
 		CreatedAt:       core.TimestampToTime(result.CreatedAt),
 	}, nil
 }
@@ -168,11 +183,29 @@ func (s *service) UpdateEndpoint(ctx context.Context, req endpointTypes.UpdateEn
 		return nil, err
 	}
 
+	if req.EventTypeIds != nil {
+		_ = s.repo.DeleteEndpointEventTypesByEndpointId(ctx, endpointId)
+		for _, etIDStr := range req.EventTypeIds {
+			if etID, err := core.StringToPGUUID(etIDStr); err == nil {
+				_ = s.repo.AddEndpointEventType(ctx, core.AddEndpointEventTypeParams{
+					EndpointID:  endpointId,
+					EventTypeID: etID,
+				})
+			}
+		}
+	}
+
+	rawEventTypes, _ := s.repo.GetEventTypesByEndpointId(ctx, endpointId)
+	safeEventTypes, eventTypeIds := formatSafeEventTypes(rawEventTypes)
+
 	return &endpointTypes.EndpointResponse{
 		ID:              core.PgUUIDToUUID(existing.ID),
+		ApplicationID:   core.PgUUIDToUUID(existing.ApplicationID),
 		Url:             req.Url,
 		SecretEncrypted: secret,
 		Enabled:         req.Enabled,
+		EventTypes:      safeEventTypes,
+		EventTypeIds:    eventTypeIds,
 		CreatedAt:       core.TimestampToTime(existing.CreatedAt),
 	}, nil
 }
@@ -264,7 +297,125 @@ func (s *service) GetEndpoints(ctx context.Context, req endpointTypes.GetEndpoin
 		return nil, retreval_err
 	}
 
+	var endpointItems []endpointTypes.EndpointResponse
+	for _, ep := range result {
+		rawEventTypes, _ := s.repo.GetEventTypesByEndpointId(ctx, ep.ID)
+		safeEventTypes, etIds := formatSafeEventTypes(rawEventTypes)
+		endpointItems = append(endpointItems, endpointTypes.EndpointResponse{
+			ID:              core.PgUUIDToUUID(ep.ID),
+			ApplicationID:   core.PgUUIDToUUID(ep.ApplicationID),
+			Url:             ep.Url,
+			SecretEncrypted: ep.SecretEncrypted,
+			Enabled:         ep.Enabled,
+			EventTypes:      safeEventTypes,
+			EventTypeIds:    etIds,
+			CreatedAt:       core.TimestampToTime(ep.CreatedAt),
+		})
+	}
+
 	return &endpointTypes.EndpointsResponse{
-		Endpoints: result,
+		Endpoints: endpointItems,
 	}, nil
+}
+
+func (s *service) GetEndpointEventTypes(ctx context.Context, applicationId, endpointId string) ([]core.EventType, error) {
+	user_id, getIdErr := TureHookMiddleware.GetUserID(ctx)
+	if !getIdErr {
+		return nil, endpointTypes.ErrNotAuthorized
+	}
+	userId := core.UUIDTOPgUUID(user_id)
+
+	epID, err := core.StringToPGUUID(endpointId)
+	if err != nil {
+		return nil, endpointTypes.ErrInvalidId
+	}
+
+	checkEndpointById := core.GetEndpointsByIdParams{
+		ID:     epID,
+		UserID: userId,
+	}
+	if _, err := s.repo.GetEndpointsById(ctx, checkEndpointById); err != nil {
+		return nil, endpointTypes.ErrEndpointNotFound
+	}
+
+	return s.repo.GetEventTypesByEndpointId(ctx, epID)
+}
+
+func (s *service) AddEndpointEventType(ctx context.Context, applicationId, endpointId, eventTypeId string) error {
+	user_id, getIdErr := TureHookMiddleware.GetUserID(ctx)
+	if !getIdErr {
+		return endpointTypes.ErrNotAuthorized
+	}
+	userId := core.UUIDTOPgUUID(user_id)
+
+	epID, err := core.StringToPGUUID(endpointId)
+	if err != nil {
+		return endpointTypes.ErrInvalidId
+	}
+	etID, err := core.StringToPGUUID(eventTypeId)
+	if err != nil {
+		return endpointTypes.ErrInvalidId
+	}
+
+	checkEndpointById := core.GetEndpointsByIdParams{
+		ID:     epID,
+		UserID: userId,
+	}
+	if _, err := s.repo.GetEndpointsById(ctx, checkEndpointById); err != nil {
+		return endpointTypes.ErrEndpointNotFound
+	}
+
+	return s.repo.AddEndpointEventType(ctx, core.AddEndpointEventTypeParams{
+		EndpointID:  epID,
+		EventTypeID: etID,
+	})
+}
+
+func (s *service) RemoveEndpointEventType(ctx context.Context, applicationId, endpointId, eventTypeId string) error {
+	user_id, getIdErr := TureHookMiddleware.GetUserID(ctx)
+	if !getIdErr {
+		return endpointTypes.ErrNotAuthorized
+	}
+	userId := core.UUIDTOPgUUID(user_id)
+
+	epID, err := core.StringToPGUUID(endpointId)
+	if err != nil {
+		return endpointTypes.ErrInvalidId
+	}
+	etID, err := core.StringToPGUUID(eventTypeId)
+	if err != nil {
+		return endpointTypes.ErrInvalidId
+	}
+
+	checkEndpointById := core.GetEndpointsByIdParams{
+		ID:     epID,
+		UserID: userId,
+	}
+	if _, err := s.repo.GetEndpointsById(ctx, checkEndpointById); err != nil {
+		return endpointTypes.ErrEndpointNotFound
+	}
+
+	return s.repo.RemoveEndpointEventType(ctx, core.RemoveEndpointEventTypeParams{
+		EndpointID:  epID,
+		EventTypeID: etID,
+	})
+}
+
+func formatSafeEventTypes(eventTypes []core.EventType) ([]endpointTypes.SafeEventType, []string) {
+	safe := make([]endpointTypes.SafeEventType, 0, len(eventTypes))
+	ids := make([]string, 0, len(eventTypes))
+	for _, et := range eventTypes {
+		idStr := core.PgUUIDToUUID(et.ID).String()
+		ids = append(ids, idStr)
+		desc := ""
+		if et.Description.Valid {
+			desc = et.Description.String
+		}
+		safe = append(safe, endpointTypes.SafeEventType{
+			ID:          idStr,
+			Name:        et.Name,
+			Description: desc,
+		})
+	}
+	return safe, ids
 }

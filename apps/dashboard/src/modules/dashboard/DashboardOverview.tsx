@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import type { AuthUser } from "@/lib/types";
 import type { Application } from "@/modules/applications/types";
+import Link from "next/link";
 
 export interface DashboardOverviewProps {
   user?: AuthUser | null;
@@ -22,7 +23,7 @@ export function DashboardOverview({
   application,
 }: DashboardOverviewProps) {
   return (
-    <div className="relative isolate min-h-[calc(100vh-4rem)] overflow-hidden">
+    <div className="relative isolate min-h-[calc(100vh-5rem)] overflow-hidden overflow-y-auto">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 pb-32">
         {/* Welcome Section */}
         <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
@@ -43,10 +44,12 @@ export function DashboardOverview({
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button className="h-9 cursor-pointer border border-primary bg-primary px-4 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90">
+            <Link href="/endpoints" >
+            <Button className="h-9 border border-primary bg-primary px-4 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90">
               <Webhook className="h-3.5 w-3.5" />
               <span>Add Endpoint</span>
             </Button>
+            </Link>
           </div>
         </div>
 
@@ -128,10 +131,12 @@ export function DashboardOverview({
             receiving webhook deliveries.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
+            <Link href="/events" >
             <Button className="h-8 cursor-pointer border border-primary bg-primary px-3 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90">
-              <span>Register Endpoint</span>
+              <span>Register Events</span>
               <ArrowUpRight className="h-3.5 w-3.5" />
             </Button>
+            </Link>
             <Button
               variant="outline"
               className="h-8 cursor-pointer border-border bg-canvas px-3 text-xs text-foreground transition-colors hover:bg-secondary"

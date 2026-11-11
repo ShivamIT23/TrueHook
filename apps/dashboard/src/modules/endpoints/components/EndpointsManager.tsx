@@ -20,20 +20,29 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { Application } from "@/modules/applications/types";
+import type { EventType } from "@/modules/event-types/types";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import { CreateEndpointModal } from "@/modules/endpoints/components/CreateEndpointModal";
 import { DeleteEndpointDialog } from "@/modules/endpoints/components/DeleteEndpointDialog";
 import { EditEndpointModal } from "@/modules/endpoints/components/EditEndpointModal";
 import { useEndpointsQuery } from "@/modules/endpoints/hooks/useEndpoints";
 import type { Endpoint } from "@/modules/endpoints/types";
+import { useEventTypesQuery } from "@/modules/event-types/hooks/useEventTypes";
 
 interface EndpointsManagerProps {
   application: Application | null;
   initialEndpoints: Endpoint[];
+  eventTypes?: EventType[];
 }
 
 export function EndpointsManager({
   application,
   initialEndpoints,
+  eventTypes = [],
 }: EndpointsManagerProps) {
   const applicationId = application?.id || "";
 
@@ -44,6 +53,11 @@ export function EndpointsManager({
     isFetching,
     refetch,
   } = useEndpointsQuery(applicationId, initialEndpoints);
+
+  const { data: currentEventTypes = eventTypes } = useEventTypesQuery(
+    applicationId,
+    eventTypes,
+  );
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -291,6 +305,7 @@ export function EndpointsManager({
                 <thead>
                   <tr className="border-b border-border bg-secondary/40 text-muted-foreground">
                     <th className="py-3 px-4 font-semibold">Destination URL</th>
+                    <th className="py-3 px-4 font-semibold">Subscribed Events</th>
                     <th className="py-3 px-4 font-semibold">Status</th>
                     <th className="py-3 px-4 font-semibold">Signing Secret</th>
                     <th className="py-3 px-4 font-semibold">Created</th>
@@ -301,6 +316,7 @@ export function EndpointsManager({
                 </thead>
                 <tbody className="divide-y divide-border">
                   {filteredEndpoints.map((ep) => {
+                    console.log(ep);
                     const isHttps = ep.url.startsWith("https://");
                     const isSecretRevealed = Boolean(revealedSecrets[ep.id]);
 
@@ -337,6 +353,87 @@ export function EndpointsManager({
                               )}
                             </button>
                           </div>
+                        </td>
+
+                        {/* Subscribed Events */}
+                        <td className="py-3.5 px-4">
+                          {(() => {
+                            const typesList: Array<{ id: string; name: string }> = [];
+
+                            if (ep.event_types && ep.event_types.length > 0) {
+                              for (const et of ep.event_types) {
+                                const id = typeof et.id === "string" ? et.id : "";
+                                const name =
+                                  et.name ||
+                                  currentEventTypes.find((t) => t.id === id)?.name ||
+                                  id;
+                                if (name) typesList.push({ id, name });
+                              }
+                            } else if (
+                              ep.event_type_ids &&
+                              ep.event_type_ids.length > 0
+                            ) {
+                              for (const id of ep.event_type_ids) {
+                                const found = currentEventTypes.find(
+                                  (t) => t.id === id,
+                                );
+                                typesList.push({ id, name: found?.name || id });
+                              }
+                            }
+
+                            if (typesList.length === 0) {
+                              return (
+                                <span className="text-xs text-muted-foreground italic">
+                                  No events (inactive)
+                                </span>
+                              );
+                            }
+
+                            return (
+                              <div className="flex items-center gap-1 max-w-50">
+                                {typesList.slice(0, 2).map((et, idx) => (
+                                  <span
+                                    key={et.id || et.name || idx}
+                                    className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary"
+                                  >
+                                    {et.name}
+                                  </span>
+                                ))}
+                                {typesList.length > 2 && (
+                                  <HoverCard>
+                                    <HoverCardTrigger className="inline-flex items-center rounded-full bg-secondary hover:bg-secondary/80 border border-border px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground hover:text-foreground cursor-pointer transition-colors select-none">
+                                      +{typesList.length - 2}
+                                    </HoverCardTrigger>
+                                    <HoverCardContent
+                                      side="top"
+                                      align="center"
+                                      sideOffset={6}
+                                      className="z-50 w-64 p-3 rounded-xl border border-border bg-popover shadow-xl text-foreground"
+                                    >
+                                      <div className="space-y-2">
+                                        <div className="flex items-center justify-between border-b border-border pb-1.5 text-xs font-semibold text-foreground">
+                                          <span>Remaining Events</span>
+                                          <span className="text-[10px] font-normal text-muted-foreground">
+                                            {typesList.length - 2} more
+                                          </span>
+                                        </div>
+                                        <div className="flex flex-wrap gap-1.5 max-h-44 overflow-y-auto pt-0.5">
+                                          {typesList.slice(2).map((et, idx) => (
+                                            <span
+                                              key={et.id || et.name || idx}
+                                              className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary"
+                                            >
+                                              {et.name}
+                                            </span>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    </HoverCardContent>
+                                  </HoverCard>
+                                )}
+                              </div>
+                            );
+                          })()}
                         </td>
 
                         {/* Status */}
@@ -447,6 +544,7 @@ export function EndpointsManager({
       <CreateEndpointModal
         isOpen={isCreateOpen}
         applicationId={applicationId}
+        eventTypes={currentEventTypes}
         onClose={() => setIsCreateOpen(false)}
       />
 
@@ -454,6 +552,7 @@ export function EndpointsManager({
         isOpen={Boolean(editingEndpoint)}
         endpoint={editingEndpoint}
         applicationId={applicationId}
+        eventTypes={currentEventTypes}
         onClose={() => setEditingEndpoint(null)}
       />
 

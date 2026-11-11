@@ -49,7 +49,7 @@ export function ProtectedLayoutShell({
           onToggleMobileSidebar={() => setIsMobileOpen(true)}
           showLogo={false}
         />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
     </div>
   );

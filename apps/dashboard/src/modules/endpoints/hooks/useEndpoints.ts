@@ -41,12 +41,21 @@ export function useCreateEndpointMutation(applicationId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (payload: { url: string; secret?: string }) => {
+    mutationFn: async (payload: {
+      url: string;
+      secret?: string;
+      event_type_ids?: string[];
+    }) => {
       const formData = new FormData();
       formData.append("application_id", applicationId);
       formData.append("url", payload.url);
       if (payload.secret) {
         formData.append("secret", payload.secret);
+      }
+      if (payload.event_type_ids) {
+        for (const id of payload.event_type_ids) {
+          formData.append("event_type_ids", id);
+        }
       }
 
       const result = await createEndpointAction(
@@ -84,6 +93,7 @@ export function useUpdateEndpointMutation(applicationId: string) {
       url: string;
       secret?: string;
       enabled: boolean;
+      event_type_ids?: string[];
     }) => {
       const formData = new FormData();
       formData.append("application_id", applicationId);
@@ -93,6 +103,11 @@ export function useUpdateEndpointMutation(applicationId: string) {
         formData.append("secret", payload.secret);
       }
       formData.append("enabled", payload.enabled ? "true" : "false");
+      if (payload.event_type_ids) {
+        for (const id of payload.event_type_ids) {
+          formData.append("event_type_ids", id);
+        }
+      }
 
       const result = await updateEndpointAction(
         initialUpdateEndpointState,

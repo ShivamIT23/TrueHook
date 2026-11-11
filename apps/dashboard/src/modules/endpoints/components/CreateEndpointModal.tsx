@@ -1,16 +1,19 @@
 "use client";
 
-import { AlertCircle, Globe, Key, Loader2, Plus, X } from "lucide-react";
+import { AlertCircle, Globe, Key, Loader2, Plus, Tag, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { EventTypeMultiSelect } from "@/modules/endpoints/components/EventTypeMultiSelect";
+import type { EventType } from "@/modules/event-types/types";
 import { useCreateEndpointMutation } from "@/modules/endpoints/hooks/useEndpoints";
 import type { CreateEndpointState, Endpoint } from "@/modules/endpoints/types";
 
 interface CreateEndpointModalProps {
   isOpen: boolean;
   applicationId: string;
+  eventTypes?: EventType[];
   onClose: () => void;
   onSuccess?: (endpoint: Endpoint) => void;
 }
@@ -18,11 +21,13 @@ interface CreateEndpointModalProps {
 export function CreateEndpointModal({
   isOpen,
   applicationId,
+  eventTypes = [],
   onClose,
   onSuccess,
 }: CreateEndpointModalProps) {
   const [url, setUrl] = useState("");
   const [secret, setSecret] = useState("");
+  const [selectedEventTypeIds, setSelectedEventTypeIds] = useState<string[]>([]);
   const [fieldErrors, setFieldErrors] = useState<CreateEndpointState["errors"]>(
     {},
   );
@@ -36,6 +41,7 @@ export function CreateEndpointModal({
       setFieldErrors({});
       setUrl("");
       setSecret("");
+      setSelectedEventTypeIds([]);
       onClose();
     }
   };
@@ -48,6 +54,7 @@ export function CreateEndpointModal({
       const created = await mutation.mutateAsync({
         url: url.trim(),
         secret: secret.trim() ? secret.trim() : undefined,
+        event_type_ids: selectedEventTypeIds,
       });
       if (created && onSuccess) {
         onSuccess(created);
@@ -197,6 +204,31 @@ export function CreateEndpointModal({
                 HMAC secret (`whsec_...`).
               </p>
             )}
+          </div>
+
+          {/* Subscribed Event Types Multi-Select */}
+          <div className="space-y-1.5 pt-1">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-semibold text-foreground">
+                Subscribed Event Types
+              </Label>
+              <span className="text-[11px] text-muted-foreground">
+                {selectedEventTypeIds.length === 0
+                  ? "No events will be sent"
+                  : `${selectedEventTypeIds.length} selected`}
+              </span>
+            </div>
+            <EventTypeMultiSelect
+              applicationId={applicationId}
+              eventTypes={eventTypes}
+              selectedIds={selectedEventTypeIds}
+              onChange={setSelectedEventTypeIds}
+              disabled={mutation.isPending}
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Leaving this empty will not send any events to this endpoint.
+              Select or create event types to receive deliveries.
+            </p>
           </div>
 
           {/* Modal Actions */}

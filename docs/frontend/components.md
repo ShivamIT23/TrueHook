@@ -167,6 +167,7 @@ When creating or modifying components, register them below:
   - **Search & Filter**: Real-time filtering across endpoint destination URLs with clear filter action.
   - **Table & Actions**:
     - Destination URL with HTTP/HTTPS protocol tags and one-click copy button.
+    - Subscribed event types rendered as pill tags with an interactive on-hover `HoverCard` modal on the `+<count>` indicator displaying all remaining event types.
     - Active vs. Disabled status pills with pulsing indicator.
     - Webhook Signing Secret with toggle mask/reveal (`Eye` / `EyeOff`) and copy button.
     - Formatted creation timestamp.
@@ -180,8 +181,20 @@ When creating or modifying components, register them below:
 ### `CreateEndpointModal` & `EditEndpointModal`
 - **Path**: `apps/dashboard/src/modules/endpoints/components/CreateEndpointModal.tsx`, `apps/dashboard/src/modules/endpoints/components/EditEndpointModal.tsx`
 - **Layer**: Webhook Endpoints Feature Module
-- **Description**: Accessible modal dialogs for registering and editing webhook endpoints. Powered by TanStack Query mutations and BFF Server Actions (`createEndpointAction`, `updateEndpointAction`). Includes URL validation (must be valid HTTP/HTTPS), optional custom signing secret input (with auto-generation fallback), enabled delivery toggle, error banners, inline field errors in `text-destructive`, and loading spinners during submission.
+- **Description**: Accessible modal dialogs for registering and editing webhook endpoints. Powered by TanStack Query mutations and BFF Server Actions (`createEndpointAction`, `updateEndpointAction`). Includes URL validation (must be valid HTTP/HTTPS), optional custom signing secret input (with auto-generation fallback), enabled delivery toggle, `EventTypeMultiSelect` for selecting specific event types as tags with close buttons, error banners, inline field errors in `text-destructive`, and loading spinners during submission.
 - **Color Usage**: Semantic tokens (`bg-canvas`, `border-border`, `bg-primary`, `text-primary-foreground`, `text-destructive`).
+
+### `EventTypeMultiSelect`
+- **Path**: `apps/dashboard/src/modules/endpoints/components/EventTypeMultiSelect.tsx`
+- **Layer**: Webhook Endpoints Feature Module
+- **Description**: Interactive multi-select combobox component for choosing subscribed event types. Renders selected event types as tags/boxes inside the select trigger container, each equipped with an individual close button (`X`) for rapid removal. Features a dropdown popover with real-time search filtering, checkmark selection indicators, "Select all" and "Clear" quick action triggers, an inline "Create new event type" form with instant optimistic selection, outside click dismissal, and keyboard accessibility. Leaving the selection empty ensures no events are dispatched to the endpoint.
+- **Color Usage**: Semantic tokens (`bg-canvas`, `border-input`, `border-primary`, `bg-primary/10`, `text-primary`, `bg-popover`, `text-foreground`, `text-muted-foreground`).
+- **Props Interface**:
+  - `applicationId?: string`
+  - `eventTypes: EventType[]`
+  - `selectedIds: string[]`
+  - `onChange: (ids: string[]) => void`
+  - `disabled?: boolean`
 
 ### `DeleteEndpointDialog`
 - **Path**: `apps/dashboard/src/modules/endpoints/components/DeleteEndpointDialog.tsx`
@@ -231,6 +244,56 @@ When creating or modifying components, register them below:
   - `actions?: React.ReactNode`
   - `details?: string` (Optional technical/diagnostic details displayed in monospace)
   - `showDetails?: boolean`
+
+### `EventsManager`
+- **Path**: `apps/dashboard/src/modules/events/components/EventsManager.tsx`
+- **Layer**: Feature Domain Module (`modules/events`)
+- **Description**: Webhook event publication and telemetry stream workspace adhering strictly to the `mx-auto max-w-7xl` layout pattern. Features a standardized page header with category eyebrow, active application pill, description, quick refresh button, and publish modal trigger. Displays a 4-card overview grid (Total Events, Dispatched Deliveries, Event Types, and Avg Fanout Ratio). Includes a real-time search input, event type filter selector, and high-contrast table displaying monospace event IDs with hover copy feedback, styled event type pills, payload previews in code snippets, fanout delivery counters, relative/absolute timestamps, and one-click inspection triggers.
+- **Props Interface**:
+  - `application: Application | null`
+  - `initialEvents: EventItem[]`
+  - `totalEvents: number`
+  - `eventTypes: EventType[]`
+
+### `PublishEventModal`
+- **Path**: `apps/dashboard/src/modules/events/components/PublishEventModal.tsx`
+- **Layer**: Feature Domain Module (`modules/events`)
+- **Description**: Modal dialog for emitting webhook events. Contains an empty state guiding users to create event types if none are registered, an event type dropdown selector, an interactive JSON payload editor with "Format JSON" and "Sample Data" utilities, real-time RFC-8259 syntax validation alerts, and submission states with loading spinners.
+- **Props Interface**:
+  - `isOpen: boolean`
+  - `applicationId: string`
+  - `eventTypes: EventType[]`
+  - `onClose: () => void`
+  - `onSuccess?: (event: EventDetail) => void`
+
+### `EventDetailModal`
+- **Path**: `apps/dashboard/src/modules/events/components/EventDetailModal.tsx`
+- **Layer**: Feature Domain Module (`modules/events`)
+- **Description**: Comprehensive inspection dialog displaying the full event payload with one-click JSON copy, copyable event ID, formatted timestamp, and a detailed fanout deliveries target list with destination URLs, status badges (`success`, `failed`, `pending`), attempt counts, and direct links to the deliveries telemetry view.
+- **Props Interface**:
+  - `isOpen: boolean`
+  - `applicationId: string`
+  - `event: EventItem | null`
+  - `onClose: () => void`
+
+### `DeliveriesManager`
+- **Path**: `apps/dashboard/src/modules/deliveries/components/DeliveriesManager.tsx`
+- **Layer**: Feature Domain Module (`modules/deliveries`)
+- **Description**: HTTP delivery attempt monitoring dashboard enclosed in the standardized `mx-auto max-w-7xl` container. Features a page header with telemetry eyebrow, active application pill, description, and refresh button. Displays a 4-metric pipeline summary grid (Total Deliveries, Delivery Success Rate percentage, Failed Deliveries, and In-Flight/Retrying). Provides a segmented status control with live count badges (`All`, `Success`, `Failed`, `Pending`), destination URL/event type search, and a structured table rendering status icons, POST method tags, copyable destination URLs, attempt counts, timestamps, and row action buttons for inspecting and replaying deliveries.
+- **Props Interface**:
+  - `application: Application | null`
+  - `initialDeliveries: DeliveryItem[]`
+  - `totalDeliveries: number`
+
+### `DeliveryDetailModal`
+- **Path**: `apps/dashboard/src/modules/deliveries/components/DeliveryDetailModal.tsx`
+- **Layer**: Feature Domain Module (`modules/deliveries`)
+- **Description**: Telemetry modal for inspecting delivery attempts. Displays the destination endpoint URL with copy action, delivery ID, scheduled next attempt notice, original event payload code block, and an accordion-style attempt history list. Each attempt displays its attempt number, HTTP status code badge (with 2xx success and error tints), duration in milliseconds, error diagnostic callouts, formatted outgoing request headers, and formatted HTTP response body. Also provides an instant delivery replay trigger with loading state.
+- **Props Interface**:
+  - `isOpen: boolean`
+  - `applicationId: string`
+  - `delivery: DeliveryItem | null`
+  - `onClose: () => void`
 
 ---
 

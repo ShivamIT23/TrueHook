@@ -1,10 +1,12 @@
 "use client";
 
-import { AlertCircle, Globe, Key, Loader2, Save, X } from "lucide-react";
+import { AlertCircle, Globe, Key, Loader2, Save, Tag, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { EventTypeMultiSelect } from "@/modules/endpoints/components/EventTypeMultiSelect";
+import type { EventType } from "@/modules/event-types/types";
 import { useUpdateEndpointMutation } from "@/modules/endpoints/hooks/useEndpoints";
 import type { Endpoint, UpdateEndpointState } from "@/modules/endpoints/types";
 
@@ -12,6 +14,7 @@ interface EditEndpointModalProps {
   isOpen: boolean;
   endpoint: Endpoint | null;
   applicationId: string;
+  eventTypes?: EventType[];
   onClose: () => void;
   onSuccess?: (endpoint: Endpoint) => void;
 }
@@ -20,12 +23,14 @@ export function EditEndpointModal({
   isOpen,
   endpoint,
   applicationId,
+  eventTypes = [],
   onClose,
   onSuccess,
 }: EditEndpointModalProps) {
   const [url, setUrl] = useState("");
   const [secret, setSecret] = useState("");
   const [enabled, setEnabled] = useState(true);
+  const [selectedEventTypeIds, setSelectedEventTypeIds] = useState<string[]>([]);
   const [fieldErrors, setFieldErrors] = useState<UpdateEndpointState["errors"]>(
     {},
   );
@@ -37,6 +42,7 @@ export function EditEndpointModal({
       setUrl(endpoint.url || "");
       setSecret(endpoint.secret_encrypted || "");
       setEnabled(endpoint.enabled ?? true);
+      setSelectedEventTypeIds(endpoint.event_type_ids || []);
       setFieldErrors({});
     }
   }, [endpoint]);
@@ -60,6 +66,7 @@ export function EditEndpointModal({
         url: url.trim(),
         secret: secret.trim() ? secret.trim() : undefined,
         enabled,
+        event_type_ids: selectedEventTypeIds,
       });
       if (updated && onSuccess) {
         onSuccess(updated);
@@ -189,6 +196,31 @@ export function EditEndpointModal({
                 {fieldErrors.secret[0]}
               </p>
             )}
+          </div>
+
+          {/* Subscribed Event Types Multi-Select */}
+          <div className="space-y-1.5 pt-1">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-semibold text-foreground">
+                Subscribed Event Types
+              </Label>
+              <span className="text-[11px] text-muted-foreground">
+                {selectedEventTypeIds.length === 0
+                  ? "No events will be sent"
+                  : `${selectedEventTypeIds.length} selected`}
+              </span>
+            </div>
+            <EventTypeMultiSelect
+              applicationId={applicationId}
+              eventTypes={eventTypes}
+              selectedIds={selectedEventTypeIds}
+              onChange={setSelectedEventTypeIds}
+              disabled={mutation.isPending}
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Leaving this empty will not send any events to this endpoint.
+              Select or create event types to receive deliveries.
+            </p>
           </div>
 
           {/* Enabled Status Toggle */}

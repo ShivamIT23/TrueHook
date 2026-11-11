@@ -4,6 +4,12 @@ export interface Endpoint {
   url: string;
   secret_encrypted?: string;
   enabled: boolean;
+  event_types?: Array<{
+    id: string | { Bytes?: number[] };
+    name: string;
+    description?: string | { String?: string };
+  }>;
+  event_type_ids?: string[];
   created_at: string;
 }
 

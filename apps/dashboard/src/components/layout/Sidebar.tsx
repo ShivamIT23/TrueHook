@@ -86,10 +86,17 @@ export function Sidebar({
               <button
                 type="button"
                 onClick={() => setIsDesktopCollapsed(false)}
-                className="hidden md:flex h-9 w-9 rounded-[5px] bg-primary text-primary-foreground font-bold items-center justify-center text-sm shadow hover:bg-primary/90 transition-colors cursor-pointer"
+                className="hidden md:flex h-9 w-9 rounded-[5px] items-center justify-center shadow cursor-pointer"
                 title="Expand sidebar"
               >
-                TH
+                <Image
+                  src="/small-logo-white.png"
+                  alt="TrueHook Logo"
+                  width={280}
+                  height={100}
+                  priority
+                  className="h-9 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                />
               </button>
             ) : null}
 

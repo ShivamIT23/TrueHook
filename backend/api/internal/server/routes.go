@@ -7,13 +7,17 @@ import (
 	adminRoutes "github.com/ShivamIT23/TrueHook/backend/api/internal/routes/admin"
 	applicationRoutes "github.com/ShivamIT23/TrueHook/backend/api/internal/routes/application"
 	authRoutes "github.com/ShivamIT23/TrueHook/backend/api/internal/routes/auth"
+	deliveryRoutes "github.com/ShivamIT23/TrueHook/backend/api/internal/routes/delivery"
 	endpointRoutes "github.com/ShivamIT23/TrueHook/backend/api/internal/routes/endpoint"
+	eventRoutes "github.com/ShivamIT23/TrueHook/backend/api/internal/routes/event"
 	eventTypeRoutes "github.com/ShivamIT23/TrueHook/backend/api/internal/routes/event-type"
 	userRoutes "github.com/ShivamIT23/TrueHook/backend/api/internal/routes/user"
 	adminHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/admin"
 	applicationHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/application"
 	authHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/auth"
+	deliveryHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/delivery"
 	endpointHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/endpoint"
+	eventHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/event"
 	eventTypeHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/event-type"
 	userHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/user"
 	"github.com/ShivamIT23/TrueHook/backend/packages/common/response"
@@ -26,6 +30,8 @@ type RouterConfig struct {
 	ApplicationHandler *applicationHandler.Handler
 	EndpointHandler    *endpointHandler.Handler
 	EventTypeHandler   *eventTypeHandler.Handler
+	EventHandler       *eventHandler.Handler
+	DeliveryHandler    *deliveryHandler.Handler
 	UserHandler        *userHandler.Handler
 }
 
@@ -64,6 +70,12 @@ func NewRouter(cfg RouterConfig) *http.ServeMux {
 	}
 	if cfg.EventTypeHandler != nil {
 		eventTypeRoutes.EventTypeRoutes(mux, cfg.EventTypeHandler, jwt_secret)
+	}
+	if cfg.EventHandler != nil {
+		eventRoutes.EventRoutes(mux, cfg.EventHandler, jwt_secret)
+	}
+	if cfg.DeliveryHandler != nil {
+		deliveryRoutes.DeliveryRoutes(mux, cfg.DeliveryHandler, jwt_secret)
 	}
 	if cfg.UserHandler != nil {
 		userRoutes.UserRoutes(mux, cfg.UserHandler, jwt_secret)

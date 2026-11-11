@@ -8,14 +8,18 @@ import (
 	adminHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/admin"
 	applicationHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/application"
 	authHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/auth"
+	deliveryHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/delivery"
 	endpointHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/endpoint"
+	eventHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/event"
 	eventTypeHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/event-type"
 	userHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/user"
 	"github.com/ShivamIT23/TrueHook/backend/api/internal/server"
 	adminService "github.com/ShivamIT23/TrueHook/backend/api/internal/service/admin"
 	applicationService "github.com/ShivamIT23/TrueHook/backend/api/internal/service/application"
 	authService "github.com/ShivamIT23/TrueHook/backend/api/internal/service/auth"
+	deliveryService "github.com/ShivamIT23/TrueHook/backend/api/internal/service/delivery"
 	endpointService "github.com/ShivamIT23/TrueHook/backend/api/internal/service/endpoint"
+	eventService "github.com/ShivamIT23/TrueHook/backend/api/internal/service/event"
 	eventTypeService "github.com/ShivamIT23/TrueHook/backend/api/internal/service/event-type"
 	userService "github.com/ShivamIT23/TrueHook/backend/api/internal/service/user"
 	"github.com/ShivamIT23/TrueHook/backend/packages/database"
@@ -77,6 +81,14 @@ func main() {
 
 	eventTypeHandler := eventTypeHandler.NewHandler(newEventTypeService)
 
+	newEventHandler := eventService.NewService(dbQueries)
+
+	eventHandler := eventHandler.NewHandler(newEventHandler)
+
+	newDeliveryService := deliveryService.NewService(dbQueries)
+
+	deliveryHandler := deliveryHandler.NewHandler(newDeliveryService)
+
 	newUserService := userService.NewService(dbQueries)
 
 	userHandler := userHandler.NewHandler(newUserService)
@@ -92,6 +104,8 @@ func main() {
 		ApplicationHandler: applicationHandler,
 		EndpointHandler:    endpointHandler,
 		EventTypeHandler:   eventTypeHandler,
+		EventHandler:       eventHandler,
+		DeliveryHandler:    deliveryHandler,
 		UserHandler:        userHandler,
 	})
 

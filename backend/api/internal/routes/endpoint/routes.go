@@ -20,10 +20,16 @@ func EndpointRoutes(mux *http.ServeMux, handler *handlers.Handler, jwtSecret str
 	mux.Handle("PUT /api/v1/application/{application_id}/endpoint/{endpoint_id}", auth(http.HandlerFunc(handler.UpdateEndpointHandler)))
 	mux.Handle("GET /api/v1/application/{application_id}/endpoint", auth(http.HandlerFunc(handler.GetEndpointsHandler)))
 	mux.Handle("DELETE /api/v1/application/{application_id}/endpoint/{endpoint_id}", auth(http.HandlerFunc(handler.DeleteEndpointHandler)))
+	mux.Handle("GET /api/v1/application/{application_id}/endpoint/{endpoint_id}/event-types", auth(http.HandlerFunc(handler.GetEndpointEventTypesHandler)))
+	mux.Handle("POST /api/v1/application/{application_id}/endpoint/{endpoint_id}/event-types", auth(http.HandlerFunc(handler.AddEndpointEventTypeHandler)))
+	mux.Handle("DELETE /api/v1/application/{application_id}/endpoint/{endpoint_id}/event-types/{event_type_id}", auth(http.HandlerFunc(handler.RemoveEndpointEventTypeHandler)))
 
 	// Convenience unversioned routes
 	mux.Handle("POST /application/{application_id}/endpoint/create", auth(http.HandlerFunc(handler.CreateEndpointHandler)))
 	mux.Handle("PUT /application/{application_id}/endpoint/{endpoint_id}", auth(http.HandlerFunc(handler.UpdateEndpointHandler)))
 	mux.Handle("GET /application/{application_id}/endpoint", auth(http.HandlerFunc(handler.GetEndpointsHandler)))
 	mux.Handle("DELETE /application/{application_id}/endpoint/{endpoint_id}", auth(http.HandlerFunc(handler.DeleteEndpointHandler)))
+	mux.Handle("GET /application/{application_id}/endpoint/{endpoint_id}/event-types", auth(http.HandlerFunc(handler.GetEndpointEventTypesHandler)))
+	mux.Handle("POST /application/{application_id}/endpoint/{endpoint_id}/event-types", auth(http.HandlerFunc(handler.AddEndpointEventTypeHandler)))
+	mux.Handle("DELETE /application/{application_id}/endpoint/{endpoint_id}/event-types/{event_type_id}", auth(http.HandlerFunc(handler.RemoveEndpointEventTypeHandler)))
 }

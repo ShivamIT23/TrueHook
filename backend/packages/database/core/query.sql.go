@@ -11,6 +11,68 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const addEndpointEventType = `-- name: AddEndpointEventType :exec
+
+INSERT INTO endpoint_event_types (
+  endpoint_id, event_type_id
+) VALUES (
+  $1, $2
+)
+ON CONFLICT DO NOTHING
+`
+
+type AddEndpointEventTypeParams struct {
+	EndpointID  pgtype.UUID
+	EventTypeID pgtype.UUID
+}
+
+// ============================================================================
+// Endpoint Event Types Queries
+// ============================================================================
+func (q *Queries) AddEndpointEventType(ctx context.Context, arg AddEndpointEventTypeParams) error {
+	_, err := q.db.Exec(ctx, addEndpointEventType, arg.EndpointID, arg.EventTypeID)
+	return err
+}
+
+const countDeliveriesByApplicationId = `-- name: CountDeliveriesByApplicationId :one
+SELECT COUNT(*)
+FROM deliveries d
+JOIN endpoints ep ON d.endpoint_id = ep.id
+JOIN applications a ON ep.application_id = a.id
+WHERE a.id = $1 AND a.user_id = $2
+`
+
+type CountDeliveriesByApplicationIdParams struct {
+	ID     pgtype.UUID
+	UserID pgtype.UUID
+}
+
+func (q *Queries) CountDeliveriesByApplicationId(ctx context.Context, arg CountDeliveriesByApplicationIdParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countDeliveriesByApplicationId, arg.ID, arg.UserID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const countEventsByApplicationId = `-- name: CountEventsByApplicationId :one
+SELECT COUNT(*)
+FROM events e
+JOIN applications a ON e.application_id = a.id
+WHERE e.application_id = $1 AND a.user_id = $2
+`
+
+type CountEventsByApplicationIdParams struct {
+	ApplicationID pgtype.UUID
+	UserID        pgtype.UUID
+}
+
+func (q *Queries) CountEventsByApplicationId(ctx context.Context, arg CountEventsByApplicationIdParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countEventsByApplicationId, arg.ApplicationID, arg.UserID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createAdmin = `-- name: CreateAdmin :one
 INSERT INTO admins (
   name, email, password_hash
@@ -74,6 +136,96 @@ func (q *Queries) CreateApplication(ctx context.Context, arg CreateApplicationPa
 	return i, err
 }
 
+const createDelivery = `-- name: CreateDelivery :one
+
+INSERT INTO deliveries (
+  event_id, endpoint_id, status, attempts, next_attempt_at
+) VALUES (
+  $1, $2, $3, $4, $5
+)
+RETURNING id, event_id, endpoint_id, status, attempts, next_attempt_at, created_at
+`
+
+type CreateDeliveryParams struct {
+	EventID       pgtype.UUID
+	EndpointID    pgtype.UUID
+	Status        string
+	Attempts      pgtype.Int4
+	NextAttemptAt pgtype.Timestamptz
+}
+
+// ============================================================================
+// Deliveries Queries
+// ============================================================================
+func (q *Queries) CreateDelivery(ctx context.Context, arg CreateDeliveryParams) (Delivery, error) {
+	row := q.db.QueryRow(ctx, createDelivery,
+		arg.EventID,
+		arg.EndpointID,
+		arg.Status,
+		arg.Attempts,
+		arg.NextAttemptAt,
+	)
+	var i Delivery
+	err := row.Scan(
+		&i.ID,
+		&i.EventID,
+		&i.EndpointID,
+		&i.Status,
+		&i.Attempts,
+		&i.NextAttemptAt,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const createDeliveryAttempt = `-- name: CreateDeliveryAttempt :one
+
+INSERT INTO delivery_attempts (
+  delivery_id, attempt_number, request_headers, response_status, response_body, error_message, duration_ms
+) VALUES (
+  $1, $2, $3, $4, $5, $6, $7
+)
+RETURNING id, delivery_id, attempt_number, request_headers, response_status, response_body, error_message, duration_ms, created_at
+`
+
+type CreateDeliveryAttemptParams struct {
+	DeliveryID     pgtype.UUID
+	AttemptNumber  int32
+	RequestHeaders []byte
+	ResponseStatus pgtype.Int4
+	ResponseBody   pgtype.Text
+	ErrorMessage   pgtype.Text
+	DurationMs     pgtype.Int4
+}
+
+// ============================================================================
+// Delivery Attempts Queries
+// ============================================================================
+func (q *Queries) CreateDeliveryAttempt(ctx context.Context, arg CreateDeliveryAttemptParams) (DeliveryAttempt, error) {
+	row := q.db.QueryRow(ctx, createDeliveryAttempt,
+		arg.DeliveryID,
+		arg.AttemptNumber,
+		arg.RequestHeaders,
+		arg.ResponseStatus,
+		arg.ResponseBody,
+		arg.ErrorMessage,
+		arg.DurationMs,
+	)
+	var i DeliveryAttempt
+	err := row.Scan(
+		&i.ID,
+		&i.DeliveryID,
+		&i.AttemptNumber,
+		&i.RequestHeaders,
+		&i.ResponseStatus,
+		&i.ResponseBody,
+		&i.ErrorMessage,
+		&i.DurationMs,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const createEndpoints = `-- name: CreateEndpoints :one
 INSERT INTO endpoints (
   application_id, url, secret_encrypted
@@ -98,6 +250,38 @@ func (q *Queries) CreateEndpoints(ctx context.Context, arg CreateEndpointsParams
 		&i.Url,
 		&i.SecretEncrypted,
 		&i.Enabled,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const createEvent = `-- name: CreateEvent :one
+
+INSERT INTO events (
+  application_id, event_type_id, payload
+) VALUES (
+  $1, $2, $3
+)
+RETURNING id, application_id, event_type_id, payload, created_at
+`
+
+type CreateEventParams struct {
+	ApplicationID pgtype.UUID
+	EventTypeID   pgtype.UUID
+	Payload       []byte
+}
+
+// ============================================================================
+// Events Queries
+// ============================================================================
+func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) (Event, error) {
+	row := q.db.QueryRow(ctx, createEvent, arg.ApplicationID, arg.EventTypeID, arg.Payload)
+	var i Event
+	err := row.Scan(
+		&i.ID,
+		&i.ApplicationID,
+		&i.EventTypeID,
+		&i.Payload,
 		&i.CreatedAt,
 	)
 	return i, err
@@ -172,6 +356,16 @@ type DeleteApplicationParams struct {
 
 func (q *Queries) DeleteApplication(ctx context.Context, arg DeleteApplicationParams) error {
 	_, err := q.db.Exec(ctx, deleteApplication, arg.ID, arg.UserID)
+	return err
+}
+
+const deleteEndpointEventTypesByEndpointId = `-- name: DeleteEndpointEventTypesByEndpointId :exec
+DELETE FROM endpoint_event_types
+WHERE endpoint_id = $1
+`
+
+func (q *Queries) DeleteEndpointEventTypesByEndpointId(ctx context.Context, endpointID pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deleteEndpointEventTypesByEndpointId, endpointID)
 	return err
 }
 
@@ -337,6 +531,85 @@ func (q *Queries) GetApplicationsByUserId(ctx context.Context, userID pgtype.UUI
 	return items, nil
 }
 
+const getDeliveryAttemptById = `-- name: GetDeliveryAttemptById :one
+SELECT da.id, da.delivery_id, da.attempt_number, da.request_headers, da.response_status, da.response_body, da.error_message, da.duration_ms, da.created_at
+FROM delivery_attempts da
+JOIN deliveries d ON da.delivery_id = d.id
+JOIN endpoints ep ON d.endpoint_id = ep.id
+JOIN applications a ON ep.application_id = a.id
+WHERE da.id = $1 AND a.user_id = $2
+LIMIT 1
+`
+
+type GetDeliveryAttemptByIdParams struct {
+	ID     pgtype.UUID
+	UserID pgtype.UUID
+}
+
+func (q *Queries) GetDeliveryAttemptById(ctx context.Context, arg GetDeliveryAttemptByIdParams) (DeliveryAttempt, error) {
+	row := q.db.QueryRow(ctx, getDeliveryAttemptById, arg.ID, arg.UserID)
+	var i DeliveryAttempt
+	err := row.Scan(
+		&i.ID,
+		&i.DeliveryID,
+		&i.AttemptNumber,
+		&i.RequestHeaders,
+		&i.ResponseStatus,
+		&i.ResponseBody,
+		&i.ErrorMessage,
+		&i.DurationMs,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getDeliveryById = `-- name: GetDeliveryById :one
+SELECT d.id, d.event_id, d.endpoint_id, d.status, d.attempts, d.next_attempt_at, d.created_at, ep.url AS endpoint_url, et.name AS event_type_name, e.payload AS event_payload
+FROM deliveries d
+JOIN endpoints ep ON d.endpoint_id = ep.id
+JOIN events e ON d.event_id = e.id
+JOIN event_types et ON e.event_type_id = et.id
+JOIN applications a ON ep.application_id = a.id
+WHERE d.id = $1 AND a.user_id = $2
+LIMIT 1
+`
+
+type GetDeliveryByIdParams struct {
+	ID     pgtype.UUID
+	UserID pgtype.UUID
+}
+
+type GetDeliveryByIdRow struct {
+	ID            pgtype.UUID
+	EventID       pgtype.UUID
+	EndpointID    pgtype.UUID
+	Status        string
+	Attempts      pgtype.Int4
+	NextAttemptAt pgtype.Timestamptz
+	CreatedAt     pgtype.Timestamptz
+	EndpointUrl   string
+	EventTypeName string
+	EventPayload  []byte
+}
+
+func (q *Queries) GetDeliveryById(ctx context.Context, arg GetDeliveryByIdParams) (GetDeliveryByIdRow, error) {
+	row := q.db.QueryRow(ctx, getDeliveryById, arg.ID, arg.UserID)
+	var i GetDeliveryByIdRow
+	err := row.Scan(
+		&i.ID,
+		&i.EventID,
+		&i.EndpointID,
+		&i.Status,
+		&i.Attempts,
+		&i.NextAttemptAt,
+		&i.CreatedAt,
+		&i.EndpointUrl,
+		&i.EventTypeName,
+		&i.EventPayload,
+	)
+	return i, err
+}
+
 const getEndpointsByApplicationId = `-- name: GetEndpointsByApplicationId :many
 SELECT et.id, et.application_id, et.url, et.secret_encrypted, et.enabled, et.created_at
 FROM endpoints et
@@ -353,6 +626,41 @@ type GetEndpointsByApplicationIdParams struct {
 
 func (q *Queries) GetEndpointsByApplicationId(ctx context.Context, arg GetEndpointsByApplicationIdParams) ([]Endpoint, error) {
 	rows, err := q.db.Query(ctx, getEndpointsByApplicationId, arg.ApplicationID, arg.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Endpoint
+	for rows.Next() {
+		var i Endpoint
+		if err := rows.Scan(
+			&i.ID,
+			&i.ApplicationID,
+			&i.Url,
+			&i.SecretEncrypted,
+			&i.Enabled,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getEndpointsByEventTypeId = `-- name: GetEndpointsByEventTypeId :many
+SELECT ep.id, ep.application_id, ep.url, ep.secret_encrypted, ep.enabled, ep.created_at
+FROM endpoints ep
+JOIN endpoint_event_types eet ON ep.id = eet.endpoint_id
+WHERE eet.event_type_id = $1 AND ep.enabled = TRUE
+ORDER BY ep.created_at ASC
+`
+
+func (q *Queries) GetEndpointsByEventTypeId(ctx context.Context, eventTypeID pgtype.UUID) ([]Endpoint, error) {
+	rows, err := q.db.Query(ctx, getEndpointsByEventTypeId, eventTypeID)
 	if err != nil {
 		return nil, err
 	}
@@ -402,6 +710,87 @@ func (q *Queries) GetEndpointsById(ctx context.Context, arg GetEndpointsByIdPara
 		&i.SecretEncrypted,
 		&i.Enabled,
 		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getEndpointsForEventDelivery = `-- name: GetEndpointsForEventDelivery :many
+SELECT ep.id, ep.application_id, ep.url, ep.secret_encrypted, ep.enabled, ep.created_at
+FROM endpoints ep
+WHERE ep.application_id = $1
+  AND ep.enabled = TRUE
+  AND EXISTS (
+    SELECT 1 FROM endpoint_event_types eet
+    WHERE eet.endpoint_id = ep.id AND eet.event_type_id = $2
+  )
+ORDER BY ep.created_at ASC
+`
+
+type GetEndpointsForEventDeliveryParams struct {
+	ApplicationID pgtype.UUID
+	EventTypeID   pgtype.UUID
+}
+
+func (q *Queries) GetEndpointsForEventDelivery(ctx context.Context, arg GetEndpointsForEventDeliveryParams) ([]Endpoint, error) {
+	rows, err := q.db.Query(ctx, getEndpointsForEventDelivery, arg.ApplicationID, arg.EventTypeID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Endpoint
+	for rows.Next() {
+		var i Endpoint
+		if err := rows.Scan(
+			&i.ID,
+			&i.ApplicationID,
+			&i.Url,
+			&i.SecretEncrypted,
+			&i.Enabled,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getEventById = `-- name: GetEventById :one
+SELECT e.id, e.application_id, e.event_type_id, e.payload, e.created_at, et.name AS event_type_name
+FROM events e
+JOIN applications a ON e.application_id = a.id
+JOIN event_types et ON e.event_type_id = et.id
+WHERE e.id = $1 AND a.user_id = $2
+LIMIT 1
+`
+
+type GetEventByIdParams struct {
+	ID     pgtype.UUID
+	UserID pgtype.UUID
+}
+
+type GetEventByIdRow struct {
+	ID            pgtype.UUID
+	ApplicationID pgtype.UUID
+	EventTypeID   pgtype.UUID
+	Payload       []byte
+	CreatedAt     pgtype.Timestamptz
+	EventTypeName string
+}
+
+func (q *Queries) GetEventById(ctx context.Context, arg GetEventByIdParams) (GetEventByIdRow, error) {
+	row := q.db.QueryRow(ctx, getEventById, arg.ID, arg.UserID)
+	var i GetEventByIdRow
+	err := row.Scan(
+		&i.ID,
+		&i.ApplicationID,
+		&i.EventTypeID,
+		&i.Payload,
+		&i.CreatedAt,
+		&i.EventTypeName,
 	)
 	return i, err
 }
@@ -466,6 +855,66 @@ func (q *Queries) GetEventTypesByApplicationId(ctx context.Context, arg GetEvent
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getEventTypesByEndpointId = `-- name: GetEventTypesByEndpointId :many
+SELECT et.id, et.application_id, et.name, et.description, et.created_at
+FROM event_types et
+JOIN endpoint_event_types eet ON et.id = eet.event_type_id
+WHERE eet.endpoint_id = $1
+ORDER BY et.name ASC
+`
+
+func (q *Queries) GetEventTypesByEndpointId(ctx context.Context, endpointID pgtype.UUID) ([]EventType, error) {
+	rows, err := q.db.Query(ctx, getEventTypesByEndpointId, endpointID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []EventType
+	for rows.Next() {
+		var i EventType
+		if err := rows.Scan(
+			&i.ID,
+			&i.ApplicationID,
+			&i.Name,
+			&i.Description,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getSubscribedEventTypeIdsByEndpointId = `-- name: GetSubscribedEventTypeIdsByEndpointId :many
+SELECT event_type_id
+FROM endpoint_event_types
+WHERE endpoint_id = $1
+`
+
+func (q *Queries) GetSubscribedEventTypeIdsByEndpointId(ctx context.Context, endpointID pgtype.UUID) ([]pgtype.UUID, error) {
+	rows, err := q.db.Query(ctx, getSubscribedEventTypeIdsByEndpointId, endpointID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []pgtype.UUID
+	for rows.Next() {
+		var event_type_id pgtype.UUID
+		if err := rows.Scan(&event_type_id); err != nil {
+			return nil, err
+		}
+		items = append(items, event_type_id)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -543,6 +992,241 @@ func (q *Queries) ListApplications(ctx context.Context) ([]Application, error) {
 	return items, nil
 }
 
+const listDeliveriesByApplicationId = `-- name: ListDeliveriesByApplicationId :many
+SELECT d.id, d.event_id, d.endpoint_id, d.status, d.attempts, d.next_attempt_at, d.created_at, ep.url AS endpoint_url, et.name AS event_type_name
+FROM deliveries d
+JOIN endpoints ep ON d.endpoint_id = ep.id
+JOIN events e ON d.event_id = e.id
+JOIN event_types et ON e.event_type_id = et.id
+JOIN applications a ON ep.application_id = a.id
+WHERE a.id = $1 AND a.user_id = $2
+ORDER BY d.created_at DESC
+LIMIT $3 OFFSET $4
+`
+
+type ListDeliveriesByApplicationIdParams struct {
+	ID     pgtype.UUID
+	UserID pgtype.UUID
+	Limit  int32
+	Offset int32
+}
+
+type ListDeliveriesByApplicationIdRow struct {
+	ID            pgtype.UUID
+	EventID       pgtype.UUID
+	EndpointID    pgtype.UUID
+	Status        string
+	Attempts      pgtype.Int4
+	NextAttemptAt pgtype.Timestamptz
+	CreatedAt     pgtype.Timestamptz
+	EndpointUrl   string
+	EventTypeName string
+}
+
+func (q *Queries) ListDeliveriesByApplicationId(ctx context.Context, arg ListDeliveriesByApplicationIdParams) ([]ListDeliveriesByApplicationIdRow, error) {
+	rows, err := q.db.Query(ctx, listDeliveriesByApplicationId,
+		arg.ID,
+		arg.UserID,
+		arg.Limit,
+		arg.Offset,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListDeliveriesByApplicationIdRow
+	for rows.Next() {
+		var i ListDeliveriesByApplicationIdRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.EventID,
+			&i.EndpointID,
+			&i.Status,
+			&i.Attempts,
+			&i.NextAttemptAt,
+			&i.CreatedAt,
+			&i.EndpointUrl,
+			&i.EventTypeName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDeliveriesByEndpointId = `-- name: ListDeliveriesByEndpointId :many
+SELECT d.id, d.event_id, d.endpoint_id, d.status, d.attempts, d.next_attempt_at, d.created_at, ep.url AS endpoint_url, et.name AS event_type_name
+FROM deliveries d
+JOIN endpoints ep ON d.endpoint_id = ep.id
+JOIN events e ON d.event_id = e.id
+JOIN event_types et ON e.event_type_id = et.id
+JOIN applications a ON ep.application_id = a.id
+WHERE d.endpoint_id = $1 AND a.user_id = $2
+ORDER BY d.created_at DESC
+LIMIT $3 OFFSET $4
+`
+
+type ListDeliveriesByEndpointIdParams struct {
+	EndpointID pgtype.UUID
+	UserID     pgtype.UUID
+	Limit      int32
+	Offset     int32
+}
+
+type ListDeliveriesByEndpointIdRow struct {
+	ID            pgtype.UUID
+	EventID       pgtype.UUID
+	EndpointID    pgtype.UUID
+	Status        string
+	Attempts      pgtype.Int4
+	NextAttemptAt pgtype.Timestamptz
+	CreatedAt     pgtype.Timestamptz
+	EndpointUrl   string
+	EventTypeName string
+}
+
+func (q *Queries) ListDeliveriesByEndpointId(ctx context.Context, arg ListDeliveriesByEndpointIdParams) ([]ListDeliveriesByEndpointIdRow, error) {
+	rows, err := q.db.Query(ctx, listDeliveriesByEndpointId,
+		arg.EndpointID,
+		arg.UserID,
+		arg.Limit,
+		arg.Offset,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListDeliveriesByEndpointIdRow
+	for rows.Next() {
+		var i ListDeliveriesByEndpointIdRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.EventID,
+			&i.EndpointID,
+			&i.Status,
+			&i.Attempts,
+			&i.NextAttemptAt,
+			&i.CreatedAt,
+			&i.EndpointUrl,
+			&i.EventTypeName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDeliveriesByEventId = `-- name: ListDeliveriesByEventId :many
+SELECT d.id, d.event_id, d.endpoint_id, d.status, d.attempts, d.next_attempt_at, d.created_at, ep.url AS endpoint_url, et.name AS event_type_name
+FROM deliveries d
+JOIN endpoints ep ON d.endpoint_id = ep.id
+JOIN events e ON d.event_id = e.id
+JOIN event_types et ON e.event_type_id = et.id
+JOIN applications a ON ep.application_id = a.id
+WHERE d.event_id = $1 AND a.user_id = $2
+ORDER BY d.created_at DESC
+`
+
+type ListDeliveriesByEventIdParams struct {
+	EventID pgtype.UUID
+	UserID  pgtype.UUID
+}
+
+type ListDeliveriesByEventIdRow struct {
+	ID            pgtype.UUID
+	EventID       pgtype.UUID
+	EndpointID    pgtype.UUID
+	Status        string
+	Attempts      pgtype.Int4
+	NextAttemptAt pgtype.Timestamptz
+	CreatedAt     pgtype.Timestamptz
+	EndpointUrl   string
+	EventTypeName string
+}
+
+func (q *Queries) ListDeliveriesByEventId(ctx context.Context, arg ListDeliveriesByEventIdParams) ([]ListDeliveriesByEventIdRow, error) {
+	rows, err := q.db.Query(ctx, listDeliveriesByEventId, arg.EventID, arg.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListDeliveriesByEventIdRow
+	for rows.Next() {
+		var i ListDeliveriesByEventIdRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.EventID,
+			&i.EndpointID,
+			&i.Status,
+			&i.Attempts,
+			&i.NextAttemptAt,
+			&i.CreatedAt,
+			&i.EndpointUrl,
+			&i.EventTypeName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDeliveryAttemptsByDeliveryId = `-- name: ListDeliveryAttemptsByDeliveryId :many
+SELECT da.id, da.delivery_id, da.attempt_number, da.request_headers, da.response_status, da.response_body, da.error_message, da.duration_ms, da.created_at
+FROM delivery_attempts da
+JOIN deliveries d ON da.delivery_id = d.id
+JOIN endpoints ep ON d.endpoint_id = ep.id
+JOIN applications a ON ep.application_id = a.id
+WHERE da.delivery_id = $1 AND a.user_id = $2
+ORDER BY da.attempt_number ASC
+`
+
+type ListDeliveryAttemptsByDeliveryIdParams struct {
+	DeliveryID pgtype.UUID
+	UserID     pgtype.UUID
+}
+
+func (q *Queries) ListDeliveryAttemptsByDeliveryId(ctx context.Context, arg ListDeliveryAttemptsByDeliveryIdParams) ([]DeliveryAttempt, error) {
+	rows, err := q.db.Query(ctx, listDeliveryAttemptsByDeliveryId, arg.DeliveryID, arg.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []DeliveryAttempt
+	for rows.Next() {
+		var i DeliveryAttempt
+		if err := rows.Scan(
+			&i.ID,
+			&i.DeliveryID,
+			&i.AttemptNumber,
+			&i.RequestHeaders,
+			&i.ResponseStatus,
+			&i.ResponseBody,
+			&i.ErrorMessage,
+			&i.DurationMs,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listEndpoints = `-- name: ListEndpoints :many
 SELECT id, application_id, url, secret_encrypted, enabled, created_at FROM endpoints
 ORDER BY id
@@ -606,6 +1290,64 @@ func (q *Queries) ListEventTypes(ctx context.Context) ([]EventType, error) {
 	return items, nil
 }
 
+const listEventsByApplicationId = `-- name: ListEventsByApplicationId :many
+SELECT e.id, e.application_id, e.event_type_id, e.payload, e.created_at, et.name AS event_type_name
+FROM events e
+JOIN applications a ON e.application_id = a.id
+JOIN event_types et ON e.event_type_id = et.id
+WHERE e.application_id = $1 AND a.user_id = $2
+ORDER BY e.created_at DESC
+LIMIT $3 OFFSET $4
+`
+
+type ListEventsByApplicationIdParams struct {
+	ApplicationID pgtype.UUID
+	UserID        pgtype.UUID
+	Limit         int32
+	Offset        int32
+}
+
+type ListEventsByApplicationIdRow struct {
+	ID            pgtype.UUID
+	ApplicationID pgtype.UUID
+	EventTypeID   pgtype.UUID
+	Payload       []byte
+	CreatedAt     pgtype.Timestamptz
+	EventTypeName string
+}
+
+func (q *Queries) ListEventsByApplicationId(ctx context.Context, arg ListEventsByApplicationIdParams) ([]ListEventsByApplicationIdRow, error) {
+	rows, err := q.db.Query(ctx, listEventsByApplicationId,
+		arg.ApplicationID,
+		arg.UserID,
+		arg.Limit,
+		arg.Offset,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListEventsByApplicationIdRow
+	for rows.Next() {
+		var i ListEventsByApplicationIdRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ApplicationID,
+			&i.EventTypeID,
+			&i.Payload,
+			&i.CreatedAt,
+			&i.EventTypeName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listUsers = `-- name: ListUsers :many
 SELECT id, logo_url, name, email, password_hash, created_at FROM users
 ORDER BY email
@@ -636,6 +1378,21 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const removeEndpointEventType = `-- name: RemoveEndpointEventType :exec
+DELETE FROM endpoint_event_types
+WHERE endpoint_id = $1 AND event_type_id = $2
+`
+
+type RemoveEndpointEventTypeParams struct {
+	EndpointID  pgtype.UUID
+	EventTypeID pgtype.UUID
+}
+
+func (q *Queries) RemoveEndpointEventType(ctx context.Context, arg RemoveEndpointEventTypeParams) error {
+	_, err := q.db.Exec(ctx, removeEndpointEventType, arg.EndpointID, arg.EventTypeID)
+	return err
 }
 
 const updateAdmin = `-- name: UpdateAdmin :exec
@@ -693,6 +1450,29 @@ func (q *Queries) UpdateApplication(ctx context.Context, arg UpdateApplicationPa
 		arg.Name,
 		arg.Description,
 		arg.LogoUrl,
+	)
+	return err
+}
+
+const updateDeliveryStatus = `-- name: UpdateDeliveryStatus :exec
+UPDATE deliveries
+SET status = $2, attempts = $3, next_attempt_at = $4
+WHERE id = $1
+`
+
+type UpdateDeliveryStatusParams struct {
+	ID            pgtype.UUID
+	Status        string
+	Attempts      pgtype.Int4
+	NextAttemptAt pgtype.Timestamptz
+}
+
+func (q *Queries) UpdateDeliveryStatus(ctx context.Context, arg UpdateDeliveryStatusParams) error {
+	_, err := q.db.Exec(ctx, updateDeliveryStatus,
+		arg.ID,
+		arg.Status,
+		arg.Attempts,
+		arg.NextAttemptAt,
 	)
 	return err
 }

@@ -34,6 +34,12 @@ interface RawEndpoint {
   SecretEncrypted?: string;
   enabled?: boolean;
   Enabled?: boolean;
+  event_types?: Array<{
+    id: string | { Bytes?: number[] };
+    name: string;
+    description?: string | { String?: string };
+  }>;
+  event_type_ids?: string[];
   created_at?: string | { Time?: string };
   CreatedAt?: string | { Time?: string };
 }
@@ -43,12 +49,22 @@ interface RawEndpointsData {
   endpoints?: RawEndpoint[];
 }
 
+function bytesToUUID(bytes: number[]): string {
+  if (!bytes || bytes.length !== 16) return "";
+  const hex = bytes.map((b) => b.toString(16).padStart(2, "0")).join("");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
 function normalizeEndpoint(raw: RawEndpoint): Endpoint {
   let id = "";
   if (typeof raw.id === "string") {
     id = raw.id;
   } else if (typeof raw.ID === "string") {
     id = raw.ID;
+  } else if ((raw.id as any)?.Bytes && Array.isArray((raw.id as any).Bytes)) {
+    id = bytesToUUID((raw.id as any).Bytes);
+  } else if ((raw.ID as any)?.Bytes && Array.isArray((raw.ID as any).Bytes)) {
+    id = bytesToUUID((raw.ID as any).Bytes);
   }
 
   const url = raw.url || raw.Url || "";
@@ -72,12 +88,55 @@ function normalizeEndpoint(raw: RawEndpoint): Endpoint {
     createdAt = raw.CreatedAt.Time;
   }
 
+  const rawEventTypes =
+    raw.event_types || (raw as any).EventTypes || [];
+
+  const event_types = Array.isArray(rawEventTypes)
+    ? rawEventTypes.map((et: any) => {
+        let etId = "";
+        if (typeof et.id === "string") {
+          etId = et.id;
+        } else if (typeof et.ID === "string") {
+          etId = et.ID;
+        } else if (et.id?.Bytes && Array.isArray(et.id.Bytes)) {
+          etId = bytesToUUID(et.id.Bytes);
+        } else if (et.ID?.Bytes && Array.isArray(et.ID.Bytes)) {
+          etId = bytesToUUID(et.ID.Bytes);
+        }
+
+        const name = et.name || et.Name || "";
+        let desc = "";
+        if (typeof et.description === "string") {
+          desc = et.description;
+        } else if (typeof et.Description === "string") {
+          desc = et.Description;
+        } else if (et.description?.String) {
+          desc = et.description.String;
+        } else if (et.Description?.String) {
+          desc = et.Description.String;
+        }
+
+        return {
+          id: etId,
+          name,
+          description: desc,
+        };
+      })
+    : [];
+
+  const rawEventTypeIds = raw.event_type_ids || (raw as any).EventTypeIds;
+  const event_type_ids = Array.isArray(rawEventTypeIds)
+    ? rawEventTypeIds
+    : event_types.map((et) => et.id).filter(Boolean);
+
   return {
     id,
     application_id: raw.application_id || raw.ApplicationID || "",
     url,
     secret_encrypted,
     enabled,
+    event_type_ids,
+    event_types,
     created_at: createdAt || new Date().toISOString(),
   };
 }
@@ -204,13 +263,18 @@ export async function createEndpointAction(
   }
 
   try {
+    const eventTypeIdsRaw = formData.getAll("event_type_ids") as string[];
+    const eventTypeIds = eventTypeIdsRaw.filter(Boolean);
+
     const payload: {
       application_id: string;
       url: string;
       secret_encrypted?: string;
+      event_type_ids?: string[];
     } = {
       application_id: applicationId,
       url,
+      event_type_ids: eventTypeIds,
     };
 
     if (secret) {
@@ -347,17 +411,22 @@ export async function updateEndpointAction(
   }
 
   try {
+    const eventTypeIdsRaw = formData.getAll("event_type_ids") as string[];
+    const eventTypeIds = eventTypeIdsRaw.filter(Boolean);
+
     const payload: {
       id: string;
       application_id: string;
       url: string;
       secret_encrypted?: string;
       enabled: boolean;
+      event_type_ids?: string[];
     } = {
       id: endpointId,
       application_id: applicationId,
       url,
       enabled,
+      event_type_ids: eventTypeIds,
     };
 
     if (secret) {
