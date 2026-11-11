@@ -111,8 +111,14 @@ func (s *service) UpdateEventType(ctx context.Context, req eventTypeTypes.Update
 		return nil, eventTypeTypes.ErrInvalidId
 	}
 
+	checkEventTypeById := core.GetEventTypeByIdParams{
+		ID:     event_type_id,
+		UserID: userId,
+	}
+
 	// Check if event_type already exists
-	result, err := s.repo.GetEventTypeById(ctx, event_type_id)
+	result, err := s.repo.GetEventTypeById(ctx, checkEventTypeById)
+
 	if err != nil {
 		return nil, eventTypeTypes.ErrEventTypeNotFound
 	}
@@ -147,6 +153,9 @@ func (s *service) UpdateEventType(ctx context.Context, req eventTypeTypes.Update
 func (s *service) DeleteEventType(ctx context.Context, req *http.Request) (*eventTypeTypes.EventTypeResponse, error) {
 	id := req.PathValue("id")
 	if id == "" {
+		id = req.PathValue("event_type_id")
+	}
+	if id == "" {
 		return nil, eventTypeTypes.ErrInvalidId
 	}
 
@@ -164,8 +173,13 @@ func (s *service) DeleteEventType(ctx context.Context, req *http.Request) (*even
 		return nil, eventTypeTypes.ErrInvalidId
 	}
 
+	checkEventTypeById := core.GetEventTypeByIdParams{
+		ID:     event_type_id,
+		UserID: userId,
+	}
+
 	// Check if event_type already exists
-	result, err := s.repo.GetEventTypeById(ctx, event_type_id)
+	result, err := s.repo.GetEventTypeById(ctx, checkEventTypeById)
 	if err != nil {
 		return nil, eventTypeTypes.ErrEventTypeNotFound
 	}

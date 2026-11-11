@@ -28,12 +28,13 @@ Think of TrueHook as a simplified Svix-style webhook delivery platform.
 - NATS JetStream for asynchronous event processing
 - Redis only when a concrete use case requires it
 
-### Frontend
+### Frontend Applications
 
-- Next.js
-- React
-- TypeScript
-- Tailwind CSS
+- `apps/web`: Public website, landing pages, public documentation, and authentication flows (login, register).
+- `apps/dashboard`: Customer portal for authenticated users (applications, endpoints, event streams, delivery attempt logs, replay triggers, metrics).
+- `apps/admin`: Internal administration console exclusively for TrueHook company operators (system configuration, cross-tenant management, frontend updates, and operational controls).
+
+All frontend apps are built with Next.js, React, TypeScript, and Tailwind CSS.
 
 ### Monorepo
 
@@ -199,12 +200,41 @@ Do not expose internal database models directly as public API responses.
 
 ## 11. Frontend Rules
 
-- Use TypeScript strict mode.
-- Keep components focused.
-- Separate API communication from UI components.
-- Handle loading, empty, success, and error states.
-- Use reusable components for common UI patterns.
-- Avoid unnecessary client-side state.
+Applies to all frontend applications (`apps/web`, `apps/dashboard`, `apps/admin`):
+
+- **Application Roles**:
+  - `apps/web`: Public marketing, landing pages, and authentication entry points (`login`, `register`).
+  - `apps/dashboard`: Authenticated customer workspace for managing webhooks, viewing delivery history, and inspecting payloads.
+  - `apps/admin`: Internal company console exclusively for TrueHook operators to update frontend settings, manage tenants, and inspect system health.
+- Use TypeScript strict mode with explicit interfaces for all component props.
+- Keep the code modular across all frontend apps:
+  - Primitive UI components live in `src/component/ui/` (e.g., Button, Input, Card, Badge, Modal). These must be generic, reusable, accessible, and free of business logic.
+  - Domain/feature modules live in `src/modules/<feature>/` (e.g., auth, endpoints, events, deliveries, metrics, admin-controls). Keep module-specific components, hooks, schemas, and state encapsulated.
+  - Shared layout components live in `src/component/` (e.g., navigation, sidebar, backgrounds).
+  - Next.js App Router route files (`src/app/**/page.tsx`) must remain minimal page shells that purely compose modules and UI primitives.
+  - Keep components small, focused, and single-purpose (aim for under 150 lines). Extract sub-components and custom hooks when complexity grows.
+  - Separate data fetching and business logic from presentational rendering.
+- Maintain the strict color scheme & theme modes:
+  - **Theme Modes**:
+    - `apps/web`: Public website in clean white/light mode.
+    - `apps/dashboard`: **White/light mode for everything** (overview, applications, endpoints, events, deliveries, metrics) just like `apps/web`. **ONLY the customer `/login` and `/register` routes** are black/dark mode (`.dark`, `bg-[#141412]`, dark card, `BackgroundSVG`, `#f2f2e8` text).
+  - Major scheme (dominates 85–90% of the UI surface):
+    - `#141412` (Obsidian canvas in dark auth; high-contrast text and dark neutral in light mode)
+    - `#ffffff` / `#f2f2e8` (Clean white canvas and light card surfaces in light mode; parchment cream text and borders in dark mode)
+  - Subtle accent scheme (used sparingly and deliberately, 10–15% max):
+    - `#124060` (Deep nautical blue: primary actions, active navigation, focus rings)
+    - `#ea5c47` (Coral red: destructive actions, error badges, critical notifications)
+    - `#c39f59` (Warm brass: warning states, status indicators, subtle highlights)
+  - Never introduce extraneous colors or create multi-colored, noisy interfaces.
+  - **MANDATORY**: Always use custom semantic color utility classes from `globals.css` `:root` (e.g. `bg-background`, `text-foreground`, `border-border`, `bg-canvas`, `text-muted-foreground`, `bg-primary`, `text-primary-foreground`, `bg-secondary`, `text-destructive`, `text-brass`, `ring-ring`). NEVER use default Tailwind color scales (`gray-*`, `slate-*`, `zinc-*`, `neutral-*`, `stone-*`, `blue-*`, `red-*`, `emerald-*`, etc.) or hardcoded hex classes.
+- Keep things minimal:
+  - Prioritize clean typography, purposeful contrast, generous whitespace, and crisp borders.
+  - Avoid unnecessary decorative clutter, heavy shadows, flashy gradients, or gratuitous animations.
+  - Use subtle, snappy micro-interactions (e.g., quick color transitions on hover/focus).
+- Update documentation on every change:
+  - Any addition, update, or refactor of a page or component must be reflected immediately in `docs/frontend/`.
+  - Maintain an accurate catalog of reusable UI components and page routes.
+- AI agents must follow the `frontend-design` / `frontend-components` skill when creating or modifying pages and components.
 - Do not expose API secrets or signing secrets in the browser.
 - Make dashboard data consistent with backend API contracts.
 - Ensure responsive layouts and accessible controls.
@@ -246,6 +276,7 @@ Before implementing a significant feature:
 6. Implement incrementally.
 7. Add or update tests.
 8. Run relevant checks.
+9. Update documentation for every change.
 
 Do not rewrite working code unnecessarily.
 
@@ -257,6 +288,8 @@ If a requirement is ambiguous, state your assumption or ask a focused question.
 
 ## 14. Documentation
 
+Update docs on every change.
+
 Document:
 
 - Public API endpoints.
@@ -266,6 +299,8 @@ Document:
 - Environment variables.
 - Local development setup.
 - Database migrations.
+- Frontend architecture, pages, and modular components.
+- Design system tokens, color palette rules, and UI primitives.
 - Important architectural decisions.
 
 Keep documentation synchronized with implementation.
@@ -282,5 +317,5 @@ Before declaring work complete:
 - Check authorization.
 - Check security implications.
 - Check logging and observability.
-- Update documentation where necessary.
+- Update documentation on every change (mandatory).
 - Report what was changed and what was not verified.

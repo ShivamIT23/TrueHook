@@ -10,6 +10,7 @@ import (
 	"github.com/ShivamIT23/TrueHook/backend/packages/database/core"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type contextKey string
@@ -33,6 +34,9 @@ func (s *service) CreateApplication(ctx context.Context, req applicationTypes.Cr
 	name := req.Name
 	if err := validateName(name); err != nil {
 		return nil, applicationTypes.ErrInvalidName
+	}
+	if len(req.LogoUrl) > 500 {
+		return nil, applicationTypes.ErrInvalidLogoUrl
 	}
 	description := req.Description
 
@@ -61,6 +65,7 @@ func (s *service) CreateApplication(ctx context.Context, req applicationTypes.Cr
 		UserID:      userId,
 		Name:        name,
 		Description: core.StringToText(description),
+		LogoUrl:     core.StringToText(req.LogoUrl),
 	}
 
 	result, creation_err := s.repo.CreateApplication(ctx, newApplication)
@@ -76,6 +81,7 @@ func (s *service) CreateApplication(ctx context.Context, req applicationTypes.Cr
 		ID:          core.PgUUIDToUUID(result.ID),
 		Name:        result.Name,
 		Description: result.Description.String,
+		LogoUrl:     core.TextToString(result.LogoUrl),
 		CreatedAt:   core.TimestampToTime(result.CreatedAt),
 	}, nil
 }
@@ -89,6 +95,9 @@ func (s *service) UpdateApplication(ctx context.Context, req applicationTypes.Up
 	name := req.Name
 	if err := validateName(name); err != nil {
 		return nil, applicationTypes.ErrInvalidName
+	}
+	if len(req.LogoUrl) > 500 {
+		return nil, applicationTypes.ErrInvalidLogoUrl
 	}
 	description := req.Description
 
@@ -119,11 +128,19 @@ func (s *service) UpdateApplication(ctx context.Context, req applicationTypes.Up
 		return nil, err
 	}
 
+	var logoText pgtype.Text
+	if req.LogoUrl != "" {
+		logoText = core.StringToText(req.LogoUrl)
+	} else {
+		logoText = result.LogoUrl
+	}
+
 	updateApplication := core.UpdateApplicationParams{
 		ID:          application_id,
 		UserID:      userId,
 		Name:        name,
 		Description: core.StringToText(description),
+		LogoUrl:     logoText,
 	}
 
 	creation_err := s.repo.UpdateApplication(ctx, updateApplication)
@@ -139,6 +156,7 @@ func (s *service) UpdateApplication(ctx context.Context, req applicationTypes.Up
 		ID:          core.PgUUIDToUUID(result.ID),
 		Name:        req.Name,
 		Description: req.Description,
+		LogoUrl:     core.TextToString(logoText),
 		CreatedAt:   core.TimestampToTime(result.CreatedAt),
 	}, nil
 }
@@ -195,6 +213,7 @@ func (s *service) DeleteApplication(ctx context.Context, req *http.Request) (*ap
 		ID:          core.PgUUIDToUUID(result.ID),
 		Name:        result.Name,
 		Description: result.Description.String,
+		LogoUrl:     core.TextToString(result.LogoUrl),
 		CreatedAt:   core.TimestampToTime(result.CreatedAt),
 	}, nil
 }
@@ -237,6 +256,7 @@ func (s *service) GetApplication(ctx context.Context, req *http.Request) (*appli
 		ID:          core.PgUUIDToUUID(result.ID),
 		Name:        result.Name,
 		Description: result.Description.String,
+		LogoUrl:     core.TextToString(result.LogoUrl),
 		CreatedAt:   core.TimestampToTime(result.CreatedAt),
 	}, nil
 }
@@ -261,8 +281,19 @@ func (s *service) GetAllApplication(ctx context.Context) (*applicationTypes.Appl
 		return nil, retreval_err
 	}
 
+	apps := make([]applicationTypes.ApplicationResponse, len(result))
+	for i, app := range result {
+		apps[i] = applicationTypes.ApplicationResponse{
+			ID:          core.PgUUIDToUUID(app.ID),
+			Name:        app.Name,
+			Description: app.Description.String,
+			LogoUrl:     core.TextToString(app.LogoUrl),
+			CreatedAt:   core.TimestampToTime(app.CreatedAt),
+		}
+	}
+
 	return &applicationTypes.ApplicationsResponse{
-		Applications: result,
+		Applications: apps,
 	}, nil
 }
 

@@ -5,6 +5,8 @@ import (
 	"errors"
 	"net/mail"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 
 	TrueHookJWT "github.com/ShivamIT23/TrueHook/backend/api/internal/lib"
 	authTypes "github.com/ShivamIT23/TrueHook/backend/api/internal/types/auth"
@@ -26,10 +28,14 @@ func NewService(repo *core.Queries, jwtSecret string) authTypes.Service {
 	}
 }
 
-func (s *service) Signup(ctx context.Context, req authTypes.SignupRequest) (*authTypes.AuthResponse, error) {
+func (s *service) Register(ctx context.Context, req authTypes.RegisterRequest) (*authTypes.AuthResponse, error) {
 	email := strings.ToLower(strings.TrimSpace(req.Email))
 	if err := validateEmail(email); err != nil {
 		return nil, authTypes.ErrInvalidEmail
+	}
+	name := strings.ToLower(strings.TrimSpace(req.Name))
+	if err := validateName(name); err != nil {
+		return nil, authTypes.ErrInvalidName
 	}
 
 	if len(req.Password) < 8 {
@@ -52,6 +58,7 @@ func (s *service) Signup(ctx context.Context, req authTypes.SignupRequest) (*aut
 	}
 
 	newUser := core.CreateUserParams{
+		Name:         name,
 		Email:        email,
 		PasswordHash: string(hashedBytes),
 	}
@@ -75,14 +82,16 @@ func (s *service) Signup(ctx context.Context, req authTypes.SignupRequest) (*aut
 	return &authTypes.AuthResponse{
 		User: authTypes.UserResponse{
 			ID:        userId,
+			Name:      name,
 			Email:     res.Email,
+			LogoUrl:   core.TextToString(res.LogoUrl),
 			CreatedAt: core.TimestampToTime(res.CreatedAt),
 		},
 		Token: token,
 	}, nil
 }
 
-func (s *service) Signin(ctx context.Context, req authTypes.SigninRequest) (*authTypes.AuthResponse, error) {
+func (s *service) Login(ctx context.Context, req authTypes.LoginRequest) (*authTypes.AuthResponse, error) {
 	email := strings.ToLower(strings.TrimSpace(req.Email))
 	if email == "" || req.Password == "" {
 		return nil, authTypes.ErrInvalidCredentials
@@ -111,7 +120,9 @@ func (s *service) Signin(ctx context.Context, req authTypes.SigninRequest) (*aut
 	return &authTypes.AuthResponse{
 		User: authTypes.UserResponse{
 			ID:        userId,
+			Name:      user.Name,
 			Email:     user.Email,
+			LogoUrl:   core.TextToString(user.LogoUrl),
 			CreatedAt: core.TimestampToTime(user.CreatedAt),
 		},
 		Token: token,
@@ -129,5 +140,25 @@ func validateEmail(email string) error {
 	if !strings.Contains(email, ".") {
 		return errors.New("missing domain")
 	}
+	return nil
+}
+
+func validateName(name string) error {
+	name = strings.TrimSpace(name)
+
+	if name == "" || utf8.RuneCountInString(name) > 255 {
+		return errors.New("invalid name length")
+	}
+
+	if !utf8.ValidString(name) {
+		return errors.New("invalid UTF-8 encoding")
+	}
+
+	for _, r := range name {
+		if unicode.IsControl(r) {
+			return errors.New("name contains invalid characters")
+		}
+	}
+
 	return nil
 }

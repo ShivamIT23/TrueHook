@@ -5,13 +5,19 @@ import (
 	"log"
 
 	"github.com/ShivamIT23/TrueHook/backend/api/internal/config"
+	adminHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/admin"
 	applicationHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/application"
 	authHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/auth"
+	endpointHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/endpoint"
 	eventTypeHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/event-type"
+	userHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/user"
 	"github.com/ShivamIT23/TrueHook/backend/api/internal/server"
+	adminService "github.com/ShivamIT23/TrueHook/backend/api/internal/service/admin"
 	applicationService "github.com/ShivamIT23/TrueHook/backend/api/internal/service/application"
 	authService "github.com/ShivamIT23/TrueHook/backend/api/internal/service/auth"
+	endpointService "github.com/ShivamIT23/TrueHook/backend/api/internal/service/endpoint"
 	eventTypeService "github.com/ShivamIT23/TrueHook/backend/api/internal/service/event-type"
+	userService "github.com/ShivamIT23/TrueHook/backend/api/internal/service/user"
 	"github.com/ShivamIT23/TrueHook/backend/packages/database"
 	"github.com/ShivamIT23/TrueHook/backend/packages/database/core"
 	customNats "github.com/ShivamIT23/TrueHook/backend/packages/nats"
@@ -63,15 +69,30 @@ func main() {
 
 	applicationHandler := applicationHandler.NewHandler(newApplicationService)
 
+	newEndpointService := endpointService.NewService(dbQueries)
+
+	endpointHandler := endpointHandler.NewHandler(newEndpointService)
+
 	newEventTypeService := eventTypeService.NewService(dbQueries)
 
 	eventTypeHandler := eventTypeHandler.NewHandler(newEventTypeService)
 
+	newUserService := userService.NewService(dbQueries)
+
+	userHandler := userHandler.NewHandler(newUserService)
+
+	newAdminService := adminService.NewService(dbQueries, cfg.JWT_SECRET)
+
+	adminHandler := adminHandler.NewHandler(newAdminService)
+
 	// 5.. Assemble HTTP Router
 	router := server.NewRouter(server.RouterConfig{
+		AdminHandler:       adminHandler,
 		AuthHandler:        authHandler,
 		ApplicationHandler: applicationHandler,
-		EventTypeHandler: eventTypeHandler,
+		EndpointHandler:    endpointHandler,
+		EventTypeHandler:   eventTypeHandler,
+		UserHandler:        userHandler,
 	})
 
 	// 6. Start HTTP Server with Graceful Shutdown

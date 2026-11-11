@@ -11,29 +11,93 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createApplication = `-- name: CreateApplication :one
-INSERT INTO applications (
-  user_id, name, description
+const createAdmin = `-- name: CreateAdmin :one
+INSERT INTO admins (
+  name, email, password_hash
 ) VALUES (
   $1, $2, $3
 )
-RETURNING id, user_id, name, description, created_at
+RETURNING id, name, email, password_hash, created_at
+`
+
+type CreateAdminParams struct {
+	Name         string
+	Email        string
+	PasswordHash string
+}
+
+func (q *Queries) CreateAdmin(ctx context.Context, arg CreateAdminParams) (Admin, error) {
+	row := q.db.QueryRow(ctx, createAdmin, arg.Name, arg.Email, arg.PasswordHash)
+	var i Admin
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.PasswordHash,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const createApplication = `-- name: CreateApplication :one
+INSERT INTO applications (
+  user_id, name, description, logo_url
+) VALUES (
+  $1, $2, $3, $4
+)
+RETURNING id, logo_url, user_id, name, description, created_at
 `
 
 type CreateApplicationParams struct {
 	UserID      pgtype.UUID
 	Name        string
 	Description pgtype.Text
+	LogoUrl     pgtype.Text
 }
 
 func (q *Queries) CreateApplication(ctx context.Context, arg CreateApplicationParams) (Application, error) {
-	row := q.db.QueryRow(ctx, createApplication, arg.UserID, arg.Name, arg.Description)
+	row := q.db.QueryRow(ctx, createApplication,
+		arg.UserID,
+		arg.Name,
+		arg.Description,
+		arg.LogoUrl,
+	)
 	var i Application
 	err := row.Scan(
 		&i.ID,
+		&i.LogoUrl,
 		&i.UserID,
 		&i.Name,
 		&i.Description,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const createEndpoints = `-- name: CreateEndpoints :one
+INSERT INTO endpoints (
+  application_id, url, secret_encrypted
+) VALUES (
+  $1, $2, $3
+)
+RETURNING id, application_id, url, secret_encrypted, enabled, created_at
+`
+
+type CreateEndpointsParams struct {
+	ApplicationID   pgtype.UUID
+	Url             string
+	SecretEncrypted string
+}
+
+func (q *Queries) CreateEndpoints(ctx context.Context, arg CreateEndpointsParams) (Endpoint, error) {
+	row := q.db.QueryRow(ctx, createEndpoints, arg.ApplicationID, arg.Url, arg.SecretEncrypted)
+	var i Endpoint
+	err := row.Scan(
+		&i.ID,
+		&i.ApplicationID,
+		&i.Url,
+		&i.SecretEncrypted,
+		&i.Enabled,
 		&i.CreatedAt,
 	)
 	return i, err
@@ -69,23 +133,26 @@ func (q *Queries) CreateEventType(ctx context.Context, arg CreateEventTypeParams
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (
-  email, password_hash
+  name, email, password_hash
 ) VALUES (
-  $1, $2
+  $1, $2, $3
 )
-RETURNING id, email, password_hash, created_at
+RETURNING id, logo_url, name, email, password_hash, created_at
 `
 
 type CreateUserParams struct {
+	Name         string
 	Email        string
 	PasswordHash string
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, createUser, arg.Email, arg.PasswordHash)
+	row := q.db.QueryRow(ctx, createUser, arg.Name, arg.Email, arg.PasswordHash)
 	var i User
 	err := row.Scan(
 		&i.ID,
+		&i.LogoUrl,
+		&i.Name,
 		&i.Email,
 		&i.PasswordHash,
 		&i.CreatedAt,
@@ -108,13 +175,30 @@ func (q *Queries) DeleteApplication(ctx context.Context, arg DeleteApplicationPa
 	return err
 }
 
+const deleteEndpoints = `-- name: DeleteEndpoints :exec
+DELETE FROM endpoints et
+USING applications a
+WHERE et.id = $1
+  AND et.application_id = a.id
+  AND a.user_id = $2
+`
+
+type DeleteEndpointsParams struct {
+	ID     pgtype.UUID
+	UserID pgtype.UUID
+}
+
+func (q *Queries) DeleteEndpoints(ctx context.Context, arg DeleteEndpointsParams) error {
+	_, err := q.db.Exec(ctx, deleteEndpoints, arg.ID, arg.UserID)
+	return err
+}
+
 const deleteEventType = `-- name: DeleteEventType :exec
 DELETE FROM event_types et
 USING applications a
 WHERE et.id = $1
   AND et.application_id = a.id
   AND a.user_id = $2
-RETURNING id, application_id, name, description, created_at
 `
 
 type DeleteEventTypeParams struct {
@@ -137,8 +221,44 @@ func (q *Queries) DeleteUser(ctx context.Context, id pgtype.UUID) error {
 	return err
 }
 
+const getAdminByEmail = `-- name: GetAdminByEmail :one
+SELECT id, name, email, password_hash, created_at FROM admins
+WHERE email = $1 LIMIT 1
+`
+
+func (q *Queries) GetAdminByEmail(ctx context.Context, email string) (Admin, error) {
+	row := q.db.QueryRow(ctx, getAdminByEmail, email)
+	var i Admin
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.PasswordHash,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getAdminById = `-- name: GetAdminById :one
+SELECT id, name, email, password_hash, created_at FROM admins
+WHERE id = $1 LIMIT 1
+`
+
+func (q *Queries) GetAdminById(ctx context.Context, id pgtype.UUID) (Admin, error) {
+	row := q.db.QueryRow(ctx, getAdminById, id)
+	var i Admin
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.PasswordHash,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const getApplicationById = `-- name: GetApplicationById :one
-SELECT id, user_id, name, description, created_at FROM applications
+SELECT id, logo_url, user_id, name, description, created_at FROM applications
 WHERE id = $1 AND user_id = $2 LIMIT 1
 `
 
@@ -152,6 +272,7 @@ func (q *Queries) GetApplicationById(ctx context.Context, arg GetApplicationById
 	var i Application
 	err := row.Scan(
 		&i.ID,
+		&i.LogoUrl,
 		&i.UserID,
 		&i.Name,
 		&i.Description,
@@ -161,7 +282,7 @@ func (q *Queries) GetApplicationById(ctx context.Context, arg GetApplicationById
 }
 
 const getApplicationByName = `-- name: GetApplicationByName :one
-SELECT id, user_id, name, description, created_at FROM applications
+SELECT id, logo_url, user_id, name, description, created_at FROM applications
 WHERE name = $1 AND user_id = $2 LIMIT 1
 `
 
@@ -175,6 +296,7 @@ func (q *Queries) GetApplicationByName(ctx context.Context, arg GetApplicationBy
 	var i Application
 	err := row.Scan(
 		&i.ID,
+		&i.LogoUrl,
 		&i.UserID,
 		&i.Name,
 		&i.Description,
@@ -184,7 +306,7 @@ func (q *Queries) GetApplicationByName(ctx context.Context, arg GetApplicationBy
 }
 
 const getApplicationsByUserId = `-- name: GetApplicationsByUserId :many
-SELECT id, user_id, name, description, created_at FROM applications
+SELECT id, logo_url, user_id, name, description, created_at FROM applications
 WHERE user_id = $1
 `
 
@@ -199,6 +321,7 @@ func (q *Queries) GetApplicationsByUserId(ctx context.Context, userID pgtype.UUI
 		var i Application
 		if err := rows.Scan(
 			&i.ID,
+			&i.LogoUrl,
 			&i.UserID,
 			&i.Name,
 			&i.Description,
@@ -214,13 +337,91 @@ func (q *Queries) GetApplicationsByUserId(ctx context.Context, userID pgtype.UUI
 	return items, nil
 }
 
-const getEventTypeById = `-- name: GetEventTypeById :one
-SELECT id, application_id, name, description, created_at FROM event_types
-WHERE id = $1 LIMIT 1
+const getEndpointsByApplicationId = `-- name: GetEndpointsByApplicationId :many
+SELECT et.id, et.application_id, et.url, et.secret_encrypted, et.enabled, et.created_at
+FROM endpoints et
+JOIN applications a
+    ON et.application_id = a.id
+WHERE et.application_id = $1
+  AND a.user_id = $2
 `
 
-func (q *Queries) GetEventTypeById(ctx context.Context, id pgtype.UUID) (EventType, error) {
-	row := q.db.QueryRow(ctx, getEventTypeById, id)
+type GetEndpointsByApplicationIdParams struct {
+	ApplicationID pgtype.UUID
+	UserID        pgtype.UUID
+}
+
+func (q *Queries) GetEndpointsByApplicationId(ctx context.Context, arg GetEndpointsByApplicationIdParams) ([]Endpoint, error) {
+	rows, err := q.db.Query(ctx, getEndpointsByApplicationId, arg.ApplicationID, arg.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Endpoint
+	for rows.Next() {
+		var i Endpoint
+		if err := rows.Scan(
+			&i.ID,
+			&i.ApplicationID,
+			&i.Url,
+			&i.SecretEncrypted,
+			&i.Enabled,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getEndpointsById = `-- name: GetEndpointsById :one
+SELECT et.id, et.application_id, et.url, et.secret_encrypted, et.enabled, et.created_at
+FROM endpoints et
+JOIN applications a
+    ON et.application_id = a.id
+WHERE et.id = $1
+  AND a.user_id = $2
+`
+
+type GetEndpointsByIdParams struct {
+	ID     pgtype.UUID
+	UserID pgtype.UUID
+}
+
+func (q *Queries) GetEndpointsById(ctx context.Context, arg GetEndpointsByIdParams) (Endpoint, error) {
+	row := q.db.QueryRow(ctx, getEndpointsById, arg.ID, arg.UserID)
+	var i Endpoint
+	err := row.Scan(
+		&i.ID,
+		&i.ApplicationID,
+		&i.Url,
+		&i.SecretEncrypted,
+		&i.Enabled,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getEventTypeById = `-- name: GetEventTypeById :one
+SELECT et.id, et.application_id, et.name, et.description, et.created_at
+FROM event_types et
+JOIN applications a
+    ON et.application_id = a.id
+WHERE et.id = $1
+  AND a.user_id = $2
+`
+
+type GetEventTypeByIdParams struct {
+	ID     pgtype.UUID
+	UserID pgtype.UUID
+}
+
+func (q *Queries) GetEventTypeById(ctx context.Context, arg GetEventTypeByIdParams) (EventType, error) {
+	row := q.db.QueryRow(ctx, getEventTypeById, arg.ID, arg.UserID)
 	var i EventType
 	err := row.Scan(
 		&i.ID,
@@ -273,7 +474,7 @@ func (q *Queries) GetEventTypesByApplicationId(ctx context.Context, arg GetEvent
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, password_hash, created_at FROM users
+SELECT id, logo_url, name, email, password_hash, created_at FROM users
 WHERE email = $1 LIMIT 1
 `
 
@@ -282,6 +483,8 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 	var i User
 	err := row.Scan(
 		&i.ID,
+		&i.LogoUrl,
+		&i.Name,
 		&i.Email,
 		&i.PasswordHash,
 		&i.CreatedAt,
@@ -290,7 +493,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 }
 
 const getUserById = `-- name: GetUserById :one
-SELECT id, email, password_hash, created_at FROM users
+SELECT id, logo_url, name, email, password_hash, created_at FROM users
 WHERE id = $1 LIMIT 1
 `
 
@@ -299,6 +502,8 @@ func (q *Queries) GetUserById(ctx context.Context, id pgtype.UUID) (User, error)
 	var i User
 	err := row.Scan(
 		&i.ID,
+		&i.LogoUrl,
+		&i.Name,
 		&i.Email,
 		&i.PasswordHash,
 		&i.CreatedAt,
@@ -307,7 +512,7 @@ func (q *Queries) GetUserById(ctx context.Context, id pgtype.UUID) (User, error)
 }
 
 const listApplications = `-- name: ListApplications :many
-SELECT id, user_id, name, description, created_at FROM applications
+SELECT id, logo_url, user_id, name, description, created_at FROM applications
 ORDER BY name
 `
 
@@ -322,6 +527,7 @@ func (q *Queries) ListApplications(ctx context.Context) ([]Application, error) {
 		var i Application
 		if err := rows.Scan(
 			&i.ID,
+			&i.LogoUrl,
 			&i.UserID,
 			&i.Name,
 			&i.Description,
@@ -337,8 +543,71 @@ func (q *Queries) ListApplications(ctx context.Context) ([]Application, error) {
 	return items, nil
 }
 
+const listEndpoints = `-- name: ListEndpoints :many
+SELECT id, application_id, url, secret_encrypted, enabled, created_at FROM endpoints
+ORDER BY id
+`
+
+func (q *Queries) ListEndpoints(ctx context.Context) ([]Endpoint, error) {
+	rows, err := q.db.Query(ctx, listEndpoints)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Endpoint
+	for rows.Next() {
+		var i Endpoint
+		if err := rows.Scan(
+			&i.ID,
+			&i.ApplicationID,
+			&i.Url,
+			&i.SecretEncrypted,
+			&i.Enabled,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listEventTypes = `-- name: ListEventTypes :many
+SELECT id, application_id, name, description, created_at FROM event_types
+ORDER BY name
+`
+
+func (q *Queries) ListEventTypes(ctx context.Context) ([]EventType, error) {
+	rows, err := q.db.Query(ctx, listEventTypes)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []EventType
+	for rows.Next() {
+		var i EventType
+		if err := rows.Scan(
+			&i.ID,
+			&i.ApplicationID,
+			&i.Name,
+			&i.Description,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listUsers = `-- name: ListUsers :many
-SELECT id, email, password_hash, created_at FROM users
+SELECT id, logo_url, name, email, password_hash, created_at FROM users
 ORDER BY email
 `
 
@@ -353,6 +622,8 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 		var i User
 		if err := rows.Scan(
 			&i.ID,
+			&i.LogoUrl,
+			&i.Name,
 			&i.Email,
 			&i.PasswordHash,
 			&i.CreatedAt,
@@ -367,10 +638,44 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 	return items, nil
 }
 
+const updateAdmin = `-- name: UpdateAdmin :exec
+UPDATE admins
+  set name = $2,
+  email = $3
+WHERE id = $1
+`
+
+type UpdateAdminParams struct {
+	ID    pgtype.UUID
+	Name  string
+	Email string
+}
+
+func (q *Queries) UpdateAdmin(ctx context.Context, arg UpdateAdminParams) error {
+	_, err := q.db.Exec(ctx, updateAdmin, arg.ID, arg.Name, arg.Email)
+	return err
+}
+
+const updateAdminPassword = `-- name: UpdateAdminPassword :exec
+UPDATE admins
+  set password_hash = $2
+WHERE id = $1
+`
+
+type UpdateAdminPasswordParams struct {
+	ID           pgtype.UUID
+	PasswordHash string
+}
+
+func (q *Queries) UpdateAdminPassword(ctx context.Context, arg UpdateAdminPasswordParams) error {
+	_, err := q.db.Exec(ctx, updateAdminPassword, arg.ID, arg.PasswordHash)
+	return err
+}
+
 const updateApplication = `-- name: UpdateApplication :exec
 UPDATE applications
-  set name = $3 , description = $4
-WHERE id = $1 AND user_id=$2
+  set name = $3, description = $4, logo_url = $5
+WHERE id = $1 AND user_id = $2
 `
 
 type UpdateApplicationParams struct {
@@ -378,6 +683,7 @@ type UpdateApplicationParams struct {
 	UserID      pgtype.UUID
 	Name        string
 	Description pgtype.Text
+	LogoUrl     pgtype.Text
 }
 
 func (q *Queries) UpdateApplication(ctx context.Context, arg UpdateApplicationParams) error {
@@ -386,6 +692,38 @@ func (q *Queries) UpdateApplication(ctx context.Context, arg UpdateApplicationPa
 		arg.UserID,
 		arg.Name,
 		arg.Description,
+		arg.LogoUrl,
+	)
+	return err
+}
+
+const updateEndpoints = `-- name: UpdateEndpoints :exec
+UPDATE endpoints et
+SET
+    url = $3,
+    secret_encrypted = $4,
+    enabled = $5
+FROM applications a
+WHERE et.id = $1
+  AND et.application_id = a.id
+  AND a.user_id = $2
+`
+
+type UpdateEndpointsParams struct {
+	ID              pgtype.UUID
+	UserID          pgtype.UUID
+	Url             string
+	SecretEncrypted string
+	Enabled         bool
+}
+
+func (q *Queries) UpdateEndpoints(ctx context.Context, arg UpdateEndpointsParams) error {
+	_, err := q.db.Exec(ctx, updateEndpoints,
+		arg.ID,
+		arg.UserID,
+		arg.Url,
+		arg.SecretEncrypted,
+		arg.Enabled,
 	)
 	return err
 }
@@ -399,7 +737,6 @@ FROM applications a
 WHERE et.id = $1
   AND et.application_id = a.id
   AND a.user_id = $2
-RETURNING a.id, user_id, a.name, a.description, a.created_at, et.id, application_id, et.name, et.description, et.created_at
 `
 
 type UpdateEventTypeParams struct {
@@ -421,18 +758,28 @@ func (q *Queries) UpdateEventType(ctx context.Context, arg UpdateEventTypeParams
 
 const updateUser = `-- name: UpdateUser :exec
 UPDATE users
-  set email = $2,
-  password_hash = $3
+  set name = $2,
+  email = $3,
+  password_hash = $4,
+  logo_url = $5
 WHERE id = $1
 `
 
 type UpdateUserParams struct {
 	ID           pgtype.UUID
+	Name         string
 	Email        string
 	PasswordHash string
+	LogoUrl      pgtype.Text
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
-	_, err := q.db.Exec(ctx, updateUser, arg.ID, arg.Email, arg.PasswordHash)
+	_, err := q.db.Exec(ctx, updateUser,
+		arg.ID,
+		arg.Name,
+		arg.Email,
+		arg.PasswordHash,
+		arg.LogoUrl,
+	)
 	return err
 }

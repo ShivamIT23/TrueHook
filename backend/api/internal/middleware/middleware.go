@@ -18,6 +18,7 @@ type contextKey string
 const (
 	UserIDContextKey contextKey = "user_id"
 	EmailContextKey  contextKey = "email"
+	RoleContextKey   contextKey = "role"
 )
 
 type statusRecorder struct {
@@ -116,6 +117,8 @@ func RequireAuth(jwtSecret string) func(http.Handler) http.Handler {
 				UserIDContextKey, claims.UserID)
 			ctx = context.WithValue(ctx, EmailContextKey,
 				claims.Email)
+			ctx = context.WithValue(ctx, RoleContextKey,
+				claims.Role)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
@@ -131,5 +134,11 @@ func GetUserID(ctx context.Context) (uuid.UUID, bool) {
 // GetEmail retrieves the authenticated user's email from the request context.
 func GetEmail(ctx context.Context) (string, bool) {
 	val, ok := ctx.Value(EmailContextKey).(string)
+	return val, ok
+}
+
+// GetRole retrieves the authenticated user's role from the request context.
+func GetRole(ctx context.Context) (string, bool) {
+	val, ok := ctx.Value(RoleContextKey).(string)
 	return val, ok
 }

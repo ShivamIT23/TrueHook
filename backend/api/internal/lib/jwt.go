@@ -12,11 +12,22 @@ import (
 type JWTClaims struct {
 	UserID uuid.UUID `json:"user_id"`
 	Email  string    `json:"email"`
+	Role   string    `json:"role,omitempty"`
 	jwt.RegisteredClaims
 }
 
 // GenerateToken creates a signed JWT string valid for 72 hours.
 func GenerateToken(userID uuid.UUID, email string, secret string) (string, error) {
+	return GenerateTokenWithRole(userID, email, "user", secret)
+}
+
+// GenerateAdminToken creates a signed JWT string with admin role valid for 72 hours.
+func GenerateAdminToken(userID uuid.UUID, email string, secret string) (string, error) {
+	return GenerateTokenWithRole(userID, email, "admin", secret)
+}
+
+// GenerateTokenWithRole creates a signed JWT string with a specific role valid for 72 hours.
+func GenerateTokenWithRole(userID uuid.UUID, email string, role string, secret string) (string, error) {
 	if secret == "" {
 		return "", errors.New("JWT secret cannot be empty")
 	}
@@ -24,6 +35,7 @@ func GenerateToken(userID uuid.UUID, email string, secret string) (string, error
 	claims := JWTClaims{
 		UserID: userID,
 		Email:  email,
+		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(72 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "truehook-skills",
+  "version": "1.0.0",
+  "description": "TrueHook agent skills registry, design rules, and theme configuration",
+  "theme": {
+    "palette": {
+      "majorDark": "#141412",
+      "majorLight": "#f2f2e8",
+      "white": "#ffffff",
+      "accentBlue": "#124060",
+      "accentCoral": "#ea5c47",
+      "accentBrass": "#c39f59"
+    },
+    "appModes": {
+      "apps/web": {
+        "mode": "light",
+        "description": "White/light mode throughout"
+      },
+      "apps/dashboard": {
+        "mode": "light",
+        "description": "White/light mode for everything just like web; ONLY /login and /register are black/dark",
+        "defaultTheme": "light",
+        "darkExceptions": [
+          "/login",
+          "/register"
+        ]
+      },
+      "apps/admin": {
+        "mode": "operator-console",
+        "description": "Internal company back-office console"
+      }
+    }
+  },
+  "skills": [
+    {
+      "name": "frontend-design",
+      "path": ".agents/skills/frontend-design/SKILL.md",
+      "description": "Design tokens, strict 5-color palette, and theme rules (white/light mode for dashboard except dark /login and /register)"
+    },
+    {
+      "name": "frontend-components",
+      "path": ".agents/skills/frontend-components/SKILL.md",
+      "description": "Modular directory structure, component layers, prop interfaces, atomic design, and catalog documentation protocols"
+    },
+    {
+      "name": "api-design",
+      "path": ".agents/skills/api-design/SKILL.md",
+      "description": "Design and implement TrueHook public REST APIs and BFF server actions"
+    },
+    {
+      "name": "webhook-delivery",
+      "path": ".agents/skills/webhook-delivery/SKILL.md",
+      "description": "Reliable webhook delivery, event fanout, retry backoff, and signature verification"
+    },
+    {
+      "name": "database-design",
+      "path": ".agents/skills/database-design/SKILL.md",
+      "description": "PostgreSQL schema, relationships, indexes, and migrations"
+    },
+    {
+      "name": "go-backend",
+      "path": ".agents/skills/go-backend/SKILL.md",
+      "description": "Go backend services, HTTP APIs, workers, and NATS JetStream integration"
+    },
+    {
+      "name": "security-review",
+      "path": ".agents/skills/security-review/SKILL.md",
+      "description": "API security, HMAC signing, SSRF protections, and secret isolation"
+    },
+    {
+      "name": "testing",
+      "path": ".agents/skills/testing/SKILL.md",
+      "description": "Unit, integration, and E2E testing across backend and frontend"
+    }
+  ]
+}

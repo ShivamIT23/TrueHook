@@ -17,6 +17,35 @@ func NewHandler(service eventTypeTypes.Service) *Handler {
 	return &Handler{service: service}
 }
 
+// GetEventTypesHandler handles retreving all event-type.
+// GET /api/v1/application/{application_id}/event-type
+// GET /application/{application_id}/event-type
+func (h *Handler) GetEventTypesHandler(w http.ResponseWriter, r *http.Request) {
+
+	application_id := r.PathValue("application_id")
+	if application_id == "" {
+		return
+	}
+
+	var req eventTypeTypes.GetEventTypeRequest
+
+	req.ApplicationId = application_id
+
+	applicationResp, err := h.service.GetEventTypes(r.Context(), req)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, eventTypeTypes.ErrNotAuthorized):
+			response.Fail(w, http.StatusUnauthorized, "EventType not found with this user", nil, "Invalid Credentials")
+		default:
+			response.Fail(w, http.StatusInternalServerError, err.Error(), nil, "INTERNAL_ERROR")
+		}
+		return
+	}
+
+	response.Success(w, http.StatusOK, "Retrieving successful", applicationResp)
+}
+
 // CreateEventTypeHandler handles event-type creation.
 // POST /api/v1/application/{application_id}/event-type/create
 // POST /application/{application_id}/event-type/create
@@ -102,35 +131,6 @@ func (h *Handler) UpdateEventTypeHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	response.Success(w, http.StatusCreated, "EventType Updation Successfully", applicationResp)
-}
-
-// GetEventTypesHandler handles retreving all event-type.
-// GET /api/v1/application/{application_id}/event-type
-// GET /application/{application_id}/event-type
-func (h *Handler) GetEventTypesHandler(w http.ResponseWriter, r *http.Request) {
-
-	application_id := r.PathValue("application_id")
-	if application_id == "" {
-		return
-	}
-
-	var req eventTypeTypes.GetEventTypeRequest
-
-	req.ApplicationId = application_id
-
-	applicationResp, err := h.service.GetEventTypes(r.Context(), req)
-
-	if err != nil {
-		switch {
-		case errors.Is(err, eventTypeTypes.ErrNotAuthorized):
-			response.Fail(w, http.StatusUnauthorized, "EventType not found with this user", nil, "Invalid Credentials")
-		default:
-			response.Fail(w, http.StatusInternalServerError, err.Error(), nil, "INTERNAL_ERROR")
-		}
-		return
-	}
-
-	response.Success(w, http.StatusOK, "Retrieving successful", applicationResp)
 }
 
 // DeleteEventTypeHandler handles event-type deletion.

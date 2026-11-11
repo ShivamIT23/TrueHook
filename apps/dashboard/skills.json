@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "truehook-dashboard-skills",
+  "version": "1.0.0",
+  "description": "TrueHook customer dashboard theme rules and agent guidelines",
+  "theme": {
+    "palette": {
+      "majorDark": "#141412",
+      "majorLight": "#f2f2e8",
+      "white": "#ffffff",
+      "accentBlue": "#124060",
+      "accentCoral": "#ea5c47",
+      "accentBrass": "#c39f59"
+    },
+    "app": "apps/dashboard",
+    "defaultTheme": "light",
+    "rule": "White/light mode for everything just like apps/web; ONLY /login and /register are black/dark",
+    "darkExceptions": ["/login", "/register"]
+  }
+}

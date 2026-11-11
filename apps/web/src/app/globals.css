@@ -2,25 +2,63 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #141412;
+  --canvas: #ffffff;
+  --cream: #f2f2e8;
+  --blue: #124060;
+  --coral: #ea5c47;
+  --brass: #c39f59;
+  --card: #ffffff;
+  --card-foreground: #141412;
+  --popover: #ffffff;
+  --popover-foreground: #141412;
+  --primary: #124060;
+  --primary-foreground: #f2f2e8;
+  --secondary: #f5f5f0;
+  --secondary-foreground: #141412;
+  --muted: #f5f5f0;
+  --muted-foreground: #70706a;
+  --accent: #f5f5f0;
+  --accent-foreground: #141412;
+  --destructive: #ea5c47;
+  --destructive-foreground: #ffffff;
+  --border: #e5e5dc;
+  --input: #e5e5dc;
+  --ring: #124060;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-canvas: var(--canvas);
+  --color-cream: var(--cream);
+  --color-blue: var(--blue);
+  --color-coral: var(--coral);
+  --color-brass: var(--brass);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family:
+    Inter, -apple-system, BlinkMacSystemFont, "avenir next", avenir, helvetica, "helvetica neue", ubuntu, roboto, noto, "segoe ui", arial, sans-serif;
 }

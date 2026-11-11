@@ -17,8 +17,48 @@ func NewHandler(service applicationTypes.Service) *Handler {
 	return &Handler{service: service}
 }
 
-// CreateApplication handles application creation.
+// GetApplicationHandler handles retreving application.
+// GET /api/v1/application/{id}
+// GET /application/{id}
+func (h *Handler) GetApplicationHandler(w http.ResponseWriter, r *http.Request) {
+
+	applicationResp, err := h.service.GetApplication(r.Context(), r)
+	if err != nil {
+		switch {
+		case errors.Is(err, applicationTypes.ErrApplicationNotFound):
+			response.Fail(w, http.StatusUnauthorized, "Applcation not found with this value", nil, "Either Invalid ID or Invalid Credentials")
+		default:
+			response.Fail(w, http.StatusInternalServerError, err.Error(), nil, "INTERNAL_ERROR")
+		}
+		return
+	}
+
+	response.Success(w, http.StatusOK, "Retrieving successful", applicationResp)
+}
+
+// GetAllApplicationHandler handles retreving all applications.
+// GET /api/v1/application
+// GET /application
+func (h *Handler) GetAllApplicationHandler(w http.ResponseWriter, r *http.Request) {
+
+	applicationResp, err := h.service.GetAllApplication(r.Context())
+
+	if err != nil {
+		switch {
+		case errors.Is(err, applicationTypes.ErrNotAuthorized):
+			response.Fail(w, http.StatusUnauthorized, "Applcation not found with this user", nil, "Invalid Credentials")
+		default:
+			response.Fail(w, http.StatusInternalServerError, err.Error(), nil, "INTERNAL_ERROR")
+		}
+		return
+	}
+
+	response.Success(w, http.StatusOK, "Retrieving successful", applicationResp)
+}
+
+// CreateApplicationHandler handles application creation.
 // POST /api/v1/application/create
+// POST /application/create
 func (h *Handler) CreateApplicationHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Limit request body to 1 MB to prevent memory exhaustion
@@ -37,6 +77,8 @@ func (h *Handler) CreateApplicationHandler(w http.ResponseWriter, r *http.Reques
 			response.Fail(w, http.StatusBadRequest, err.Error(), nil, "Application Already Exist")
 		case errors.Is(err, applicationTypes.ErrInvalidDescription):
 			response.Fail(w, http.StatusBadRequest, err.Error(), nil, "Invalid Description")
+		case errors.Is(err, applicationTypes.ErrInvalidLogoUrl):
+			response.Fail(w, http.StatusBadRequest, err.Error(), nil, "Invalid Logo URL")
 		case errors.Is(err, applicationTypes.ErrInvalidName):
 			response.Fail(w, http.StatusConflict, err.Error(), nil, "Name is Invalid")
 		default:
@@ -45,11 +87,12 @@ func (h *Handler) CreateApplicationHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	response.Success(w, http.StatusCreated, "User registered successfully", applicationResp)
+	response.Success(w, http.StatusCreated, "Application created successfully", applicationResp)
 }
 
-// UpdateApplication handles update application.
-// POST /api/v1/application/update
+// UpdateApplicationHandler handles update application.
+// POST /api/v1/application/update/{id}
+// POST /application/update/{id}
 func (h *Handler) UpdateApplicationHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := r.PathValue("id")
@@ -77,6 +120,8 @@ func (h *Handler) UpdateApplicationHandler(w http.ResponseWriter, r *http.Reques
 			response.Fail(w, http.StatusBadRequest, err.Error(), nil, "Application Not Exist")
 		case errors.Is(err, applicationTypes.ErrInvalidDescription):
 			response.Fail(w, http.StatusBadRequest, err.Error(), nil, "Invalid Description")
+		case errors.Is(err, applicationTypes.ErrInvalidLogoUrl):
+			response.Fail(w, http.StatusBadRequest, err.Error(), nil, "Invalid Logo URL")
 		case errors.Is(err, applicationTypes.ErrInvalidName):
 			response.Fail(w, http.StatusConflict, err.Error(), nil, "Name is Invalid")
 		default:
@@ -85,48 +130,12 @@ func (h *Handler) UpdateApplicationHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	response.Success(w, http.StatusCreated, "User registered successfully", applicationResp)
+	response.Success(w, http.StatusOK, "Application updated successfully", applicationResp)
 }
 
-// GetApplication handles retreving application.
-// GET /api/v1/application/{id}
-func (h *Handler) GetApplicationHandler(w http.ResponseWriter, r *http.Request) {
-
-	applicationResp, err := h.service.GetApplication(r.Context(), r)
-	if err != nil {
-		switch {
-		case errors.Is(err, applicationTypes.ErrApplicationNotFound):
-			response.Fail(w, http.StatusUnauthorized, "Applcation not found with this value", nil, "Either Invalid ID or Invalid Credentials")
-		default:
-			response.Fail(w, http.StatusInternalServerError, err.Error(), nil, "INTERNAL_ERROR")
-		}
-		return
-	}
-
-	response.Success(w, http.StatusOK, "Retrieving successful", applicationResp)
-}
-
-// GetAllApplication handles retreving all applications.
-// GET /api/v1/application
-func (h *Handler) GetAllApplicationHandler(w http.ResponseWriter, r *http.Request) {
-
-	applicationResp, err := h.service.GetAllApplication(r.Context())
-
-	if err != nil {
-		switch {
-		case errors.Is(err, applicationTypes.ErrNotAuthorized):
-			response.Fail(w, http.StatusUnauthorized, "Applcation not found with this user", nil, "Invalid Credentials")
-		default:
-			response.Fail(w, http.StatusInternalServerError, err.Error(), nil, "INTERNAL_ERROR")
-		}
-		return
-	}
-
-	response.Success(w, http.StatusOK, "Retrieving successful", applicationResp)
-}
-
-// DeleteApplication handles application deletion.
+// DeleteApplicationHandler handles application deletion.
 // DELETE /api/v1/application/{id}
+// DELETE /application/{id}
 func (h *Handler) DeleteApplicationHandler(w http.ResponseWriter, r *http.Request) {
 
 	applicationResp, err := h.service.DeleteApplication(r.Context(), r)

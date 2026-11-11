@@ -18,6 +18,7 @@ func TestApiLoadConfig(t *testing.T) {
 	os.Setenv("ALLOWED_ORIGINS", "https://app.example.com,https://dashboard.example.com")
 	os.Setenv("SKIP_TLS_VERIFY", "false")
 	os.Setenv("NATS_URL", "nats://127.0.0.1:4222")
+	os.Setenv("SQLC_AUTH_TOKEN", "mock_sqlc_token")
 
 	defer func() {
 		os.Unsetenv("API_PORT")
@@ -30,6 +31,7 @@ func TestApiLoadConfig(t *testing.T) {
 		os.Unsetenv("ALLOWED_ORIGINS")
 		os.Unsetenv("SKIP_TLS_VERIFY")
 		os.Unsetenv("NATS_URL")
+		os.Unsetenv("SQLC_AUTH_TOKEN")
 	}()
 
 	cfg := LoadConfig()
@@ -68,5 +70,8 @@ func TestApiLoadConfig(t *testing.T) {
 	}
 	if cfg.NATS_URL != "nats://127.0.0.1:4222" {
 		t.Errorf("expected NATS_URL nats://127.0.0.1:4222, got %s", cfg.NATS_URL)
+	}
+	if cfg.SQLC_AUTH_TOKEN != "mock_sqlc_token" {
+		t.Errorf("expected SQLC_AUTH_TOKEN mock_sqlc_token, got %s", cfg.SQLC_AUTH_TOKEN)
 	}
 }

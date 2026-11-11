@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fef8f3;
+  --foreground: #141412;
+  --canvas: #ffffff;
+  --cream: #f2f2e8;
+  --blue: #124060;
+  --coral: #ea5c47;
+  --brass: #c39f59;
+  --card: #fef8f3;
+  --card-foreground: #141412;
+  --popover: #ffffff;
+  --popover-foreground: #141412;
+  --primary: #124060;
+  --primary-foreground: #f2f2e8;
+  --secondary: #f5f5f0;
+  --secondary-foreground: #141412;
+  --muted: #f5f5f0;
+  --muted-foreground: #70706a;
+  --accent: #f5f5f0;
+  --accent-foreground: #141412;
+  --destructive: #ea5c47;
+  --destructive-foreground: #fef8f3;
+  --border: #e5e5dc;
+  --input: #e5e5dc;
+  --ring: #124060;
+}
+
+.dark {
+  --background: #141412;
+  --foreground: #f2f2e8;
+  --canvas: #141412;
+  --card: #181816;
+  --card-foreground: #f2f2e8;
+  --popover: #181816;
+  --popover-foreground: #f2f2e8;
+  --primary: #124060;
+  --primary-foreground: #f2f2e8;
+  --secondary: #232320;
+  --secondary-foreground: #f2f2e8;
+  --muted: #232320;
+  --muted-foreground: #9e9e96;
+  --accent: #232320;
+  --accent-foreground: #f2f2e8;
+  --destructive: #ea5c47;
+  --destructive-foreground: #fef8f3;
+  --border: #262624;
+  --input: #2b2b27;
+  --ring: #124060;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-canvas: var(--canvas);
+  --color-cream: var(--cream);
+  --color-blue: var(--blue);
+  --color-coral: var(--coral);
+  --color-brass: var(--brass);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  font-size: 14px;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family:
+    Inter, -apple-system, BlinkMacSystemFont, "avenir next", avenir, helvetica, "helvetica neue", ubuntu, roboto, noto, "segoe ui", arial, sans-serif;
+}
+
+h1 {
+  font-size: 1.71429rem;
+  line-height: 2.28571rem;
+  font-weight: 600;
+}
+
+button,
+li,
+a {
+  cursor: pointer;
+}
+
+/* Custom subtle scrollbar for sidebar */
+.sidebar-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.sidebar-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+.sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+.sidebar-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}

@@ -8,8 +8,17 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Admin struct {
+	ID           pgtype.UUID
+	Name         string
+	Email        string
+	PasswordHash string
+	CreatedAt    pgtype.Timestamptz
+}
+
 type Application struct {
 	ID          pgtype.UUID
+	LogoUrl     pgtype.Text
 	UserID      pgtype.UUID
 	Name        string
 	Description pgtype.Text
@@ -84,6 +93,8 @@ type ProcessedWebhook struct {
 
 type User struct {
 	ID           pgtype.UUID
+	LogoUrl      pgtype.Text
+	Name         string
 	Email        string
 	PasswordHash string
 	CreatedAt    pgtype.Timestamptz

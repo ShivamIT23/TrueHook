@@ -17,30 +17,33 @@ func NewHandler(service authTypes.Service) *Handler {
 	return &Handler{service: service}
 }
 
-// Signup handles user registration.
-// POST /api/v1/auth/signup
-func (h *Handler) SignupHandler(w http.ResponseWriter, r *http.Request) {
+// RegisterHandler handles user registration.
+// POST /api/v1/auth/register
+// POST /auth/register
+func (h *Handler) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Limit request body to 1 MB to prevent memory exhaustion
 	r.Body = http.MaxBytesReader(w, r.Body, 1024*1024)
 
-	var req authTypes.SignupRequest
+	var req authTypes.RegisterRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		response.Fail(w, http.StatusBadRequest, "Invalid request payload", err.Error(), "INVALID_REQUEST_BODY")
 		return
 	}
 
-	authResp, err := h.service.Signup(r.Context(), req)
+	authResp, err := h.service.Register(r.Context(), req)
 	if err != nil {
 		switch {
 		case errors.Is(err, authTypes.ErrInvalidEmail):
 			response.Fail(w, http.StatusBadRequest, err.Error(), nil, "INVALID_EMAIL")
+		case errors.Is(err, authTypes.ErrInvalidName):
+			response.Fail(w, http.StatusBadRequest, err.Error(), nil, "INVALID_NAME")
 		case errors.Is(err, authTypes.ErrInvalidPassword):
 			response.Fail(w, http.StatusBadRequest, err.Error(), nil, "WEAK_PASSWORD")
 		case errors.Is(err, authTypes.ErrEmailTaken):
 			response.Fail(w, http.StatusConflict, err.Error(), nil, "EMAIL_EXISTS")
 		default:
-			response.Fail(w, http.StatusInternalServerError, "An unexpected error occurred during signup", nil, "INTERNAL_ERROR")
+			response.Fail(w, http.StatusInternalServerError, "An unexpected error occurred during register", nil, "INTERNAL_ERROR")
 		}
 		return
 	}
@@ -48,24 +51,25 @@ func (h *Handler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	response.Success(w, http.StatusCreated, "User registered successfully", authResp)
 }
 
-// Signin handles user authentication.
-// POST /api/v1/auth/signin
-func (h *Handler) SigninHandler(w http.ResponseWriter, r *http.Request) {
+// LoginHandler handles user authentication.
+// POST /api/v1/auth/login
+// POST /auth/login
+func (h *Handler) LogininHandler(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, 1024*1024)
 
-	var req authTypes.SigninRequest
+	var req authTypes.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		response.Fail(w, http.StatusBadRequest, "Invalid request payload", err.Error(), "INVALID_REQUEST_BODY")
 		return
 	}
 
-	authResp, err := h.service.Signin(r.Context(), req)
+	authResp, err := h.service.Login(r.Context(), req)
 	if err != nil {
 		switch {
 		case errors.Is(err, authTypes.ErrInvalidCredentials):
 			response.Fail(w, http.StatusUnauthorized, "Invalid email or password", nil, "INVALID_CREDENTIALS")
 		default:
-			response.Fail(w, http.StatusInternalServerError, "An unexpected error occurred during signin", nil, "INTERNAL_ERROR")
+			response.Fail(w, http.StatusInternalServerError, err.Error(), nil, "INTERNAL_ERROR")
 		}
 		return
 	}
