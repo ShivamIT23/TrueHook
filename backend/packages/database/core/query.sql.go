@@ -73,6 +73,35 @@ func (q *Queries) CountEventsByApplicationId(ctx context.Context, arg CountEvent
 	return count, err
 }
 
+const createAPI = `-- name: CreateAPI :one
+INSERT INTO api (
+  user_id, api_key, api_credits_used
+) VALUES (
+  $1, $2, $3
+)
+RETURNING id, api_key, user_id, api_credits_used, created_at, updated_at
+`
+
+type CreateAPIParams struct {
+	UserID         pgtype.UUID
+	ApiKey         string
+	ApiCreditsUsed int64
+}
+
+func (q *Queries) CreateAPI(ctx context.Context, arg CreateAPIParams) (Api, error) {
+	row := q.db.QueryRow(ctx, createAPI, arg.UserID, arg.ApiKey, arg.ApiCreditsUsed)
+	var i Api
+	err := row.Scan(
+		&i.ID,
+		&i.ApiKey,
+		&i.UserID,
+		&i.ApiCreditsUsed,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const createAdmin = `-- name: CreateAdmin :one
 INSERT INTO admins (
   name, email, password_hash
@@ -344,6 +373,21 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
+const deleteAPI = `-- name: DeleteAPI :exec
+DELETE FROM api
+WHERE id = $1 AND user_id = $2
+`
+
+type DeleteAPIParams struct {
+	ID     pgtype.UUID
+	UserID pgtype.UUID
+}
+
+func (q *Queries) DeleteAPI(ctx context.Context, arg DeleteAPIParams) error {
+	_, err := q.db.Exec(ctx, deleteAPI, arg.ID, arg.UserID)
+	return err
+}
+
 const deleteApplication = `-- name: DeleteApplication :exec
 DELETE FROM applications
 WHERE id = $1 AND user_id = $2
@@ -413,6 +457,82 @@ WHERE id = $1
 func (q *Queries) DeleteUser(ctx context.Context, id pgtype.UUID) error {
 	_, err := q.db.Exec(ctx, deleteUser, id)
 	return err
+}
+
+const getAPIById = `-- name: GetAPIById :one
+SELECT id, api_key, user_id, api_credits_used, created_at, updated_at FROM api
+WHERE id = $1 AND user_id = $2 LIMIT 1
+`
+
+type GetAPIByIdParams struct {
+	ID     pgtype.UUID
+	UserID pgtype.UUID
+}
+
+func (q *Queries) GetAPIById(ctx context.Context, arg GetAPIByIdParams) (Api, error) {
+	row := q.db.QueryRow(ctx, getAPIById, arg.ID, arg.UserID)
+	var i Api
+	err := row.Scan(
+		&i.ID,
+		&i.ApiKey,
+		&i.UserID,
+		&i.ApiCreditsUsed,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getAPIByKey = `-- name: GetAPIByKey :one
+SELECT id, api_key, user_id, api_credits_used, created_at, updated_at FROM api
+WHERE api_key = $1 LIMIT 1
+`
+
+func (q *Queries) GetAPIByKey(ctx context.Context, apiKey string) (Api, error) {
+	row := q.db.QueryRow(ctx, getAPIByKey, apiKey)
+	var i Api
+	err := row.Scan(
+		&i.ID,
+		&i.ApiKey,
+		&i.UserID,
+		&i.ApiCreditsUsed,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getAPIsByUserId = `-- name: GetAPIsByUserId :many
+SELECT id, api_key, user_id, api_credits_used, created_at, updated_at FROM api
+WHERE user_id = $1
+ORDER BY created_at DESC
+`
+
+func (q *Queries) GetAPIsByUserId(ctx context.Context, userID pgtype.UUID) ([]Api, error) {
+	rows, err := q.db.Query(ctx, getAPIsByUserId, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Api
+	for rows.Next() {
+		var i Api
+		if err := rows.Scan(
+			&i.ID,
+			&i.ApiKey,
+			&i.UserID,
+			&i.ApiCreditsUsed,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getAdminByEmail = `-- name: GetAdminByEmail :one
@@ -1380,6 +1500,34 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 	return items, nil
 }
 
+const regenerateAPIKey = `-- name: RegenerateAPIKey :one
+UPDATE api
+SET api_key = $3,
+    updated_at = NOW()
+WHERE id = $1 AND user_id = $2
+RETURNING id, api_key, user_id, api_credits_used, created_at, updated_at
+`
+
+type RegenerateAPIKeyParams struct {
+	ID     pgtype.UUID
+	UserID pgtype.UUID
+	ApiKey string
+}
+
+func (q *Queries) RegenerateAPIKey(ctx context.Context, arg RegenerateAPIKeyParams) (Api, error) {
+	row := q.db.QueryRow(ctx, regenerateAPIKey, arg.ID, arg.UserID, arg.ApiKey)
+	var i Api
+	err := row.Scan(
+		&i.ID,
+		&i.ApiKey,
+		&i.UserID,
+		&i.ApiCreditsUsed,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const removeEndpointEventType = `-- name: RemoveEndpointEventType :exec
 DELETE FROM endpoint_event_types
 WHERE endpoint_id = $1 AND event_type_id = $2
@@ -1393,6 +1541,62 @@ type RemoveEndpointEventTypeParams struct {
 func (q *Queries) RemoveEndpointEventType(ctx context.Context, arg RemoveEndpointEventTypeParams) error {
 	_, err := q.db.Exec(ctx, removeEndpointEventType, arg.EndpointID, arg.EventTypeID)
 	return err
+}
+
+const setAPICredits = `-- name: SetAPICredits :one
+UPDATE api
+SET api_credits_used = $3,
+    updated_at = NOW()
+WHERE id = $1 AND user_id = $2
+RETURNING id, api_key, user_id, api_credits_used, created_at, updated_at
+`
+
+type SetAPICreditsParams struct {
+	ID             pgtype.UUID
+	UserID         pgtype.UUID
+	ApiCreditsUsed int64
+}
+
+func (q *Queries) SetAPICredits(ctx context.Context, arg SetAPICreditsParams) (Api, error) {
+	row := q.db.QueryRow(ctx, setAPICredits, arg.ID, arg.UserID, arg.ApiCreditsUsed)
+	var i Api
+	err := row.Scan(
+		&i.ID,
+		&i.ApiKey,
+		&i.UserID,
+		&i.ApiCreditsUsed,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateAPICredits = `-- name: UpdateAPICredits :one
+UPDATE api
+SET api_credits_used = api_credits_used + $3,
+    updated_at = NOW()
+WHERE id = $1 AND user_id = $2
+RETURNING id, api_key, user_id, api_credits_used, created_at, updated_at
+`
+
+type UpdateAPICreditsParams struct {
+	ID             pgtype.UUID
+	UserID         pgtype.UUID
+	ApiCreditsUsed int64
+}
+
+func (q *Queries) UpdateAPICredits(ctx context.Context, arg UpdateAPICreditsParams) (Api, error) {
+	row := q.db.QueryRow(ctx, updateAPICredits, arg.ID, arg.UserID, arg.ApiCreditsUsed)
+	var i Api
+	err := row.Scan(
+		&i.ID,
+		&i.ApiKey,
+		&i.UserID,
+		&i.ApiCreditsUsed,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const updateAdmin = `-- name: UpdateAdmin :exec

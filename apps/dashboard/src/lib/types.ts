@@ -35,6 +35,7 @@ export interface AuthActionErrors {
   name?: string[];
   password?: string[];
   confirmPassword?: string[];
+  logo_url?: string[];
   _form?: string[];
 }
 

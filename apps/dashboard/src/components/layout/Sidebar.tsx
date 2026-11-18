@@ -4,6 +4,7 @@ import {
   Activity,
   ChevronLeft,
   ChevronRight,
+  Layers,
   LayoutDashboard,
   Radio,
   Send,
@@ -34,6 +35,11 @@ export const defaultNavLinks: NavLinkItem[] = [
     title: "Dashboard",
     path: "/dashboard",
     icon: LayoutDashboard,
+  },
+  {
+    title: "Applications",
+    path: "/applications",
+    icon: Layers,
   },
   {
     title: "Event Types",

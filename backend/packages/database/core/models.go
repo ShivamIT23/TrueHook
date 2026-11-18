@@ -16,6 +16,15 @@ type Admin struct {
 	CreatedAt    pgtype.Timestamptz
 }
 
+type Api struct {
+	ID             pgtype.UUID
+	ApiKey         string
+	UserID         pgtype.UUID
+	ApiCreditsUsed int64
+	CreatedAt      pgtype.Timestamptz
+	UpdatedAt      pgtype.Timestamptz
+}
+
 type Application struct {
 	ID          pgtype.UUID
 	LogoUrl     pgtype.Text

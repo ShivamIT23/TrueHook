@@ -385,6 +385,36 @@ When creating or modifying components, register them below:
   - `delivery: DeliveryItem | null`
   - `onClose: () => void`
 
+### `ApplicationsManager`
+- **Path**: `apps/dashboard/src/modules/applications/components/ApplicationsManager.tsx`
+- **Layer**: Feature Domain Module (`modules/applications`)
+- **Description**: Comprehensive application workspace manager. Displays metric overview cards (Total Applications, Active Workspace, Security Standard), real-time name and description filtering, application cards with copyable IDs, relative creation dates, active workspace badges, and action triggers for instant workspace switching via `selectApplicationAction`, application creation (`CreateApplicationModal`), and deletion (`DeleteApplicationDialog`).
+- **Props Interface**:
+  - `initialApplications: Application[]`
+  - `activeApplication: Application | null`
+
+### `MyAccountManager`
+- **Path**: `apps/dashboard/src/modules/account/components/MyAccountManager.tsx`
+- **Layer**: Feature Domain Module (`modules/account`)
+- **Description**: User profile, security, and account management interface. Features a verified member header with avatar/initial fallback, member since date, copyable account UUID, a personal details form (name, email, logo/avatar URL) powered by BFF action `updateUserAction` with live feedback and session cookie updates, and password update utilities.
+- **Props Interface**:
+  - `user: AuthUser | null`
+
+### `SettingsManager`
+- **Path**: `apps/dashboard/src/modules/settings/components/SettingsManager.tsx`
+- **Layer**: Feature Domain Module (`modules/settings`)
+- **Description**: Platform and delivery configuration interface. Manages active application defaults, configurable outgoing HTTP connection timeout (3s–60s), maximum retry attempts (1–10) with jitter backoff, HMAC-SHA256 signature details, SSRF mitigation guardrails, email failure alert preferences, and danger zone safeguards.
+- **Props Interface**:
+  - `application: Application | null`
+  - `user: AuthUser | null`
+
+### `HelpSupportManager`
+- **Path**: `apps/dashboard/src/modules/help/components/HelpSupportManager.tsx`
+- **Layer**: Feature Domain Module (`modules/help`)
+- **Description**: Developer documentation and support interface. Features an operational system status indicator with pulsing beacon, quickstart and signature verification resource cards, an interactive FAQ accordion covering at-least-once delivery, retry backoff, and SSRF protections, and a direct support ticket submission form with reference ID generation.
+- **Props Interface**:
+  - None (Self-contained presentation and ticket submission state)
+
 ---
 
 ## 4. Documentation Protocol

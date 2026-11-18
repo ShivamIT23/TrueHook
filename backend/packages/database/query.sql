@@ -363,3 +363,50 @@ JOIN endpoints ep ON d.endpoint_id = ep.id
 JOIN applications a ON ep.application_id = a.id
 WHERE da.id = $1 AND a.user_id = $2
 LIMIT 1;
+
+-- name: GetAPIById :one
+SELECT * FROM api
+WHERE id = $1 AND user_id = $2 LIMIT 1;
+
+-- name: GetAPIByKey :one
+SELECT * FROM api
+WHERE api_key = $1 LIMIT 1;
+
+-- name: GetAPIsByUserId :many
+SELECT * FROM api
+WHERE user_id = $1
+ORDER BY created_at DESC;
+
+-- name: CreateAPI :one
+INSERT INTO api (
+  user_id, api_key, api_credits_used
+) VALUES (
+  $1, $2, $3
+)
+RETURNING *;
+
+-- name: UpdateAPICredits :one
+UPDATE api
+SET api_credits_used = api_credits_used + $3,
+    updated_at = NOW()
+WHERE id = $1 AND user_id = $2
+RETURNING *;
+
+-- name: SetAPICredits :one
+UPDATE api
+SET api_credits_used = $3,
+    updated_at = NOW()
+WHERE id = $1 AND user_id = $2
+RETURNING *;
+
+-- name: RegenerateAPIKey :one
+UPDATE api
+SET api_key = $3,
+    updated_at = NOW()
+WHERE id = $1 AND user_id = $2
+RETURNING *;
+
+-- name: DeleteAPI :exec
+DELETE FROM api
+WHERE id = $1 AND user_id = $2;
+

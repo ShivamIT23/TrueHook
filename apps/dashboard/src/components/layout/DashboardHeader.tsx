@@ -4,7 +4,6 @@ import {
   Bell,
   Check,
   ChevronDown,
-  ExternalLink,
   HelpCircle,
   Layers,
   LogOut,
@@ -199,7 +198,7 @@ export function DashboardHeader({
               </div>
 
               <Link
-                href="/?switch=true"
+                href="/applications"
                 className="text-[11px] font-medium text-foreground hover:text-primary hover:underline whitespace-nowrap"
               >
                 Open application panel
@@ -269,29 +268,36 @@ export function DashboardHeader({
                   {/* Links for pages */}
                   <div className="py-1.5 mt-3 flex flex-col text-sm">
                     <Link
-                      href="#"
+                      href="/applications"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex gap-2 py-1.5 px-3 items-center text-foreground hover:bg-secondary hover:text-secondary2 rounded-lg transition-all duration-200"
+                    >
+                      <Layers size={14} />
+                      <span>Applications</span>
+                    </Link>
+                    <Link
+                      href="/my-account"
+                      onClick={() => setMenuOpen(false)}
                       className="flex gap-2 py-1.5 px-3 items-center text-foreground hover:bg-secondary hover:text-secondary2 rounded-lg transition-all duration-200"
                     >
                       <User size={14} />
                       <span>My Account</span>
                     </Link>
                     <Link
-                      href="#"
+                      href="/settings"
+                      onClick={() => setMenuOpen(false)}
                       className="flex gap-2 py-1.5 px-3 items-center text-foreground hover:bg-secondary hover:text-secondary2 rounded-lg transition-all duration-200"
                     >
                       <Settings2 size={14} />
                       <span>Settings</span>
                     </Link>
                     <Link
-                      href="#"
+                      href="/help"
+                      onClick={() => setMenuOpen(false)}
                       className="flex gap-2 py-1.5 px-3 items-center text-foreground hover:bg-secondary hover:text-secondary2 rounded-lg transition-all duration-200"
                     >
                       <HelpCircle size={14} />
                       <span>Help & Support</span>
-                      <ExternalLink
-                        size={13}
-                        className="stroke-[2.5px] ml-auto"
-                      />
                     </Link>
                   </div>
 

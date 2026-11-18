@@ -21,6 +21,15 @@ Customer accounts and organizations.
 - `password_hash` (TEXT, Not Null)
 - `created_at` (TIMESTAMPTZ, Default: `NOW()`)
 
+### `api`
+API keys and developer credit usage tracking per user.
+- `id` (UUID, Primary Key, Default: `gen_random_uuid()`)
+- `api_key` (VARCHAR(255), Unique, Not Null) - Cryptographically generated or custom developer API key.
+- `user_id` (UUID, Not Null, Foreign Key: `users(id)` ON DELETE CASCADE)
+- `api_credits_used` (BIGINT, Not Null, Default: `0`) - Cumulative API credits consumed.
+- `created_at` (TIMESTAMPTZ, Not Null, Default: `NOW()`)
+- `updated_at` (TIMESTAMPTZ, Not Null, Default: `NOW()`)
+
 ### `applications`
 Logical sources of webhook events.
 - `id` (UUID, Primary Key, Default: `gen_random_uuid()`)

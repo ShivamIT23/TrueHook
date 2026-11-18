@@ -5,6 +5,7 @@ import (
 
 	"github.com/ShivamIT23/TrueHook/backend/api/internal/config"
 	adminRoutes "github.com/ShivamIT23/TrueHook/backend/api/internal/routes/admin"
+	apiRoutes "github.com/ShivamIT23/TrueHook/backend/api/internal/routes/api"
 	applicationRoutes "github.com/ShivamIT23/TrueHook/backend/api/internal/routes/application"
 	authRoutes "github.com/ShivamIT23/TrueHook/backend/api/internal/routes/auth"
 	deliveryRoutes "github.com/ShivamIT23/TrueHook/backend/api/internal/routes/delivery"
@@ -13,6 +14,7 @@ import (
 	eventTypeRoutes "github.com/ShivamIT23/TrueHook/backend/api/internal/routes/event-type"
 	userRoutes "github.com/ShivamIT23/TrueHook/backend/api/internal/routes/user"
 	adminHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/admin"
+	apiHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/api"
 	applicationHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/application"
 	authHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/auth"
 	deliveryHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/delivery"
@@ -26,6 +28,7 @@ import (
 // RouterConfig contains dependencies required to assemble all routes.
 type RouterConfig struct {
 	AdminHandler       *adminHandler.Handler
+	APIHandler         *apiHandler.Handler
 	AuthHandler        *authHandler.Handler
 	ApplicationHandler *applicationHandler.Handler
 	EndpointHandler    *endpointHandler.Handler
@@ -58,6 +61,9 @@ func NewRouter(cfg RouterConfig) *http.ServeMux {
 	// Register module routes
 	if cfg.AdminHandler != nil {
 		adminRoutes.AdminRoutes(mux, cfg.AdminHandler, jwt_secret)
+	}
+	if cfg.APIHandler != nil {
+		apiRoutes.APIRoutes(mux, cfg.APIHandler, jwt_secret)
 	}
 	if cfg.AuthHandler != nil {
 		authRoutes.AuthRoutes(mux, cfg.AuthHandler)

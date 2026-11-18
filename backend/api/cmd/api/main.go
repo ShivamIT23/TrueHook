@@ -6,6 +6,7 @@ import (
 
 	"github.com/ShivamIT23/TrueHook/backend/api/internal/config"
 	adminHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/admin"
+	apiHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/api"
 	applicationHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/application"
 	authHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/auth"
 	deliveryHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/delivery"
@@ -15,6 +16,7 @@ import (
 	userHandler "github.com/ShivamIT23/TrueHook/backend/api/internal/handlers/user"
 	"github.com/ShivamIT23/TrueHook/backend/api/internal/server"
 	adminService "github.com/ShivamIT23/TrueHook/backend/api/internal/service/admin"
+	apiService "github.com/ShivamIT23/TrueHook/backend/api/internal/service/api"
 	applicationService "github.com/ShivamIT23/TrueHook/backend/api/internal/service/application"
 	authService "github.com/ShivamIT23/TrueHook/backend/api/internal/service/auth"
 	deliveryService "github.com/ShivamIT23/TrueHook/backend/api/internal/service/delivery"
@@ -97,9 +99,14 @@ func main() {
 
 	adminHandler := adminHandler.NewHandler(newAdminService)
 
+	newAPIService := apiService.NewService(dbQueries)
+
+	apiHandler := apiHandler.NewHandler(newAPIService)
+
 	// 5.. Assemble HTTP Router
 	router := server.NewRouter(server.RouterConfig{
 		AdminHandler:       adminHandler,
+		APIHandler:         apiHandler,
 		AuthHandler:        authHandler,
 		ApplicationHandler: applicationHandler,
 		EndpointHandler:    endpointHandler,

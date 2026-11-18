@@ -15,6 +15,15 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS api (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    api_key VARCHAR(255) UNIQUE NOT NULL,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    api_credits_used BIGINT NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS applications (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     logo_url VARCHAR(500),
@@ -111,3 +120,5 @@ CREATE INDEX IF NOT EXISTS idx_deliveries_endpoint_id ON deliveries(endpoint_id)
 CREATE INDEX IF NOT EXISTS idx_deliveries_status_next_attempt ON deliveries(status, next_attempt_at);
 CREATE INDEX IF NOT EXISTS idx_delivery_attempts_delivery_id ON delivery_attempts(delivery_id);
 CREATE INDEX IF NOT EXISTS idx_outbox_published_at ON outbox(published_at);
+CREATE INDEX IF NOT EXISTS idx_api_user_id ON api(user_id);
+CREATE INDEX IF NOT EXISTS idx_api_api_key ON api(api_key);
