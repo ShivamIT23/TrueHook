@@ -3,6 +3,7 @@
 import { AlertCircle, Globe, Key, Loader2, Save, Tag, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { XButton } from "@/components/ui/x-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { EventTypeMultiSelect } from "@/modules/endpoints/components/EventTypeMultiSelect";
@@ -100,7 +101,7 @@ export function EditEndpointModal({
       />
 
       {/* Modal Dialog Card */}
-      <div className="relative z-10 w-full max-w-lg rounded-2xl border border-border bg-canvas p-6 shadow-xl animate-in fade-in zoom-in-95 sm:p-8">
+      <div className="relative z-10 w-full max-w-lg rounded-2xl border border-border bg-canvas p-6 shadow-xl animate-in fade-in zoom-in-95 ">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>
@@ -111,15 +112,17 @@ export function EditEndpointModal({
               Modify destination URL, secret, or active delivery status.
             </p>
           </div>
-          <button
-            type="button"
+          <XButton
+            width={32}
+            height={32}
             onClick={handleClose}
             disabled={mutation.isPending}
-            className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors disabled:opacity-50"
+            borderStyle="none"
             aria-label="Close modal"
+            title="Close"
           >
             <X className="h-5 w-5" />
-          </button>
+          </XButton>
         </div>
 
         {/* Global Error Banner */}
@@ -227,7 +230,7 @@ export function EditEndpointModal({
           <div className="pt-2">
             <label
               htmlFor="edit-endpoint-enabled"
-              className="flex items-center justify-between p-3 rounded-lg border border-border bg-secondary/50 cursor-pointer hover:bg-secondary transition-colors"
+              className="flex items-center justify-between p-3 rounded-lg border border-border bg-secondary2/50 cursor-pointer hover:bg-secondary2 transition-colors"
             >
               <div>
                 <p className="text-xs font-semibold text-foreground">

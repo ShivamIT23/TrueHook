@@ -30,7 +30,7 @@ Think of TrueHook as a simplified Svix-style webhook delivery platform.
 
 ### Frontend Applications
 
-- `apps/web`: Public website, landing pages, public documentation, and authentication flows (login, register).
+- `apps/web`: Public website, landing pages, public documentation, and authentication flows (signin, signup).
 - `apps/dashboard`: Customer portal for authenticated users (applications, endpoints, event streams, delivery attempt logs, replay triggers, metrics).
 - `apps/admin`: Internal administration console exclusively for TrueHook company operators (system configuration, cross-tenant management, frontend updates, and operational controls).
 
@@ -203,7 +203,7 @@ Do not expose internal database models directly as public API responses.
 Applies to all frontend applications (`apps/web`, `apps/dashboard`, `apps/admin`):
 
 - **Application Roles**:
-  - `apps/web`: Public marketing, landing pages, and authentication entry points (`login`, `register`).
+  - `apps/web`: Public marketing, landing pages, and authentication entry points (`signin`, `signup`).
   - `apps/dashboard`: Authenticated customer workspace for managing webhooks, viewing delivery history, and inspecting payloads.
   - `apps/admin`: Internal company console exclusively for TrueHook operators to update frontend settings, manage tenants, and inspect system health.
 - Use TypeScript strict mode with explicit interfaces for all component props.
@@ -216,17 +216,16 @@ Applies to all frontend applications (`apps/web`, `apps/dashboard`, `apps/admin`
   - Separate data fetching and business logic from presentational rendering.
 - Maintain the strict color scheme & theme modes:
   - **Theme Modes**:
-    - `apps/web`: Public website in clean white/light mode.
-    - `apps/dashboard`: **White/light mode for everything** (overview, applications, endpoints, events, deliveries, metrics) just like `apps/web`. **ONLY the customer `/login` and `/register` routes** are black/dark mode (`.dark`, `bg-[#141412]`, dark card, `BackgroundSVG`, `#f2f2e8` text).
-  - Major scheme (dominates 85–90% of the UI surface):
-    - `#141412` (Obsidian canvas in dark auth; high-contrast text and dark neutral in light mode)
-    - `#ffffff` / `#f2f2e8` (Clean white canvas and light card surfaces in light mode; parchment cream text and borders in dark mode)
-  - Subtle accent scheme (used sparingly and deliberately, 10–15% max):
-    - `#124060` (Deep nautical blue: primary actions, active navigation, focus rings)
-    - `#ea5c47` (Coral red: destructive actions, error badges, critical notifications)
-    - `#c39f59` (Warm brass: warning states, status indicators, subtle highlights)
+    - `apps/web`: Public website in clean `#F3EEE3` cream mode with `#111111` typography and `#D9541E` accent.
+    - `apps/dashboard`: **Clean light cream mode for everything** (overview, applications, endpoints, events, deliveries, metrics) using `#F3EEE3` surfaces and `#111111` text. **ONLY the customer `/signin` and `/signup` routes** are black/dark mode (`.dark`, `bg-[#111111]`, dark card, `BackgroundSVG`, `#F3EEE3` text).
+    - `apps/admin`: Company console using `#111111`, `#F3EEE3`, and `#D9541E`.
+  - Major scheme (dominates 90% of the UI surface):
+    - `#F3EEE3` (Clean cream canvas, surface backgrounds, and light cards in light mode; text and borders in dark mode)
+    - `#111111` (Obsidian canvas in dark mode; high-contrast text and borders in light mode)
+  - Sole accent scheme (10% max):
+    - `#D9541E` (Terracotta accent: primary and secondary actions, buttons, links, active navigation, focus rings, error badges, status highlights)
   - Never introduce extraneous colors or create multi-colored, noisy interfaces.
-  - **MANDATORY**: Always use custom semantic color utility classes from `globals.css` `:root` (e.g. `bg-background`, `text-foreground`, `border-border`, `bg-canvas`, `text-muted-foreground`, `bg-primary`, `text-primary-foreground`, `bg-secondary`, `text-destructive`, `text-brass`, `ring-ring`). NEVER use default Tailwind color scales (`gray-*`, `slate-*`, `zinc-*`, `neutral-*`, `stone-*`, `blue-*`, `red-*`, `emerald-*`, etc.) or hardcoded hex classes.
+  - **MANDATORY**: Always use custom semantic color utility classes from `globals.css` `:root` (e.g. `bg-background`, `text-foreground`, `border-border`, `bg-canvas`, `text-muted-foreground`, `bg-primary`, `text-primary-foreground`, `bg-secondary`, `text-destructive`, `ring-ring`). NEVER use default Tailwind color scales (`gray-*`, `slate-*`, `zinc-*`, `neutral-*`, `stone-*`, `blue-*`, `red-*`, `emerald-*`, etc.) or arbitrary hardcoded hex classes.
 - Keep things minimal:
   - Prioritize clean typography, purposeful contrast, generous whitespace, and crisp borders.
   - Avoid unnecessary decorative clutter, heavy shadows, flashy gradients, or gratuitous animations.

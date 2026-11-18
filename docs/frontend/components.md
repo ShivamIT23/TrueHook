@@ -20,7 +20,6 @@ To ensure maintainability, testability, and clarity, components are strictly org
 ### Tier 2: Domain Feature Modules (`apps/web/src/modules/<feature>/`)
 - **Scope**: Feature-specific components, custom hooks, types, and client API routines.
 - **Examples**:
-  - `modules/auth/`: LoginForm, RegisterForm, useAuth.
   - `modules/endpoints/`: EndpointList, EndpointForm, EndpointHealthBadge.
   - `modules/events/`: EventStream, EventDetailViewer, PayloadViewer.
   - `modules/deliveries/`: DeliveryTable, AttemptTimeline, ReplayTrigger.
@@ -55,10 +54,95 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 When creating or modifying components, register them below:
 
+### `Header` (Public Web Navigation Header)
+- **Path**: `apps/web/src/components/layout/Header.tsx`, re-exported via `apps/web/src/components/layout/index.ts`
+- **Layer**: Shared Cross-Page Layout Component
+- **Description**: Global sticky navigation header rendered across all pages in `apps/web`. Features an obsidian black background using the `--foreground` token from `globals.css`, high-contrast parchment cream brand logo (`/small-logo-white.png`) and title, navigation links (`Features`, `Docs`, `Pricing`, `Changelog`), primary and secondary auth action CTAs (`Sign In` and `Get Started`), and a responsive mobile hamburger drawer toggle.
+- **Color Usage (Strict Semantic Classes from `globals.css`)**:
+  - Container Background: `bg-foreground` (`#111111`, Obsidian black token from `:root`)
+  - Typography: `text-background` (`#F3EEE3`, Cream token) for brand and active elements; `text-background/80` for muted nav links
+  - Hover Interactions: `hover:text-primary` (`#D9541E`) and `hover:bg-background/10`
+  - Primary Action Button: `bg-primary text-primary-foreground hover:bg-primary/90` (`#D9541E` terracotta accent)
+  - Dividing Borders: `border-b border-background/15`
+  - Keyboard Focus Ring: `focus-visible:ring-ring` (`#D9541E`)
+- **Props**:
+  - `className?: string`: Optional custom styling wrapper classes.
+  - `links?: HeaderNavLink[]`: Custom navigation items (`label`, `href`, `external?`).
+  - `signInHref?: string`: URL for sign-in action (defaults to `/signin`).
+  - `signUpHref?: string`: URL for primary CTA (defaults to `/signup`).
+
+
+### `Select` (Dashboard Adapter & Base Primitive)
+- **Path**: `apps/dashboard/src/components/ui/select.tsx`, primitive at `packages/ui/src/components/ui/select.tsx`
+- **Layer**: Tier 1 UI Primitive
+- **Description**: Robust searchable select component powered by `react-select`, custom-styled for TrueHook's strict 3-color palette. Supports live search filtering, single-select and multi-select modes, customizable option descriptions, right-aligned checkmark indicators on active items, rotating chevron indicator (`rotate-180` on open with smooth 200ms transition), and compact (`sm`) mode.
+- **Color Usage**:
+  - Control Box: `bg-canvas` (`#F3EEE3`), `border-input` (`#11111126`), rounded-xl (`0.75rem`), with terracotta focus ring (`#D9541E`).
+  - Menu Dropdown: `bg-popover` (`#F3EEE3`), `border-border`, shadow-xl, rounded-xl with thin scrollbar.
+  - Option Rows: `hover:bg-secondary2` / `focus:bg-secondary2` (`#E8E2D5`), `text-foreground` (`#111111`), with `Check` icon in `text-primary` (`#D9541E`) when selected.
+  - Tag Pills (Multi-Select): `bg-secondary2` (`#E8E2D5`), `text-foreground`, `border-border`.
+- **Props**: Accepts standard `react-select` props (`options`, `value`, `onChange`, `isSearchable`, `isClearable`, `isMulti`, etc.) plus `size?: "sm" | "default"`.
+
+### `Button` (Dashboard Adapter)
+- **Path**: `apps/dashboard/src/components/ui/button.tsx`
+- **Layer**: Tier 1 UI Primitive
+- **Description**: Application-level adapter wrapping `@truehook/ui/components/ui/button`. Configured with `variant = "secondary"` as default, mapping `default` to `secondary` so dashboard action buttons automatically adopt the brand terracotta theme (`#D9541E`).
+- **Color & Interaction Usage**: Primary/secondary action buttons use `#D9541E` (`bg-secondary`, `bg-primary`) with an unmistakable deep burnt terracotta hover state (`#B83D0E`), physical elevation (`translateY(-1.5px)`), and a terracotta drop shadow (`0 4px 14px rgba(217, 84, 30, 0.35)`). Outline/ghost variants utilize `#E8E2D5` on hover. Pressed state provides tactile compression (`active:scale-[0.98]`).
+
+### `XButton` (Dynamic Color & Rotation Button)
+- **Path**: `packages/ui/src/components/ui/x-button.tsx`, adapter at `apps/dashboard/src/components/ui/x-button.tsx`
+- **Layer**: Tier 1 UI Primitive
+- **Description**: Highly configurable interactive button supporting custom width and height, two-tone color inversion (`mainColor` and `secondaryColor`), and a smooth 180° rotation effect on hover.
+- **Props**:
+  - `width` / `height`: Numeric (pixels) or CSS string (e.g. `32`, `"32px"`, `"100%"`).
+  - `mainColor` / `maincolor`: Text color normally, background color on hover (defaults to brand terracotta `#D9541E`).
+  - `secondaryColor` / `secondarycolor`: Text color on hover (defaults to clean cream `#F3EEE3`).
+  - `rotateEffect`: `"icon"` (default, rotates nested SVG icons 180° on hover), `"button"` (rotates entire button), `"both"`, or `"none"`.
+  - `rotateSelf`: Shorthand boolean to rotate the entire button 180° on hover.
+  - `borderStyle`: `"subtle"` (default), `"solid"`, or `"none"`.
+- **Usage Examples**:
+  - **Table Actions (Inspect)**:
+    ```tsx
+    <XButton
+      height={32}
+      mainColor="#D9541E"
+      secondaryColor="#F3EEE3"
+      onClick={handleInspect}
+    >
+      <Eye className="h-3.5 w-3.5" />
+      <span>Inspect</span>
+    </XButton>
+    ```
+  - **Modal Dismiss ("X" Close Buttons)**:
+    ```tsx
+    <XButton
+      width={32}
+      height={32}
+      borderStyle="none"
+      onClick={onClose}
+      aria-label="Close dialog"
+      title="Close"
+    >
+      <X className="h-5 w-5" />
+    </XButton>
+    ```
+
+### `Toast` & `Toasts` (Stacked Morph Notifications)
+- **Path**: `packages/ui/src/components/ui/toast.tsx`, adapters in `apps/*/src/components/ui/toast.tsx`
+- **Layer**: Tier 1 UI Primitive
+- **Description**: Floating top-center stacked notifications engineered with spring animations, auto-dismiss timers, swipe-to-dismiss gestures, action buttons, and clean status glyphs (`success` emerald checkmark badge in `#2D6A4F`, `error` alert badge in destructive `#D9541E`, `warning` amber triangle in `#C38B22`, `info` nautical badge in `#124060`, and `pending` spinner). Styled to mirror the `@kobra/toast` aesthetic with rounded pill geometry (`rounded-full`) for single-line messages, rounded card geometry (`rounded-2xl`) for notifications with descriptions, fixed top-center placement (`top-5`), soft elevation shadows, crisp 1px borders (`border-border`), and full theme reactivity (`#F3EEE3` in light mode, `#111111` in dark mode).
+- **Exports**: `ToastSide`, `ToastAlign`, `ToastPosition`, `ToastState`, `ToastAction`, `ToastInput`, `Note`, `toast`, `dismissToast`, `Toasts`.
+- **Color Usage**: Strict tokens from `globals.css` `:root`: `bg-card` surface backdrop with `backdrop-blur-md`, `border-border`, `text-foreground`, `text-muted-foreground`, `text-[#2D6A4F]` for success glyph, `text-destructive` for error badge, and `bg-foreground` & `text-background` for action buttons. Supported by `.toast-container` and `.toast-pill` rules in `globals.css` and `transpilePackages: ["@truehook/ui"]`.
+
+### `SoundEffects` (Audio Layer)
+- **Path**: `packages/ui/src/components/ui/sound.tsx`, adapters in `apps/*/src/components/ui/sound.tsx`
+- **Layer**: Tier 1 UI Primitive / Audio
+- **Description**: Lightweight Web Audio API listener attached to `document` that detects interactive presses on `[data-slot]` and `[data-sound]` and plays non-intrusive procedural haptic feedback chimes and clicks without external audio files.
+
 ### `BackgroundSVG`
 - **Path**: `apps/dashboard/src/components/background/BackgroundSVG.tsx`, `apps/admin/src/components/background/BackgroundSVG.tsx`
 - **Layer**: Layout / Atmosphere
-- **Description**: SVG wave pattern backdrop configured with `#1D1D1B` strokes and soft opacity. Exclusively scoped to authentication routes (`/login` and `/register`). Never used on 404 or other content routes.
+- **Description**: SVG wave pattern backdrop configured with `#1D1D1B` strokes and soft opacity. Exclusively scoped to authentication routes (`/signin` and `/signup`). Never used on 404 or other content routes.
 - **Color Usage**: Background dark tones overlaid on `#141412`.
 
 ### `BottomWaves`
@@ -77,10 +161,10 @@ When creating or modifying components, register them below:
 - **Layer**: Auth Module
 - **Description**: Stacked secondary action buttons for GitHub, Google, and SSO authentication with centered icon assets.
 
-### `LoginForm` & `RegisterForm`
-- **Path**: `apps/dashboard/src/modules/auth/LoginForm.tsx`, `apps/dashboard/src/modules/auth/RegisterForm.tsx`
+### `SignInForm` & `SignUpForm`
+- **Path**: `apps/dashboard/src/modules/auth/SignInForm.tsx`, `apps/dashboard/src/modules/auth/SignUpForm.tsx`
 - **Layer**: Auth Module (BFF Server Actions)
-- **Description**: Centered, dark translucent auth cards (`max-w-[440px]`, `bg-[#181816]/90`, `border-[#262624]`) powered by Next.js Server Actions (`loginAction`, `registerAction`) via React 19 `useActionState`. Features server-side input validation, error banners and inline field error hints in `#ea5c47`, password visibility toggle, pending submission spinners, secure HTTP-only cookie provisioning, and seamless redirect upon authentication.
+- **Description**: Centered, dark translucent auth cards (`max-w-[440px]`, `bg-[#181816]/90`, `border-[#262624]`) powered by Next.js Server Actions (`signInAction`, `signUpAction`) via React 19 `useActionState`. Features server-side input validation, error banners and inline field error hints in `#ea5c47`, password visibility toggle, pending submission spinners, secure HTTP-only cookie provisioning, and seamless redirect upon authentication.
 - **Color Usage**:
   - Primary CTA button: `#124060` with `#164e75` hover and `#f2f2e8` text.
   - Error state / banners: `#ea5c47` background tint (`bg-[#ea5c47]/10`) and border (`border-[#ea5c47]/30`).
@@ -89,8 +173,8 @@ When creating or modifying components, register them below:
 ### `DashboardHeader`
 - **Path**: `apps/dashboard/src/components/layout/DashboardHeader.tsx`
 - **Layer**: Layout Component
-- **Description**: Sticky navigation header in clean white/light mode. Displays TrueHook logo on the top-left, and a circular user avatar on the top-right. If `user.logo_url` is present, renders the image avatar; otherwise renders a circular badge with the user's capitalized first letter in `#124060` with white text. Includes a dropdown menu showing user details and sign out action.
-- **Color Usage**: White background (`bg-white/90`), border `#e5e5dc`, `#124060` nautical blue badge.
+- **Description**: Sticky navigation header in clean cream/light mode (`#F3EEE3`). Displays TrueHook logo on the top-left, interactive Application Select pill (`Layers` icon, current active application name, and rotating chevron) with a dropdown popover to instantly switch between active applications, an "Open application panel" link routing to the full management view, and a circular user avatar on the top-right with user profile dropdown.
+- **Color Usage**: Background `bg-background/90`, border `border-border`, active application pill `bg-canvas border-border hover:bg-secondary2`, active item indicator `text-primary` (`#D9541E`).
 
 ### `ApplicationSelector` & `CreateApplicationModal`
 - **Path**: `apps/dashboard/src/modules/applications/components/ApplicationSelector.tsx`, `apps/dashboard/src/modules/applications/components/CreateApplicationModal.tsx`
@@ -188,7 +272,7 @@ When creating or modifying components, register them below:
 - **Path**: `apps/dashboard/src/modules/endpoints/components/EventTypeMultiSelect.tsx`
 - **Layer**: Webhook Endpoints Feature Module
 - **Description**: Interactive multi-select combobox component for choosing subscribed event types. Renders selected event types as tags/boxes inside the select trigger container, each equipped with an individual close button (`X`) for rapid removal. Features a dropdown popover with real-time search filtering, checkmark selection indicators, "Select all" and "Clear" quick action triggers, an inline "Create new event type" form with instant optimistic selection, outside click dismissal, and keyboard accessibility. Leaving the selection empty ensures no events are dispatched to the endpoint.
-- **Color Usage**: Semantic tokens (`bg-canvas`, `border-input`, `border-primary`, `bg-primary/10`, `text-primary`, `bg-popover`, `text-foreground`, `text-muted-foreground`).
+- **Color Usage**: Semantic tokens (`bg-canvas`, `border-input`, `border-primary`, `bg-secondary2`, `text-foreground`, `bg-popover`, `text-muted-foreground`).
 - **Props Interface**:
   - `applicationId?: string`
   - `eventTypes: EventType[]`
@@ -202,15 +286,21 @@ When creating or modifying components, register them below:
 - **Description**: Confirmation dialog for deleting a webhook endpoint. Highlights the endpoint URL and warns about permanently dropping webhook deliveries to the destination.
 - **Color Usage**: Semantic destructive tokens (`bg-destructive/10`, `text-destructive`, `bg-destructive`).
 
+### `DeleteApplicationDialog`
+- **Path**: `apps/dashboard/src/modules/applications/components/DeleteApplicationDialog.tsx`
+- **Layer**: Applications Feature Module
+- **Description**: Confirmation dialog for permanently deleting an application. Warns the user of cascading deletion of all associated endpoints, events, and deliveries. Triggers the BFF `deleteApplicationAction` and clears local and cookie session caches upon completion.
+- **Color Usage**: Semantic destructive tokens (`bg-destructive/10`, `text-destructive`, `bg-destructive`).
+
 ### `Sidebar`
 - **Path**: `apps/dashboard/src/components/layout/Sidebar.tsx`
 - **Layer**: Shared Structural Layout Component
-- **Description**: Collapsible and responsive navigation sidebar styled with a sleek obsidian/dark theme (`bg-gray-900`, `border-gray-800`, text `text-gray-300`).
-  - **Desktop Collapse**: Toggles between expanded (`w-60`) and compact collapsed mode (`md:w-16`). When collapsed, navigation titles hide and icons center (`h-10 w-10`), with a monogram "TH" expand button in the sidebar header.
+- **Description**: Collapsible and responsive navigation sidebar styled with the sleek obsidian theme (`dark bg-[#111111]`, `text-[#F3EEE3]`, `border-[#F3EEE3]/15`).
+  - **Desktop Collapse**: Toggles between expanded (`w-60`) and compact collapsed mode (`md:w-16`). When collapsed, navigation titles hide and icons center (`h-10 w-10`), with an expand button in the sidebar header.
   - **Mobile Drawer**: Off-screen on mobile (`-translate-x-full`) with smooth slide-in transition (`translate-x-0`). Includes close (`X`) button and closes automatically when clicking links or backdrop.
-  - **Navigation & Active Highlighting**: Highlights active route with deep nautical blue (`bg-[#124060] text-white`) and right-aligned `ChevronRight` indicator.
+  - **Navigation & Active Highlighting**: Highlights active route with terracotta accent (`bg-primary text-primary-foreground font-semibold shadow-xs`) and right-aligned `ChevronRight` indicator. Inactive items use `text-muted-foreground hover:bg-[#F3EEE3]/10 hover:text-foreground`.
   - **Footer**: Subtle copyright stamp automatically hidden when collapsed on desktop.
-- **Color Usage**: `bg-gray-900`, `border-gray-800`, active indicator `#124060`, text `text-gray-300` / `hover:text-white`.
+- **Color Usage**: Strict 3-color dark palette: `bg-[#111111]`, border `border-[#F3EEE3]/15`, active indicator `bg-primary` (`#D9541E`), text `text-muted-foreground` (`#F3EEE3a6`) / `hover:text-foreground` (`#F3EEE3`).
 
 ### `ProtectedLayoutShell`
 - **Path**: `apps/dashboard/src/components/layout/ProtectedLayoutShell.tsx`

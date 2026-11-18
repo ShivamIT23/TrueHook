@@ -12,9 +12,9 @@ func AdminRoutes(mux *http.ServeMux, handler *handlers.Handler, jwtSecret string
 		return
 	}
 
-	// Public Admin Auth Routes
-	mux.HandleFunc("POST /api/v1/admin/login", handler.LoginHandler)
-	mux.HandleFunc("POST /admin/login", handler.LoginHandler)
+	// Primary Public Admin Auth Routes
+	mux.HandleFunc("POST /api/v1/admin/signin", handler.SignInHandler)
+	mux.HandleFunc("POST /admin/signin", handler.SignInHandler)
 
 	// Protected Admin User Management Routes
 	UserRoutes(mux, handler, jwtSecret)

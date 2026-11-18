@@ -57,7 +57,7 @@ All UI elements across `apps/` must strictly adhere to the 5-color palette:
 
 ### Theme Modes:
 - **`apps/web`**: White/light mode throughout.
-- **`apps/dashboard`**: **White/light mode for everything** (just like `apps/web`), **ONLY `/login` and `/register` are black/dark mode** (`.dark`, `bg-[#141412]`, `BackgroundSVG`, `#f2f2e8` text).
+- **`apps/dashboard`**: **White/light mode for everything** (just like `apps/web`), **ONLY `/signin` and `/signup` are black/dark mode** (`.dark`, `bg-[#141412]`, `BackgroundSVG`, `#f2f2e8` text).
 - **`apps/admin`**: Consistent with internal operator console specifications.
 
 ---

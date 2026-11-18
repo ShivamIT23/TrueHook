@@ -32,8 +32,8 @@ apps/dashboard/src/
 ├── app/                      # Next.js App Router (thin route shells)
 │   ├── layout.tsx            # Global dashboard layout & providers
 │   ├── page.tsx              # Overview/home route shell
-│   ├── login/page.tsx        # Customer login route shell
-│   ├── register/page.tsx     # Customer registration route shell
+│   ├── signin/page.tsx        # Customer signin route shell
+│   ├── signup/page.tsx     # Customer registration route shell
 │   └── not-found.tsx         # Custom 404 route shell
 │
 ├── components/               # Active local component adapters
@@ -68,7 +68,7 @@ apps/dashboard/src/
     - Text: High-contrast obsidian (`#141412`) for primary typography, `#70706a` for muted labels.
     - Surfaces & Cards: `#ffffff` background with crisp light borders (`#e5e5dc`).
     - Accents: Nautical blue (`#124060`) for primary buttons/CTAs, warm brass (`#c39f59`) for pending/warning states, coral red (`#ea5c47`) for errors/destructive actions.
-  - **Dark Mode Scoped Exception**: **ONLY `/login` and `/register`** routes use black/dark mode (`.dark` class, `bg-[#141412]` canvas, `BackgroundSVG`, `#f2f2e8` text, translucent `#181816`/90 cards).
+  - **Dark Mode Scoped Exception**: **ONLY `/signin` and `/signup`** routes use black/dark mode (`.dark` class, `bg-[#141412]` canvas, `BackgroundSVG`, `#f2f2e8` text, translucent `#181816`/90 cards).
 - **Strict 5-Color System**:
   - Major Scheme (85–90%): White (`#ffffff`) / Obsidian (`#141412`) and Parchment (`#f2f2e8` in dark auth).
   - Subtle Accents (10–15% max): Nautical Blue (`#124060`), Coral Red (`#ea5c47`), Warm Brass (`#c39f59`).

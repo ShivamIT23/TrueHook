@@ -16,6 +16,7 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { XButton } from "@/components/ui/x-button";
 import { useEventDetailQuery } from "@/modules/events/hooks/useEvents";
 import type { EventItem } from "@/modules/events/types";
 
@@ -96,12 +97,12 @@ export function EventDetailModal({
       />
 
       {/* Modal Dialog Card */}
-      <div className="relative z-10 w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-canvas p-6 shadow-xl animate-in fade-in zoom-in-95 sm:p-8">
+      <div className="relative z-10 w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-canvas p-6 shadow-xl animate-in fade-in zoom-in-95 ">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+              <span className="inline-flex items-center rounded-full border border-border bg-secondary2 px-2.5 py-0.5 text-xs font-semibold text-foreground">
                 {currentEvent.event_type_name || "event"}
               </span>
               <span className="text-xs text-muted-foreground font-mono">
@@ -112,19 +113,21 @@ export function EventDetailModal({
               Event Details
             </h2>
           </div>
-          <button
-            type="button"
+          <XButton
+            width={32}
+            height={32}
             onClick={onClose}
+            borderStyle="none"
             aria-label="Close dialog"
-            className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+            title="Close"
           >
             <X className="h-5 w-5" />
-          </button>
+          </XButton>
         </div>
 
         {/* Metadata Grid */}
         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="rounded-xl border border-border bg-secondary/30 p-3.5">
+          <div className="rounded-xl border border-border bg-secondary2/30 p-3.5">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground block">
               Event Identifier
             </span>
@@ -148,12 +151,12 @@ export function EventDetailModal({
             </div>
           </div>
 
-          <div className="rounded-xl border border-border bg-secondary/30 p-3.5">
+          <div className="rounded-xl border border-border bg-secondary2/30 p-3.5">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground block">
               Fanout Deliveries
             </span>
             <div className="mt-1 flex items-center gap-2">
-              <Layers className="h-4 w-4 text-primary" />
+              <Layers className="h-4 w-4 text-muted-foreground" />
               <span className="text-xs font-semibold text-foreground">
                 {deliveries.length > 0
                   ? deliveries.length
@@ -190,7 +193,7 @@ export function EventDetailModal({
               )}
             </Button>
           </div>
-          <pre className="max-h-64 overflow-auto rounded-xl border border-border bg-secondary/25 p-4 font-mono text-xs text-foreground select-all leading-relaxed">
+          <pre className="max-h-64 overflow-auto rounded-xl border border-border bg-secondary2/25 p-4 font-mono text-xs text-foreground select-all leading-relaxed">
             {JSON.stringify(currentEvent.payload, null, 2)}
           </pre>
         </div>
@@ -199,12 +202,12 @@ export function EventDetailModal({
         <div className="mt-6 border-t border-border pt-6">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-              <Layers className="h-4 w-4 text-primary" />
+              <Layers className="h-4 w-4 text-muted-foreground" />
               Fanout Delivery Targets ({deliveries.length})
             </h3>
             <Link
               href="/deliveries"
-              className="text-xs text-primary hover:underline flex items-center gap-1"
+              className="text-xs text-foreground hover:text-primary hover:underline flex items-center gap-1"
             >
               <span>View in Deliveries</span>
               <ArrowUpRight className="h-3 w-3" />
@@ -212,7 +215,7 @@ export function EventDetailModal({
           </div>
 
           {isLoading ? (
-            <div className="rounded-xl border border-border bg-secondary/15 p-6 text-center">
+            <div className="rounded-xl border border-border bg-secondary2/15 p-6 text-center">
               <p className="text-xs text-muted-foreground">
                 Loading fanout deliveries telemetry...
               </p>
@@ -236,7 +239,7 @@ export function EventDetailModal({
                 return (
                   <div
                     key={del.id}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-border bg-canvas p-3.5 shadow-2xs hover:bg-secondary/20 transition-colors"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-border bg-canvas p-3.5 shadow-2xs hover:bg-secondary2/20 transition-colors"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <Globe className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -271,9 +274,9 @@ export function EventDetailModal({
                       <span
                         className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider border ${
                           isSuccess
-                            ? "bg-primary/10 text-primary border-primary/20"
+                            ? "bg-secondary2 text-foreground border-border"
                             : isPending
-                              ? "bg-brass/10 text-brass border-brass/20"
+                              ? "bg-secondary2 text-muted-foreground border-border"
                               : "bg-destructive/10 text-destructive border-destructive/20"
                         }`}
                       >

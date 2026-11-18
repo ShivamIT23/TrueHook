@@ -60,7 +60,7 @@ func NewRouter(cfg RouterConfig) *http.ServeMux {
 		adminRoutes.AdminRoutes(mux, cfg.AdminHandler, jwt_secret)
 	}
 	if cfg.AuthHandler != nil {
-		authRoutes.RegisterRoutes(mux, cfg.AuthHandler)
+		authRoutes.AuthRoutes(mux, cfg.AuthHandler)
 	}
 	if cfg.ApplicationHandler != nil {
 		applicationRoutes.ApplicationRoutes(mux, cfg.ApplicationHandler, jwt_secret)

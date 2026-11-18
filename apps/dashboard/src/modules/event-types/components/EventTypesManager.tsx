@@ -115,8 +115,8 @@ export function EventTypesManager({
             size="sm"
             onClick={() => refetch()}
             disabled={isFetching || !applicationId}
-            className="h-9 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
-            title="Refresh endpoints"
+            className="h-9 gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-all duration-150 cursor-pointer"
+            title="Refresh event types"
           >
             <RefreshCw
               className={`h-3.5 w-3.5 ${isFetching ? "animate-spin text-primary" : ""}`}
@@ -127,7 +127,7 @@ export function EventTypesManager({
             size="sm"
             onClick={() => setIsCreateOpen(true)}
             disabled={!applicationId}
-            className="h-9 gap-1.5 text-xs"
+            className="h-9 gap-1.5 text-xs transition-all duration-150 cursor-pointer"
           >
             <Plus className="h-4 w-4" />
             <span>Create Event Type</span>
@@ -176,7 +176,7 @@ export function EventTypesManager({
       <div className="mt-4">
         {isLoading && eventTypes.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-canvas p-12 text-center">
-            <RefreshCw className="h-6 w-6 animate-spin text-primary" />
+            <RefreshCw className="h-6 w-6 animate-spin text-foreground" />
             <p className="mt-3 text-xs text-muted-foreground">
               Loading event types...
             </p>
@@ -184,7 +184,7 @@ export function EventTypesManager({
         ) : eventTypes.length === 0 ? (
           /* Empty State: No event types created yet */
           <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-canvas p-12 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary2 text-muted-foreground border border-border">
               <Radio className="h-6 w-6" />
             </div>
             <h3 className="mt-4 text-base font-semibold text-foreground">
@@ -193,11 +193,11 @@ export function EventTypesManager({
             <p className="mt-1.5 max-w-md text-xs leading-relaxed text-muted-foreground">
               Event types define what notifications your application can emit
               (e.g.{" "}
-              <code className="rounded bg-secondary px-1 py-0.5 font-mono text-primary">
+              <code className="rounded bg-secondary2 px-1 py-0.5 font-mono text-foreground font-semibold">
                 order.created
               </code>
               ,{" "}
-              <code className="rounded bg-secondary px-1 py-0.5 font-mono text-primary">
+              <code className="rounded bg-secondary2 px-1 py-0.5 font-mono text-foreground font-semibold">
                 invoice.paid
               </code>
               ). Registered webhook endpoints can subscribe to specific event
@@ -206,7 +206,7 @@ export function EventTypesManager({
             <Button
               type="button"
               onClick={() => setIsCreateOpen(true)}
-              className="mt-6 h-9 cursor-pointer border border-primary bg-primary px-4 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              className="mt-6 h-9 px-4 text-xs font-medium"
             >
               <Plus className="mr-1.5 h-3.5 w-3.5" />
               <span>Create Event Type</span>
@@ -226,7 +226,7 @@ export function EventTypesManager({
               type="button"
               variant="outline"
               onClick={() => setSearchQuery("")}
-              className="mt-4 h-8 px-3 text-xs border-border text-foreground hover:bg-secondary"
+              className="mt-4 h-8 px-3 text-xs border-border text-foreground hover:bg-secondary2"
             >
               Clear filter
             </Button>
@@ -236,7 +236,7 @@ export function EventTypesManager({
           <div className="overflow-hidden rounded-xl border border-border bg-canvas shadow-xs">
             <table className="w-full border-collapse text-left text-xs">
               <thead>
-                <tr className="border-b border-border bg-secondary/50 text-muted-foreground">
+                <tr className="border-b border-border bg-secondary2/50 text-muted-foreground">
                   <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">
                     Identifier
                   </th>
@@ -257,11 +257,11 @@ export function EventTypesManager({
                   return (
                     <tr
                       key={et.id}
-                      className="group transition-colors hover:bg-secondary/40"
+                      className="group transition-colors hover:bg-secondary2/40"
                     >
                       <td className="py-3.5 px-4 font-medium">
                         <div className="flex items-center gap-2">
-                          <span className="rounded-md border border-border bg-secondary px-2 py-0.5 font-mono text-xs font-semibold text-primary">
+                          <span className="rounded-md border border-border bg-secondary2 px-2 py-0.5 font-mono text-xs font-semibold text-foreground">
                             {et.name}
                           </span>
                           <button
@@ -295,7 +295,7 @@ export function EventTypesManager({
                           <button
                             type="button"
                             onClick={() => setEditingEventType(et)}
-                            className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-primary transition-colors cursor-pointer"
+                            className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary2 hover:text-foreground transition-colors cursor-pointer"
                             title="Edit event type"
                             aria-label={`Edit ${et.name}`}
                           >

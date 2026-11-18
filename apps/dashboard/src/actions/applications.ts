@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import {
   clearSelectedAppSession,
   getAuthToken,
+  getSelectedAppSession,
   setSelectedAppSession,
 } from "@/lib/session";
 import type {
@@ -221,3 +222,73 @@ export async function clearSelectedApplicationAction(): Promise<void> {
   await clearSelectedAppSession();
   redirect("/?switch=true");
 }
+
+/**
+ * BFF Server Action to delete an application.
+ */
+export async function deleteApplicationAction(
+  applicationId: string,
+): Promise<{ success: boolean; message?: string }> {
+  const token = await getAuthToken();
+  if (!token) {
+    return {
+      success: false,
+      message: "Authentication required.",
+    };
+  }
+
+  if (!applicationId) {
+    return {
+      success: false,
+      message: "Application ID is required.",
+    };
+  }
+
+  try {
+    let res = await fetch(`${BACKEND_URL}/api/v1/application/${applicationId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      cache: "no-store",
+    });
+
+    if (res.status === 404) {
+      res = await fetch(`${BACKEND_URL}/application/${applicationId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        cache: "no-store",
+      });
+    }
+
+    const body = (await res.json()) as BackendResponse<Application>;
+
+    if (!res.ok || !body.status) {
+      return {
+        success: false,
+        message:
+          body.error?.message || body.message || "Failed to delete application.",
+      };
+    }
+
+    // Clear active session if deleting currently selected application
+    const activeApp = await getSelectedAppSession();
+    if (activeApp && activeApp.id === applicationId) {
+      await clearSelectedAppSession();
+    }
+
+    revalidatePath("/");
+    return {
+      success: true,
+      message: "Application deleted successfully.",
+    };
+  } catch (_error) {
+    return {
+      success: false,
+      message: "Unable to connect to application service. Please try again.",
+    };
+  }
+}
+

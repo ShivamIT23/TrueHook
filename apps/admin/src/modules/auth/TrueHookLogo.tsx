@@ -17,11 +17,11 @@ export function TrueHookLogo({
         className="h-8 w-8 object-contain rounded-md"
         priority
       />
-      <span className="text-xl font-semibold tracking-tight text-[#f2f2e8]">
+      <span className="text-xl font-semibold tracking-tight text-[#F3EEE3]">
         TrueHook
       </span>
       {badge && (
-        <span className="rounded bg-[#ea5c47]/20 border border-[#ea5c47]/40 px-1.5 py-0.5 text-[10px] font-semibold tracking-wider text-[#ff8a7a] uppercase">
+        <span className="rounded bg-[#D9541E]/20 border border-[#D9541E]/40 px-1.5 py-0.5 text-[10px] font-semibold tracking-wider text-[#D9541E] uppercase">
           {badge}
         </span>
       )}

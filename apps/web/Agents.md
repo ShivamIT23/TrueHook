@@ -16,7 +16,7 @@ The public-facing website, marketing landing page, and documentation for TrueHoo
 
 - **Public Marketing**: Clear value proposition (Svix-style webhook reliability, developer experience, security, observability).
 - **Public Documentation**: Getting started guides, webhook signature verification code samples, API overview, SDK usage.
-- **Auth Entry**: Direct links into `@truehook/dashboard` auth flows (`/login`, `/register`).
+- **Auth Entry**: Direct links into `@truehook/dashboard` auth flows (`/signin`, `/signup`).
 
 ---
 
@@ -25,13 +25,18 @@ The public-facing website, marketing landing page, and documentation for TrueHoo
 ```
 apps/web/src/
 ├── app/                      # Next.js App Router (thin route shells)
-│   ├── layout.tsx            # Global HTML layout & typography
+│   ├── layout.tsx            # Global HTML layout & Header shell
 │   ├── page.tsx              # Landing page route shell
 │   └── not-found.tsx         # Custom 404 page shell
 │
-├── components/               # Active local component adapters
+├── components/               # Active local component adapters & shared layout
+│   ├── layout/               # Shared cross-page layout components
+│   │   ├── Header.tsx        # Global dark navigation header for all web pages
+│   │   └── index.ts          # Barrel re-export
 │   └── ui/                   # Used UI adapters re-exported from @truehook/ui
-│       └── not-found.tsx     # Custom interactive 404 primitive
+│       ├── not-found.tsx     # Custom interactive 404 primitive
+│       ├── sound.tsx         # Sound effects provider
+│       └── toast.tsx         # Toast notification provider
 │
 └── modules/                  # Marketing feature domains (landing, docs, features)
 ```

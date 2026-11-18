@@ -21,10 +21,10 @@ export function SocialButtons({
         type="button"
         variant="outline"
         onClick={onSSOClick}
-        className="h-10 w-full cursor-pointer justify-center border-[#2b2b27] bg-[#141412]/40 text-sm font-medium text-[#f2f2e8] transition-colors hover:bg-[#20201d]"
+        className="h-10 w-full cursor-pointer justify-center border-[#F3EEE3]/15 bg-[#111111]/40 text-sm font-medium text-[#F3EEE3] transition-colors hover:bg-[#F3EEE3]/10"
       >
         <span className="inline-flex items-center justify-center gap-2.5">
-          <Lock className="h-4 w-4 shrink-0 text-[#f2f2e8]" />
+          <Lock className="h-4 w-4 shrink-0 text-[#F3EEE3]" />
           <span>Sign in with SSO</span>
         </span>
       </Button>
@@ -34,11 +34,11 @@ export function SocialButtons({
         type="button"
         variant="outline"
         onClick={onGitHubClick}
-        className="h-10 w-full cursor-pointer justify-center border-[#2b2b27] bg-[#141412]/40 text-sm font-medium text-[#f2f2e8] transition-colors hover:bg-[#20201d]"
+        className="h-10 w-full cursor-pointer justify-center border-[#F3EEE3]/15 bg-[#111111]/40 text-sm font-medium text-[#F3EEE3] transition-colors hover:bg-[#F3EEE3]/10"
       >
         <span className="inline-flex items-center justify-center gap-2.5">
           <svg
-            className="h-4 w-4 shrink-0 fill-current text-[#f2f2e8]"
+            className="h-4 w-4 shrink-0 fill-current text-[#F3EEE3]"
             viewBox="0 0 24 24"
             aria-hidden="true"
           >
@@ -57,7 +57,7 @@ export function SocialButtons({
         type="button"
         variant="outline"
         onClick={onGoogleClick}
-        className="h-10 w-full cursor-pointer justify-center border-[#2b2b27] bg-[#141412]/40 text-sm font-medium text-[#f2f2e8] transition-colors hover:bg-[#20201d]"
+        className="h-10 w-full cursor-pointer justify-center border-[#F3EEE3]/15 bg-[#111111]/40 text-sm font-medium text-[#F3EEE3] transition-colors hover:bg-[#F3EEE3]/10"
       >
         <span className="inline-flex items-center justify-center gap-2.5">
           <svg

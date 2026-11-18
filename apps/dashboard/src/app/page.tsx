@@ -18,7 +18,7 @@ export default async function HomePage({
 }) {
   const token = await getAuthToken();
   if (!token) {
-    redirect("/login");
+    redirect("/signin");
   }
 
   const params = await searchParams;

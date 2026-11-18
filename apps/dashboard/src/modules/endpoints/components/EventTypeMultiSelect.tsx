@@ -227,7 +227,7 @@ export function EventTypeMultiSelect({
           isOpen
             ? "border-primary ring-1 ring-primary"
             : "border-input hover:border-primary/50"
-        } ${disabled ? "opacity-60 cursor-not-allowed bg-secondary/30" : ""}`}
+        } ${disabled ? "opacity-60 cursor-not-allowed bg-secondary2/30" : ""}`}
       >
         <div className="flex flex-wrap items-center gap-1.5 flex-1 min-w-0">
           {selectedEventTypes.length === 0 ? (
@@ -239,7 +239,7 @@ export function EventTypeMultiSelect({
             selectedEventTypes.map((et) => (
               <span
                 key={et.id}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-primary/25 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary shadow-2xs animate-in fade-in-50"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-secondary2 px-2.5 py-1 text-xs font-semibold text-foreground shadow-2xs animate-in fade-in-50"
               >
                 <span>{et.name}</span>
                 <button
@@ -247,7 +247,7 @@ export function EventTypeMultiSelect({
                   onClick={(e) => handleRemove(e, et.id)}
                   disabled={disabled}
                   aria-label={`Remove ${et.name}`}
-                  className="rounded p-0.5 hover:bg-primary/20 text-primary transition-colors cursor-pointer"
+                  className="rounded p-0.5 hover:bg-border text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -262,7 +262,7 @@ export function EventTypeMultiSelect({
             <button
               type="button"
               onClick={handleClearAll}
-              className="rounded p-1 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              className="rounded p-1 text-muted-foreground hover:text-foreground hover:bg-secondary2 transition-colors"
               title="Clear all selected"
               aria-label="Clear all selected"
             >
@@ -271,7 +271,7 @@ export function EventTypeMultiSelect({
           )}
           <ChevronDown
             className={`h-4 w-4 transition-transform duration-200 ${
-              isOpen ? "rotate-180 text-primary" : "text-muted-foreground"
+              isOpen ? "rotate-180 text-foreground" : "text-muted-foreground"
             }`}
           />
         </div>
@@ -288,7 +288,7 @@ export function EventTypeMultiSelect({
             >
               <div className="flex items-center justify-between border-b border-border pb-2">
                 <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                  <Plus className="h-3.5 w-3.5 text-primary" />
+                  <Plus className="h-3.5 w-3.5 text-foreground" />
                   <span>Create New Event Type</span>
                 </span>
                 <button
@@ -377,7 +377,7 @@ export function EventTypeMultiSelect({
                   size="sm"
                   onClick={handleCreate}
                   disabled={createMutation.isPending || !newTypeName.trim()}
-                  className="h-7 gap-1 text-xs bg-primary text-primary-foreground hover:bg-primary/90"
+                  className="h-7 gap-1 text-xs"
                 >
                   {createMutation.isPending ? (
                     <>
@@ -397,7 +397,7 @@ export function EventTypeMultiSelect({
             /* Options & Search View */
             <>
               {/* Search Box */}
-              <div className="p-2 border-b border-border bg-secondary/20">
+              <div className="p-2 border-b border-border bg-secondary2/20">
                 <div className="relative">
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                   <input
@@ -421,7 +421,7 @@ export function EventTypeMultiSelect({
               </div>
 
               {/* Quick Select Actions */}
-              <div className="flex items-center justify-between px-3 py-1.5 border-b border-border bg-secondary/10 text-[11px]">
+              <div className="flex items-center justify-between px-3 py-1.5 border-b border-border bg-secondary2/10 text-[11px]">
                 <span className="text-muted-foreground">
                   {selectedIds.length} of {combinedEventTypes.length} selected
                 </span>
@@ -445,7 +445,7 @@ export function EventTypeMultiSelect({
               </div>
 
               {/* Options List */}
-              <div className="max-h-48 overflow-y-auto p-1.5 space-y-1">
+              <div className="max-h-48 overflow-y-auto custom-scrollbar [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground p-1.5 space-y-1">
                 {filteredEventTypes.length === 0 ? (
                   <div className="p-3 text-center text-xs text-muted-foreground">
                     No event types found matching &quot;{searchTerm}&quot;
@@ -461,8 +461,8 @@ export function EventTypeMultiSelect({
                         onClick={() => handleToggle(et.id)}
                         className={`flex items-start gap-2.5 rounded-lg px-2.5 py-2 text-xs cursor-pointer transition-colors ${
                           isSelected
-                            ? "bg-primary/10 text-primary font-medium"
-                            : "hover:bg-secondary/60 text-foreground"
+                            ? "bg-secondary2 text-foreground font-medium"
+                            : "hover:bg-secondary2/60 text-foreground"
                         }`}
                       >
                         <div
@@ -495,11 +495,11 @@ export function EventTypeMultiSelect({
 
               {/* Create Option in Dropdown Footer */}
               {Boolean(applicationId) && (
-                <div className="p-1.5 border-t border-border bg-secondary/15">
+                <div className="p-1.5 border-t border-border bg-secondary2/15">
                   <button
                     type="button"
                     onClick={handleStartCreate}
-                    className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-primary/30 bg-primary/5 py-1.5 px-3 text-xs font-semibold text-primary hover:bg-primary/10 transition-colors"
+                    className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-border bg-secondary2/40 py-1.5 px-3 text-xs font-semibold text-foreground hover:bg-secondary2 transition-colors cursor-pointer"
                   >
                     <Plus className="h-3.5 w-3.5" />
                     <span>

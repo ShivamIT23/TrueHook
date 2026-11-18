@@ -166,7 +166,7 @@ func scanAdmin(a core.Admin, dest ...interface{}) error {
 	return nil
 }
 
-func TestAdminLogin(t *testing.T) {
+func TestAdminSignIn(t *testing.T) {
 	jwtSecret := "super-secret-key"
 	adminID := uuid.New()
 	adminEmail := "admin@truehook.internal"
@@ -178,7 +178,7 @@ func TestAdminLogin(t *testing.T) {
 
 	t.Run("empty email", func(t *testing.T) {
 		s := NewService(nil, jwtSecret)
-		_, err := s.Login(context.Background(), adminTypes.LoginRequest{
+		_, err := s.SignIn(context.Background(), adminTypes.SignInRequest{
 			Email:    "",
 			Password: password,
 		})
@@ -189,7 +189,7 @@ func TestAdminLogin(t *testing.T) {
 
 	t.Run("empty password", func(t *testing.T) {
 		s := NewService(nil, jwtSecret)
-		_, err := s.Login(context.Background(), adminTypes.LoginRequest{
+		_, err := s.SignIn(context.Background(), adminTypes.SignInRequest{
 			Email:    adminEmail,
 			Password: "",
 		})
@@ -205,7 +205,7 @@ func TestAdminLogin(t *testing.T) {
 			},
 		}
 		s := NewService(core.New(mockDB), jwtSecret)
-		_, err := s.Login(context.Background(), adminTypes.LoginRequest{
+		_, err := s.SignIn(context.Background(), adminTypes.SignInRequest{
 			Email:    adminEmail,
 			Password: password,
 		})
@@ -229,7 +229,7 @@ func TestAdminLogin(t *testing.T) {
 			},
 		}
 		s := NewService(core.New(mockDB), jwtSecret)
-		_, err := s.Login(context.Background(), adminTypes.LoginRequest{
+		_, err := s.SignIn(context.Background(), adminTypes.SignInRequest{
 			Email:    adminEmail,
 			Password: "wrongPassword",
 		})
@@ -238,7 +238,7 @@ func TestAdminLogin(t *testing.T) {
 		}
 	})
 
-	t.Run("successful admin login", func(t *testing.T) {
+	t.Run("successful admin signin", func(t *testing.T) {
 		now := time.Now().UTC()
 		mockDB := &mockDBTX{
 			queryRowFunc: func(ctx context.Context, query string, args ...interface{}) pgx.Row {
@@ -254,7 +254,7 @@ func TestAdminLogin(t *testing.T) {
 			},
 		}
 		s := NewService(core.New(mockDB), jwtSecret)
-		resp, err := s.Login(context.Background(), adminTypes.LoginRequest{
+		resp, err := s.SignIn(context.Background(), adminTypes.SignInRequest{
 			Email:    adminEmail,
 			Password: password,
 		})

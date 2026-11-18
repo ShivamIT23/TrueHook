@@ -14,7 +14,7 @@
     },
     "app": "apps/dashboard",
     "defaultTheme": "light",
-    "rule": "White/light mode for everything just like apps/web; ONLY /login and /register are black/dark",
-    "darkExceptions": ["/login", "/register"]
+    "rule": "White/light mode for everything just like apps/web; ONLY /signin and /register are black/dark",
+    "darkExceptions": ["/signin", "/register"]
   }
 }

@@ -27,7 +27,7 @@ func NewService(repo *core.Queries, jwtSecret string) adminTypes.Service {
 	}
 }
 
-func (s *service) Login(ctx context.Context, req adminTypes.LoginRequest) (*adminTypes.AuthResponse, error) {
+func (s *service) SignIn(ctx context.Context, req adminTypes.SignInRequest) (*adminTypes.AuthResponse, error) {
 	email := strings.ToLower(strings.TrimSpace(req.Email))
 	if email == "" || req.Password == "" {
 		return nil, adminTypes.ErrInvalidCredentials
@@ -66,6 +66,7 @@ func (s *service) Login(ctx context.Context, req adminTypes.LoginRequest) (*admi
 		Token: token,
 	}, nil
 }
+
 
 // verifyAdmin checks whether the caller in context has admin credentials.
 func (s *service) verifyAdmin(ctx context.Context) (uuid.UUID, error) {

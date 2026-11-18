@@ -19,11 +19,11 @@
       },
       "apps/dashboard": {
         "mode": "light",
-        "description": "White/light mode for everything just like web; ONLY /login and /register are black/dark",
+        "description": "White/light mode for everything just like web; ONLY /signin and /signup are black/dark",
         "defaultTheme": "light",
         "darkExceptions": [
-          "/login",
-          "/register"
+          "/signin",
+          "/signup"
         ]
       },
       "apps/admin": {
@@ -36,7 +36,7 @@
     {
       "name": "frontend-design",
       "path": ".agents/skills/frontend-design/SKILL.md",
-      "description": "Design tokens, strict 5-color palette, and theme rules (white/light mode for dashboard except dark /login and /register)"
+      "description": "Design tokens, strict 5-color palette, and theme rules (white/light mode for dashboard except dark /signin and /signup)"
     },
     {
       "name": "frontend-components",

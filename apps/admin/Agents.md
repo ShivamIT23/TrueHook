@@ -29,7 +29,7 @@ apps/admin/src/
 ├── app/                      # Next.js App Router (thin route shells)
 │   ├── layout.tsx            # Global admin layout & theme
 │   ├── page.tsx              # Root admin page
-│   ├── login/page.tsx        # Operator login shell
+│   ├── signin/page.tsx        # Operator signin shell
 │   └── not-found.tsx         # Custom 404 page shell
 │
 ├── components/               # Active local component adapters

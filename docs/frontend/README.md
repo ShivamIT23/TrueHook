@@ -7,8 +7,8 @@ TrueHook organizes frontend concerns into three dedicated Next.js applications l
 | Application | Directory | Intended Audience | Core Responsibilities |
 | :--- | :--- | :--- | :--- |
 | **Web** | `apps/web` | Public Visitors | Marketing landing pages, product features, and public documentation. |
-| **Dashboard** | `apps/dashboard` | Logged-in Customers | Customer portal authentication (`/login`, `/register`) and webhook management: applications, endpoints, event payload streams, delivery attempts, manual retries, and API metrics. |
-| **Admin** | `apps/admin` | Internal TrueHook Team | Back-office operations strictly for company operators: operator authentication (`/login`), platform configuration, frontend content/flag updates, cross-tenant management, and system metrics. |
+| **Dashboard** | `apps/dashboard` | Logged-in Customers | Customer portal authentication (`/signin`, `/signup`) and webhook management: applications, endpoints, event payload streams, delivery attempts, manual retries, and API metrics. |
+| **Admin** | `apps/admin` | Internal TrueHook Team | Back-office operations strictly for company operators: operator authentication (`/signin`), platform configuration, frontend content/flag updates, cross-tenant management, and system metrics. |
 
 ---
 

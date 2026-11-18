@@ -28,7 +28,7 @@ func NewService(repo *core.Queries, jwtSecret string) authTypes.Service {
 	}
 }
 
-func (s *service) Register(ctx context.Context, req authTypes.RegisterRequest) (*authTypes.AuthResponse, error) {
+func (s *service) SignUp(ctx context.Context, req authTypes.SignUpRequest) (*authTypes.AuthResponse, error) {
 	email := strings.ToLower(strings.TrimSpace(req.Email))
 	if err := validateEmail(email); err != nil {
 		return nil, authTypes.ErrInvalidEmail
@@ -91,7 +91,7 @@ func (s *service) Register(ctx context.Context, req authTypes.RegisterRequest) (
 	}, nil
 }
 
-func (s *service) Login(ctx context.Context, req authTypes.LoginRequest) (*authTypes.AuthResponse, error) {
+func (s *service) SignIn(ctx context.Context, req authTypes.SignInRequest) (*authTypes.AuthResponse, error) {
 	email := strings.ToLower(strings.TrimSpace(req.Email))
 	if email == "" || req.Password == "" {
 		return nil, authTypes.ErrInvalidCredentials

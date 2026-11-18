@@ -23,10 +23,10 @@ The requested application selection flow, local persistence, root
       • Intercepts requests before route rendering occurs.
       • If an unauthenticated user attempts to enter /dashboard,      
       /event-type, or any nested route, they are immediately          
-      redirected to /login.
+      redirected to /signin.
       • If an authenticated user attempts to enter a protected route  
       without selecting an application, they are redirected to /.     
-      • If an authenticated user visits /login or /register, they are
+      • If an authenticated user visits /signin or /register, they are
       redirected to /dashboard.
   2. Server Layout Guard
   ((protected-route)/layout.tsx/TrueHook/apps/dashboard/src/app/(prote

@@ -16,5 +16,13 @@
     "ui": "@/components/ui",
     "lib": "@/lib",
     "hooks": "@/hooks"
+  },
+  "registries": {
+  "@kobra": {
+    "url": "https://kobra.systems/r/{name}.json",
+    "headers": {
+      "Authorization": "Bearer ${KOBRA_TOKEN}"
+    }
   }
+}
 }

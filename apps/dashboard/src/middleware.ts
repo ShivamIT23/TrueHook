@@ -14,15 +14,16 @@ export function middleware(request: NextRequest) {
     request.cookies.has(SELECTED_APP_ID_COOKIE_NAME);
 
   const isAuthRoute =
-    pathname.startsWith("/login") || pathname.startsWith("/register");
+    pathname.startsWith("/signin") ||
+    pathname.startsWith("/signup");
   const isRootRoute = pathname === "/";
   const isProtectedRoute =
     pathname.startsWith("/dashboard") || pathname.startsWith("/event-type");
 
   // 1. Truly protect (protected-route): require active auth token
   if (isProtectedRoute && !hasToken) {
-    const loginUrl = new URL("/login", request.url);
-    return NextResponse.redirect(loginUrl);
+    const signinUrl = new URL("/signin", request.url);
+    return NextResponse.redirect(signinUrl);
   }
 
   // 2. Truly protect (protected-route): require selected application context
@@ -31,7 +32,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(rootUrl);
   }
 
-  // 3. Prevent authenticated users from accessing login/register
+  // 3. Prevent authenticated users from accessing signin/signup
   if (isAuthRoute && hasToken) {
     if (hasApp) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
@@ -43,7 +44,7 @@ export function middleware(request: NextRequest) {
   // After selecting application, all visits to / redirect to /dashboard
   if (isRootRoute) {
     if (!hasToken) {
-      return NextResponse.redirect(new URL("/login", request.url));
+      return NextResponse.redirect(new URL("/signin", request.url));
     }
     if (hasApp && searchParams.get("switch") !== "true") {
       return NextResponse.redirect(new URL("/dashboard", request.url));

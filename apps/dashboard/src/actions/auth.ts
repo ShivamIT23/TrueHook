@@ -40,7 +40,7 @@ function validatePassword(password: string): string | null {
  * BFF Server Action for customer authentication.
  * Proxies request to Go API /api/v1/auth/signin, validates payload, and provisions HTTP-only session cookie.
  */
-export async function loginAction(
+export async function signInAction(
   _prevState: AuthActionState,
   formData: FormData,
 ): Promise<AuthActionState> {
@@ -60,7 +60,7 @@ export async function loginAction(
   if (Object.keys(errors).length > 0) {
     return {
       success: false,
-      message: "Please check your login details.",
+      message: "Please check your signin details.",
       errors,
     };
   }
@@ -68,7 +68,7 @@ export async function loginAction(
   let shouldRedirect = false;
 
   try {
-    const res = await fetch(`${BACKEND_URL}/api/v1/auth/login`, {
+    const res = await fetch(`${BACKEND_URL}/api/v1/auth/signin`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -127,10 +127,10 @@ export async function loginAction(
 }
 
 /**
- * BFF Server Action for customer registration.
+ * BFF Server Action for customer registration / signup.
  * Proxies request to Go API /api/v1/auth/signup, validates payload, and provisions HTTP-only session cookie.
  */
-export async function registerAction(
+export async function signUpAction(
   _prevState: AuthActionState,
   formData: FormData,
 ): Promise<AuthActionState> {
@@ -157,7 +157,7 @@ export async function registerAction(
   if (Object.keys(errors).length > 0) {
     return {
       success: false,
-      message: "Please check your registration details.",
+      message: "Please check your signup details.",
       errors,
     };
   }
@@ -165,7 +165,7 @@ export async function registerAction(
   let shouldRedirect = false;
 
   try {
-    const res = await fetch(`${BACKEND_URL}/api/v1/auth/register`, {
+    const res = await fetch(`${BACKEND_URL}/api/v1/auth/signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -226,9 +226,9 @@ export async function registerAction(
     return {
       success: false,
       message:
-        "Unable to reach the registration service. Please check your network connection.",
+        "Unable to reach the signup service. Please check your network connection.",
       errors: {
-        _form: ["Registration service unreachable. Ensure backend is running."],
+        _form: ["Signup service unreachable. Ensure backend is running."],
       },
     };
   }
@@ -245,5 +245,5 @@ export async function registerAction(
  */
 export async function logoutAction(): Promise<void> {
   await clearAuthSession();
-  redirect("/login");
+  redirect("/signin");
 }

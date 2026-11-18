@@ -10,7 +10,7 @@ import (
 )
 
 type Service interface {
-	Login(ctx context.Context, req LoginRequest) (*AuthResponse, error)
+	SignIn(ctx context.Context, req SignInRequest) (*AuthResponse, error)
 	GetAllUsers(ctx context.Context) (*UsersResponse, error)
 	GetUser(ctx context.Context, req *http.Request) (*UserResponse, error)
 }
@@ -27,14 +27,14 @@ type AdminResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-// AuthResponse defines the payload returned upon successful admin login.
+// AuthResponse defines the payload returned upon successful admin signin.
 type AuthResponse struct {
 	Admin AdminResponse `json:"admin"`
 	Token string        `json:"token"`
 }
 
-// LoginRequest defines the expected payload for admin authentication.
-type LoginRequest struct {
+// SignInRequest defines the expected payload for admin authentication.
+type SignInRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }

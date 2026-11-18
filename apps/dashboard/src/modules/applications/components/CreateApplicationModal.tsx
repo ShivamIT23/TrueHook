@@ -4,9 +4,11 @@ import { AlertCircle, Loader2, Plus, X } from "lucide-react";
 import { useActionState, useEffect } from "react";
 import { createApplicationAction } from "@/actions/applications";
 import { Button } from "@/components/ui/button";
+import { XButton } from "@/components/ui/x-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/toast";
 import {
   type Application,
   initialCreateApplicationState,
@@ -30,6 +32,10 @@ export function CreateApplicationModal({
 
   useEffect(() => {
     if (state.success && state.application) {
+      toast({
+        message: `Application "${state.application.name}" created`,
+        state: "success",
+      });
       onSuccess(state.application);
       onClose();
     }
@@ -52,7 +58,7 @@ export function CreateApplicationModal({
       />
 
       {/* Modal Dialog Card */}
-      <div className="relative z-10 w-full max-w-lg rounded-2xl border border-border bg-canvas p-6 shadow-xl animate-in fade-in zoom-in-95 sm:p-8">
+      <div className="relative z-10 w-full max-w-lg rounded-2xl border border-border bg-canvas p-6 shadow-xl animate-in fade-in zoom-in-95">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>
@@ -63,15 +69,17 @@ export function CreateApplicationModal({
               Register a new logical source of webhook events.
             </p>
           </div>
-          <button
-            type="button"
+          <XButton
+            width={32}
+            height={32}
             onClick={onClose}
             disabled={isPending}
-            className="rounded-lg p-1 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors cursor-pointer"
+            borderStyle="none"
             aria-label="Close dialog"
+            title="Close"
           >
             <X className="h-5 w-5" />
-          </button>
+          </XButton>
         </div>
 
         {/* Error Banner */}
@@ -166,7 +174,7 @@ export function CreateApplicationModal({
               variant="outline"
               disabled={isPending}
               onClick={onClose}
-              className="h-9 cursor-pointer border-border bg-canvas px-4 text-xs font-medium text-muted-foreground hover:bg-secondary hover:text-foreground"
+              className="h-9 cursor-pointer border-border bg-canvas px-4 text-xs font-medium text-muted-foreground hover:bg-secondary2 hover:text-foreground"
             >
               Cancel
             </Button>

@@ -1,40 +1,68 @@
 @import "tailwindcss";
+@source "../../../packages/ui/src";
 
 :root {
-  --background: #ffffff;
-  --foreground: #141412;
-  --canvas: #ffffff;
-  --cream: #f2f2e8;
-  --blue: #124060;
-  --coral: #ea5c47;
-  --brass: #c39f59;
-  --card: #ffffff;
-  --card-foreground: #141412;
-  --popover: #ffffff;
-  --popover-foreground: #141412;
-  --primary: #124060;
-  --primary-foreground: #f2f2e8;
-  --secondary: #f5f5f0;
-  --secondary-foreground: #141412;
-  --muted: #f5f5f0;
-  --muted-foreground: #70706a;
-  --accent: #f5f5f0;
-  --accent-foreground: #141412;
-  --destructive: #ea5c47;
-  --destructive-foreground: #ffffff;
-  --border: #e5e5dc;
-  --input: #e5e5dc;
-  --ring: #124060;
+  --background: #F3EEE3;
+  --foreground: #111111;
+  --canvas: #F3EEE3;
+  --card: #F3EEE3;
+  --card-foreground: #111111;
+  --popover: #F3EEE3;
+  --popover-foreground: #111111;
+  --primary: #D9541E;
+  --primary-foreground: #F3EEE3;
+  --secondary: #D9541E;
+  --secondary2: #F3EEE3;
+  --secondary-foreground: #F3EEE3;
+  --muted: #F3EEE3;
+  --muted-foreground: #111111a6;
+  --accent: #D9541E;
+  --accent-foreground: #F3EEE3;
+  --destructive: #D9541E;
+  --destructive-foreground: #F3EEE3;
+  --border: #11111126;
+  --input: #11111126;
+  --ring: #D9541E;
+  --error: #D9541E;
+  --warning: #C38B22;
+  --success: #2D6A4F;
+  --info: #124060;
+  --toast-morph-duration: 300ms;
+  --toast-morph-ease: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.dark {
+  --background: #111111;
+  --foreground: #F3EEE3;
+  --canvas: #111111;
+  --card: #111111;
+  --card-foreground: #F3EEE3;
+  --popover: #111111;
+  --popover-foreground: #F3EEE3;
+  --primary: #D9541E;
+  --primary-foreground: #F3EEE3;
+  --secondary: #D9541E;
+  --secondary2: #111111;
+  --secondary-foreground: #F3EEE3;
+  --muted: #111111;
+  --muted-foreground: #F3EEE3a6;
+  --accent: #D9541E;
+  --accent-foreground: #F3EEE3;
+  --destructive: #D9541E;
+  --destructive-foreground: #F3EEE3;
+  --border: #F3EEE326;
+  --input: #F3EEE326;
+  --ring: #D9541E;
+  --error: #E05E28;
+  --warning: #E5A93C;
+  --success: #4EBA6F;
+  --info: #4A90E2;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-canvas: var(--canvas);
-  --color-cream: var(--cream);
-  --color-blue: var(--blue);
-  --color-coral: var(--coral);
-  --color-brass: var(--brass);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
@@ -42,6 +70,7 @@
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
+  --color-secondary2: var(--secondary2);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
@@ -52,8 +81,27 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-error: var(--error);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+  --color-info: var(--info);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+::selection {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+::-moz-selection {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  font-size: 14px;
 }
 
 body {
@@ -61,4 +109,150 @@ body {
   color: var(--foreground);
   font-family:
     Inter, -apple-system, BlinkMacSystemFont, "avenir next", avenir, helvetica, "helvetica neue", ubuntu, roboto, noto, "segoe ui", arial, sans-serif;
+}
+
+h1 {
+  font-size: 1.71429rem;
+  line-height: 2.28571rem;
+  font-weight: 600;
+}
+
+button {
+  border-radius: 0px ;
+}
+
+.xbutton-root {
+  border-radius: 999px !important;
+}
+
+/* Global interactive hover & active micro-interactions */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]) {
+  cursor: pointer;
+  transition: all 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Explicit terracotta action button hover state (matches exact class, does NOT touch secondary2) */
+button[class~="bg-secondary"]:not(:disabled):hover,
+button[class~="bg-primary"]:not(:disabled):hover,
+button[class~="bg-foreground"]:not(:disabled):hover {
+  /* background-color: #B83D0E !important; */
+  /* transform: translateY(-1.5px) !important; */
+  box-shadow: 0 1px 1px 2px #d9541e29 !important;
+}
+
+button[class~="bg-canvas"]:not(:disabled):hover {
+  /* background-color: #B83D0E !important; */
+  /* transform: translateY(-1.5px) !important; */
+  box-shadow: 0 1px 1px 1px #11111129 !important;
+}
+
+/* Active pressed state */
+button:not(:disabled):active,
+[role="button"]:not([aria-disabled="true"]):active {
+  /* transform: translateY(0) scale(0.98) !important; */
+}
+
+/* XButton custom interactive styling */
+.xbutton-root {
+  border-radius: 999px;
+  color: var(--xbtn-main, #D9541E);
+  background-color: transparent;
+  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.xbutton-root svg {
+  stroke: currentColor;
+  transition: transform 300ms ease;
+}
+
+.xbutton-root:hover {
+  border-radius: 999px;
+  background-color: var(--xbtn-main, #D9541E) !important;
+  color: var(--xbtn-sec, #F3EEE3) !important;
+}
+
+.xbutton-root:hover svg {
+  stroke: currentColor;
+  transform: rotate(180deg);
+}
+
+a {
+  cursor: pointer;
+  transition: color 120ms ease, opacity 120ms ease, background-color 120ms ease, border-color 120ms ease, text-decoration-color 120ms ease;
+}
+
+a:hover {
+  text-decoration-skip-ink: auto;
+  opacity: 0.9;
+}
+
+a:active {
+  transform: scale(0.98);
+}
+
+/* Custom subtle scrollbar for sidebar & general containers */
+.sidebar-scrollbar::-webkit-scrollbar,
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.sidebar-scrollbar::-webkit-scrollbar-track,
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-scrollbar::-webkit-scrollbar-thumb,
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 9999px;
+}
+.sidebar-scrollbar::-webkit-scrollbar-thumb:hover,
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+.sidebar-scrollbar,
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.toast-container {
+  position: fixed !important;
+  top: 1.25rem !important;
+  left: 0 !important;
+  right: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  pointer-events: none !important;
+  z-index: 9999 !important;
+}
+
+.toast-pill {
+  pointer-events: auto !important;
+  background-color: var(--card) !important;
+  color: var(--card-foreground) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+.toast-detail {
+  transition: padding var(--toast-morph-duration) var(--toast-morph-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast-pill,
+  .toast-detail {
+    transition: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+.toast-pill {
+    background: var(--popover);
+    backdrop-filter: none;
+  }
 }

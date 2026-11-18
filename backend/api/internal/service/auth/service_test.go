@@ -8,18 +8,18 @@ import (
 	authTypes "github.com/ShivamIT23/TrueHook/backend/api/internal/types/auth"
 )
 
-func TestRegisterValidation(t *testing.T) {
+func TestSignUpValidation(t *testing.T) {
 	s := NewService(nil, "test-secret")
 	ctx := context.Background()
 
 	tests := []struct {
 		name        string
-		req         authTypes.RegisterRequest
+		req         authTypes.SignUpRequest
 		expectedErr error
 	}{
 		{
 			name: "invalid email format",
-			req: authTypes.RegisterRequest{
+			req: authTypes.SignUpRequest{
 				Name:     "guest",
 				Email:    "invalid-email",
 				Password: "password123",
@@ -28,7 +28,7 @@ func TestRegisterValidation(t *testing.T) {
 		},
 		{
 			name: "missing email domain",
-			req: authTypes.RegisterRequest{
+			req: authTypes.SignUpRequest{
 				Name:     "guest",
 				Email:    "user@nodomain",
 				Password: "password123",
@@ -37,7 +37,7 @@ func TestRegisterValidation(t *testing.T) {
 		},
 		{
 			name: "empty name",
-			req: authTypes.RegisterRequest{
+			req: authTypes.SignUpRequest{
 				Name:     "",
 				Email:    "test@example.com",
 				Password: "password123",
@@ -46,7 +46,7 @@ func TestRegisterValidation(t *testing.T) {
 		},
 		{
 			name: "password too short",
-			req: authTypes.RegisterRequest{
+			req: authTypes.SignUpRequest{
 				Name:     "guest",
 				Email:    "test@example.com",
 				Password: "short",
@@ -57,7 +57,7 @@ func TestRegisterValidation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := s.Register(ctx, tt.req)
+			_, err := s.SignUp(ctx, tt.req)
 			if !errors.Is(err, tt.expectedErr) {
 				t.Fatalf("expected error %v, got %v", tt.expectedErr, err)
 			}
@@ -65,18 +65,18 @@ func TestRegisterValidation(t *testing.T) {
 	}
 }
 
-func TestLoginValidation(t *testing.T) {
+func TestSignInValidation(t *testing.T) {
 	s := NewService(nil, "test-secret")
 	ctx := context.Background()
 
 	tests := []struct {
 		name        string
-		req         authTypes.LoginRequest
+		req         authTypes.SignInRequest
 		expectedErr error
 	}{
 		{
 			name: "empty email",
-			req: authTypes.LoginRequest{
+			req: authTypes.SignInRequest{
 				Email:    "",
 				Password: "password123",
 			},
@@ -84,7 +84,7 @@ func TestLoginValidation(t *testing.T) {
 		},
 		{
 			name: "empty password",
-			req: authTypes.LoginRequest{
+			req: authTypes.SignInRequest{
 				Email:    "test@example.com",
 				Password: "",
 			},
@@ -94,7 +94,7 @@ func TestLoginValidation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := s.Login(ctx, tt.req)
+			_, err := s.SignIn(ctx, tt.req)
 			if !errors.Is(err, tt.expectedErr) {
 				t.Fatalf("expected error %v, got %v", tt.expectedErr, err)
 			}

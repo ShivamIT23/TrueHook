@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Toasts } from "@/components/ui/toast";
+import { SoundEffects } from "@/components/ui/sound";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,6 +32,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className={`min-h-full flex flex-col ${inter.className}`}>
         {children}
+        <Toasts />
+        <SoundEffects />
       </body>
     </html>
   );

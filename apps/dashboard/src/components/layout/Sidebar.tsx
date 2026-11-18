@@ -74,7 +74,7 @@ export function Sidebar({
 
   return (
     <aside
-      className={`fixed overflow-y-auto sidebar-scrollbar inset-y-0 left-0 z-50 shrink-0 bg-foreground text-cream transition-all duration-300 ease-in-out md:static md:inset-auto md:translate-x-0 ${
+      className={`dark fixed overflow-y-auto sidebar-scrollbar inset-y-0 left-0 z-50 shrink-0 bg-[#111111] text-[#F3EEE3] border-r border-[#F3EEE3]/15 transition-all duration-300 ease-in-out md:static md:inset-auto md:translate-x-0 ${
         isMobileOpen ? "translate-x-0" : "-translate-x-full"
       } ${isDesktopCollapsed ? "md:w-16 w-60" : "w-60"}`}
     >
@@ -86,7 +86,7 @@ export function Sidebar({
               <button
                 type="button"
                 onClick={() => setIsDesktopCollapsed(false)}
-                className="hidden md:flex h-9 w-9 rounded-[5px] items-center justify-center shadow cursor-pointer"
+                className="hidden md:flex h-9 w-9 rounded-[5px] items-center justify-center shadow cursor-pointer hover:bg-[#F3EEE3]/10 transition-colors"
                 title="Expand sidebar"
               >
                 <Image
@@ -120,7 +120,7 @@ export function Sidebar({
               <div className="flex items-center gap-1">
                 <button
                   type="button"
-                  className="hidden md:flex text-muted-foreground hover:text-cream p-1 rounded hover:bg-secondary/10 transition-colors cursor-pointer"
+                  className="hidden md:flex text-muted-foreground hover:text-foreground p-1 rounded hover:bg-[#F3EEE3]/10 transition-colors cursor-pointer"
                   onClick={() => setIsDesktopCollapsed(true)}
                   title="Collapse sidebar"
                 >
@@ -128,7 +128,7 @@ export function Sidebar({
                 </button>
                 <button
                   type="button"
-                  className="md:hidden text-muted-foreground hover:text-cream ml-2 p-1 rounded hover:bg-secondary/10 cursor-pointer"
+                  className="md:hidden text-muted-foreground hover:text-foreground ml-2 p-1 rounded hover:bg-[#F3EEE3]/10 cursor-pointer"
                   onClick={() => setIsMobileOpen(false)}
                   title="Close sidebar"
                 >
@@ -140,7 +140,7 @@ export function Sidebar({
 
           {/* Sidebar Navigation */}
           <nav
-            className={`pt-4 space-y-1 border-t border-border/20 ${
+            className={`pt-4 space-y-1 border-t border-[#F3EEE3]/15 ${
               isDesktopCollapsed ? "md:px-2 px-2" : "px-2"
             }`}
           >
@@ -162,8 +162,8 @@ export function Sidebar({
                       : "justify-between px-2 py-1.5"
                   } ${
                     isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-secondary/10 hover:text-cream"
+                      ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                      : "text-muted-foreground hover:bg-[#F3EEE3]/10 hover:text-foreground"
                   }`}
                 >
                   <div
@@ -201,7 +201,7 @@ export function Sidebar({
 
         {/* Sidebar Footer */}
         <div
-          className={`p-4 border-t border-border/20 text-xs text-muted-foreground text-center transition-opacity duration-200 ${
+          className={`p-4 border-t border-[#F3EEE3]/15 text-xs text-muted-foreground text-center transition-opacity duration-200 ${
             isDesktopCollapsed ? "md:hidden" : ""
           }`}
         >

@@ -12,9 +12,11 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { XButton } from "@/components/ui/x-button";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { EventType } from "@/modules/event-types/types";
 import { usePublishEventMutation } from "@/modules/events/hooks/useEvents";
@@ -28,18 +30,19 @@ interface PublishEventModalProps {
   onSuccess?: (event: EventDetail) => void;
 }
 
-const DEFAULT_SAMPLE_PAYLOAD = JSON.stringify(
-  {
-    event: "user.created",
-    data: {
-      userId: "usr_1029384756",
-      email: "developer@example.com",
-      created_at: new Date().toISOString(),
+const createSamplePayload = (eventName: string = "user.created") =>
+  JSON.stringify(
+    {
+      event: eventName,
+      data: {
+        userId: "usr_1029384756",
+        email: "developer@example.com",
+        created_at: new Date().toISOString(),
+      },
     },
-  },
-  null,
-  2,
-);
+    null,
+    2,
+  );
 
 export function PublishEventModal({
   isOpen,
@@ -48,14 +51,80 @@ export function PublishEventModal({
   onClose,
   onSuccess,
 }: PublishEventModalProps) {
+  const initialEventType = eventTypes[0];
   const [selectedEventTypeId, setSelectedEventTypeId] = useState(
-    eventTypes[0]?.id || "",
+    initialEventType?.id || "",
   );
-  const [payloadText, setPayloadText] = useState(DEFAULT_SAMPLE_PAYLOAD);
+  const [payloadText, setPayloadText] = useState(() =>
+    createSamplePayload(initialEventType?.name || "user.created"),
+  );
   const [fieldErrors, setFieldErrors] = useState<PublishEventState["errors"]>({});
   const [jsonError, setJsonError] = useState<string | null>(null);
 
   const mutation = usePublishEventMutation(applicationId);
+
+  const eventTypeOptions = eventTypes.map((et) => ({
+    value: et.id,
+    label: et.name,
+    description: et.description,
+  }));
+
+  const selectedOption =
+    eventTypeOptions.find((opt) => opt.value === selectedEventTypeId) ||
+    eventTypeOptions[0] ||
+    null;
+
+  const updatePayloadEventName = (eventName: string) => {
+    if (!eventName) return;
+    setPayloadText((prev) => {
+      try {
+        const parsed = JSON.parse(prev);
+        if (typeof parsed === "object" && parsed !== null) {
+          if (parsed.event === eventName) return prev;
+          parsed.event = eventName;
+          return JSON.stringify(parsed, null, 2);
+        }
+      } catch (_err) {
+        // Fallback to regex if JSON is invalid
+      }
+
+      if (/"event"\s*:\s*"[^"]*"/.test(prev)) {
+        return prev.replace(/"event"\s*:\s*"[^"]*"/, `"event": "${eventName}"`);
+      }
+
+      return prev;
+    });
+  };
+
+  useEffect(() => {
+    if (isOpen && eventTypes.length > 0) {
+      const exists = eventTypes.some((et) => et.id === selectedEventTypeId);
+      const target = exists
+        ? eventTypes.find((et) => et.id === selectedEventTypeId)!
+        : eventTypes[0]!;
+
+      if (!exists) {
+        setSelectedEventTypeId(target.id);
+      }
+
+      updatePayloadEventName(target.name);
+    }
+  }, [isOpen, eventTypes]);
+
+  const handleEventTypeChange = (
+    opt: { value: string; label: string; description?: string } | null,
+  ) => {
+    const newId = opt ? opt.value : "";
+    const newName = opt ? opt.label : "";
+    setSelectedEventTypeId(newId);
+    if (fieldErrors?.event_type_id) {
+      setFieldErrors((prev) => ({ ...prev, event_type_id: undefined }));
+    }
+
+    if (newName) {
+      updatePayloadEventName(newName);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -78,7 +147,8 @@ export function PublishEventModal({
   };
 
   const handleResetSample = () => {
-    setPayloadText(DEFAULT_SAMPLE_PAYLOAD);
+    const currentName = selectedOption?.label || eventTypes[0]?.name || "user.created";
+    setPayloadText(createSamplePayload(currentName));
     setJsonError(null);
   };
 
@@ -150,7 +220,7 @@ export function PublishEventModal({
       />
 
       {/* Modal Dialog Card */}
-      <div className="relative z-10 w-full max-w-xl rounded-2xl border border-border bg-canvas p-6 shadow-xl animate-in fade-in zoom-in-95 sm:p-8">
+      <div className="relative z-10 w-full max-w-xl rounded-2xl border border-border bg-canvas p-6 shadow-xl animate-in fade-in zoom-in-95 ">
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary">
@@ -165,14 +235,16 @@ export function PublishEventModal({
               delivery.
             </p>
           </div>
-          <button
-            type="button"
+          <XButton
+            width={32}
+            height={32}
             onClick={handleClose}
+            borderStyle="none"
             aria-label="Close dialog"
-            className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+            title="Close"
           >
             <X className="h-5 w-5" />
-          </button>
+          </XButton>
         </div>
 
         {formErrorMessage && (
@@ -183,8 +255,8 @@ export function PublishEventModal({
         )}
 
         {eventTypes.length === 0 ? (
-          <div className="mt-6 rounded-xl border border-brass/40 bg-brass/10 p-4 text-xs text-foreground">
-            <div className="flex items-center gap-2 font-semibold text-brass">
+          <div className="mt-6 rounded-xl border border-border bg-secondary2/50 p-4 text-xs text-foreground">
+            <div className="flex items-center gap-2 font-semibold text-foreground">
               <AlertCircle className="h-4 w-4" />
               <span>No Event Types Configured</span>
             </div>
@@ -212,18 +284,15 @@ export function PublishEventModal({
                 <Tag className="h-3.5 w-3.5 text-muted-foreground" />
                 <span>Target Event Type</span>
               </Label>
-              <select
+              <Select
                 id="event_type_id"
-                value={selectedEventTypeId}
-                onChange={(e) => setSelectedEventTypeId(e.target.value)}
-                className="w-full rounded-xl border border-input bg-canvas px-3.5 py-2.5 text-xs text-foreground shadow-xs focus:border-primary focus:outline-hidden focus:ring-1 focus:ring-primary"
-              >
-                {eventTypes.map((et) => (
-                  <option key={et.id} value={et.id}>
-                    {et.name} {et.description ? `— ${et.description}` : ""}
-                  </option>
-                ))}
-              </select>
+                options={eventTypeOptions}
+                value={selectedOption}
+                onChange={handleEventTypeChange}
+                placeholder="Select an event type..."
+                isSearchable
+                className="w-full"
+              />
               {fieldErrors?.event_type_id && (
                 <p className="text-[11px] text-destructive">
                   {fieldErrors.event_type_id[0]}
@@ -298,7 +367,7 @@ export function PublishEventModal({
                 type="submit"
                 size="sm"
                 disabled={mutation.isPending || Boolean(jsonError)}
-                className="h-9 gap-1.5 px-4 text-xs bg-primary text-primary-foreground hover:bg-primary/90"
+                className="h-9 gap-1.5 px-4 text-xs"
               >
                 {mutation.isPending ? (
                   <>

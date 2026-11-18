@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { XButton } from "@/components/ui/x-button";
 import { Input } from "@/components/ui/input";
 import type { Application } from "@/modules/applications/types";
 import { DeliveryDetailModal } from "@/modules/deliveries/components/DeliveryDetailModal";
@@ -176,21 +177,21 @@ export function DeliveriesManager({
             size="sm"
             onClick={() => refetch()}
             disabled={isFetching || !applicationId}
-            className="h-9 gap-1.5 text-xs text-muted-foreground hover:text-foreground bg-canvas"
+            className="h-9 gap-1.5 text-xs text-muted-foreground hover:text-foreground bg-canvas transition-all duration-150 cursor-pointer"
             title="Refresh deliveries"
           >
             <RefreshCw
               className={`h-3.5 w-3.5 ${isFetching ? "animate-spin text-primary" : ""}`}
             />
-            <span className="hidden sm:inline">Refresh</span>
+            <span className={`hidden sm:inline text-muted-foreground ${isFetching && "text-secondary"}`}>Refresh</span>
           </Button>
         </div>
       </div>
 
       {/* No Application Warning Banner */}
       {!application && (
-        <div className="mt-6 rounded-xl border border-brass/40 bg-brass/10 p-4 text-sm text-foreground">
-          <div className="flex items-center gap-2 font-semibold text-brass">
+        <div className="mt-6 rounded-xl border border-border bg-secondary2/50 p-4 text-sm text-foreground">
+          <div className="flex items-center gap-2 font-semibold text-foreground">
             <Layers className="h-4 w-4" />
             <span>No Application Context</span>
           </div>
@@ -224,9 +225,9 @@ export function DeliveriesManager({
               <span className="text-xs font-medium text-muted-foreground">
                 Success Rate
               </span>
-              <CheckCircle2 className="h-4 w-4 text-primary" />
+              <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
             </div>
-            <p className="mt-2 text-2xl font-bold tracking-tight text-primary">
+            <p className="mt-2 text-2xl font-bold tracking-tight text-foreground">
               {successRate}%
             </p>
             <span className="text-[11px] text-muted-foreground">
@@ -239,9 +240,9 @@ export function DeliveriesManager({
               <span className="text-xs font-medium text-muted-foreground">
                 Failed Deliveries
               </span>
-              <XCircle className="h-4 w-4 text-destructive" />
+              <XCircle className="h-4 w-4 text-muted-foreground" />
             </div>
-            <p className="mt-2 text-2xl font-bold tracking-tight text-destructive">
+            <p className="mt-2 text-2xl font-bold tracking-tight text-foreground">
               {failedCount}
             </p>
             <span className="text-[11px] text-muted-foreground">
@@ -254,9 +255,9 @@ export function DeliveriesManager({
               <span className="text-xs font-medium text-muted-foreground">
                 Pending / Retrying
               </span>
-              <Clock className="h-4 w-4 text-brass" />
+              <Clock className="h-4 w-4 text-muted-foreground" />
             </div>
-            <p className="mt-2 text-2xl font-bold tracking-tight text-brass">
+            <p className="mt-2 text-2xl font-bold tracking-tight text-foreground">
               {pendingCount}
             </p>
             <span className="text-[11px] text-muted-foreground">
@@ -269,7 +270,7 @@ export function DeliveriesManager({
       {/* Controls Bar */}
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-[240px] max-w-md">
+          <div className="relative flex-1 min-w-60 max-w-md">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="text"
@@ -290,7 +291,7 @@ export function DeliveriesManager({
           </div>
 
           {/* Status Segment Control */}
-          <div className="flex items-center rounded-xl border border-border bg-secondary/40 p-1">
+          <div className="flex items-center rounded-xl border border-border bg-secondary2/40 p-1">
             {[
               { id: "all", label: "All", count: deliveries.length },
               { id: "success", label: "Success", count: successCount },
@@ -311,8 +312,8 @@ export function DeliveriesManager({
                 <span
                   className={`rounded-full px-1.5 py-0.2 text-[10px] ${
                     statusFilter === tab.id
-                      ? "bg-secondary text-foreground"
-                      : "bg-secondary/60 text-muted-foreground"
+                      ? "bg-secondary2 text-foreground"
+                      : "bg-secondary2/60 text-muted-foreground"
                   }`}
                 >
                   {tab.count}
@@ -349,7 +350,7 @@ export function DeliveriesManager({
       <div className="mt-4">
         {filteredDeliveries.length === 0 ? (
           <div className="flex min-h-[320px] flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-canvas p-8 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-secondary/80 text-muted-foreground">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-secondary2/80 text-muted-foreground">
               <Activity className="h-6 w-6" />
             </div>
             <h3 className="mt-4 text-base font-semibold text-foreground">
@@ -381,7 +382,7 @@ export function DeliveriesManager({
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-border bg-secondary/30 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <tr className="border-b border-border bg-secondary2/30 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                     <th className="py-3 px-4">Status</th>
                     <th className="py-3 px-4">Event Type</th>
                     <th className="py-3 px-4">Destination Endpoint</th>
@@ -402,16 +403,16 @@ export function DeliveriesManager({
                     return (
                       <tr
                         key={del.id}
-                        className="hover:bg-secondary/25 transition-colors cursor-pointer group"
+                        className="hover:bg-secondary2/25 transition-colors cursor-pointer group"
                         onClick={() => setInspectingDelivery(del)}
                       >
                         <td className="py-3.5 px-4 whitespace-nowrap">
                           <span
                             className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider border ${
                               isSuccess
-                                ? "bg-primary/10 text-primary border-primary/20"
+                                ? "bg-secondary2 text-foreground border-border"
                                 : isPending
-                                  ? "bg-brass/10 text-brass border-brass/20"
+                                  ? "bg-secondary2/60 text-muted-foreground border-border"
                                   : "bg-destructive/10 text-destructive border-destructive/20"
                             }`}
                           >
@@ -434,7 +435,7 @@ export function DeliveriesManager({
 
                         <td className="py-3.5 px-4 max-w-sm sm:max-w-md">
                           <div className="flex items-center gap-2">
-                            <span className="rounded bg-secondary/80 border border-border/80 px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground uppercase font-mono">
+                            <span className="rounded bg-secondary2/80 border border-border/80 px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground uppercase font-mono">
                               POST
                             </span>
                             <span className="font-mono text-muted-foreground truncate select-all">
@@ -478,26 +479,25 @@ export function DeliveriesManager({
                         </td>
 
                         <td className="py-3.5 px-4 text-right space-x-1 whitespace-nowrap">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
+                          <XButton
+                            height={32}
+                            mainColor="#D9541E"
+                            secondaryColor="#F3EEE3"
                             onClick={(e) => {
                               e.stopPropagation();
                               setInspectingDelivery(del);
                             }}
-                            className="h-8 gap-1.5 text-xs text-primary hover:text-primary hover:bg-secondary font-medium"
                           >
                             <Eye className="h-3.5 w-3.5" />
                             <span>Inspect</span>
-                          </Button>
+                          </XButton>
                           <Button
                             type="button"
                             variant="ghost"
                             size="sm"
                             onClick={(e) => handleReplayClick(e, del)}
                             disabled={isReplaying || replayMutation.isPending}
-                            className="h-8 gap-1 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary"
+                            className="h-8 gap-1 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary2"
                             title="Re-dispatch delivery"
                           >
                             {isReplaying ? (

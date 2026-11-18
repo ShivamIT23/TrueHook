@@ -9,8 +9,8 @@ import (
 )
 
 type Service interface {
-	Register(ctx context.Context, req RegisterRequest) (*AuthResponse, error)
-	Login(ctx context.Context, req LoginRequest) (*AuthResponse, error)
+	SignUp(ctx context.Context, req SignUpRequest) (*AuthResponse, error)
+	SignIn(ctx context.Context, req SignInRequest) (*AuthResponse, error)
 }
 
 type Handler struct {
@@ -26,20 +26,21 @@ type UserResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-// AuthResponse defines the payload returned upon successful register or login.
+// AuthResponse defines the payload returned upon successful signup or signin.
 type AuthResponse struct {
 	User  UserResponse `json:"user"`
 	Token string       `json:"token"`
 }
 
-type RegisterRequest struct {
+// SignUpRequest defines the expected payload for user signup.
+type SignUpRequest struct {
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
-// LoginRequest defines the expected payload for user authentication.
-type LoginRequest struct {
+// SignInRequest defines the expected payload for user authentication.
+type SignInRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }

@@ -3,6 +3,7 @@
 import { AlertCircle, Loader2, Save, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { XButton } from "@/components/ui/x-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -94,7 +95,7 @@ export function EditEventTypeModal({
       />
 
       {/* Modal Dialog Card */}
-      <div className="relative z-10 w-full max-w-lg rounded-2xl border border-border bg-canvas p-6 shadow-xl animate-in fade-in zoom-in-95 sm:p-8">
+      <div className="relative z-10 w-full max-w-lg rounded-2xl border border-border bg-canvas p-6 shadow-xl animate-in fade-in zoom-in-95 ">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>
@@ -105,15 +106,17 @@ export function EditEventTypeModal({
               Update the name or description for this event type.
             </p>
           </div>
-          <button
-            type="button"
+          <XButton
+            width={32}
+            height={32}
             onClick={handleClose}
             disabled={mutation.isPending}
-            className="rounded-lg p-1 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors cursor-pointer"
+            borderStyle="none"
             aria-label="Close dialog"
+            title="Close"
           >
             <X className="h-5 w-5" />
-          </button>
+          </XButton>
         </div>
 
         {/* Error Banner */}
@@ -185,14 +188,14 @@ export function EditEventTypeModal({
               variant="outline"
               disabled={mutation.isPending}
               onClick={handleClose}
-              className="h-9 px-4 text-xs font-medium text-muted-foreground border-border hover:bg-secondary hover:text-foreground"
+              className="h-9 px-4 text-xs font-medium text-muted-foreground border-border hover:bg-secondary2 hover:text-foreground"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={mutation.isPending}
-              className="h-9 px-4 text-xs font-medium text-primary-foreground bg-primary hover:bg-primary/90 border border-primary"
+              className="h-9 px-4 text-xs font-medium"
             >
               {mutation.isPending ? (
                 <>

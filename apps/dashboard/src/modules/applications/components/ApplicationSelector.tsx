@@ -18,6 +18,7 @@ import { selectApplicationAction } from "@/actions/applications";
 import { Button } from "@/components/ui/button";
 import type { Application } from "@/modules/applications/types";
 import { CreateApplicationModal } from "./CreateApplicationModal";
+import { DeleteApplicationDialog } from "./DeleteApplicationDialog";
 
 const MONTH_NAMES = [
   "Jan",
@@ -58,6 +59,7 @@ export function ApplicationSelector({
   );
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isEntering, setIsEntering] = useState(false);
   const router = useRouter();
@@ -114,6 +116,36 @@ export function ApplicationSelector({
     setDropdownOpen(false);
   };
 
+  const handleAppDeleted = (deletedId: string) => {
+    const updated = applications.filter((a) => a.id !== deletedId);
+    setApplications(updated);
+
+    if (typeof window !== "undefined") {
+      try {
+        const savedId = localStorage.getItem("truehook_selected_app_id");
+        if (savedId === deletedId) {
+          localStorage.removeItem("truehook_selected_app");
+          localStorage.removeItem("truehook_selected_app_id");
+        }
+      } catch {
+        // LocalStorage access not available
+      }
+    }
+
+    if (selectedAppId === deletedId) {
+      const nextApp = updated[0] || null;
+      setSelectedAppId(nextApp ? nextApp.id : null);
+      if (nextApp && typeof window !== "undefined") {
+        try {
+          localStorage.setItem("truehook_selected_app", JSON.stringify(nextApp));
+          localStorage.setItem("truehook_selected_app_id", nextApp.id);
+        } catch {
+          // LocalStorage access not available
+        }
+      }
+    }
+  };
+
   const handleEnterApplication = async () => {
     if (!selectedApp || isEntering) return;
     setIsEntering(true);
@@ -146,12 +178,16 @@ export function ApplicationSelector({
       {/* Centered Application Card */}
       <div
         ref={containerRef}
-        className="w-full max-w-2xl rounded-2xl border border-border bg-canvas p-6 shadow-xs sm:p-8 transition-all"
+        className="w-full max-w-2xl rounded-2xl border border-border bg-canvas p-6 shadow-xs transition-all"
       >
         {/* Header Row: Title + Description on left, + Create Application on right */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary">
+              <Layers className="h-4 w-4" />
+              <span>Workspace Context</span>
+            </div>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground">
               Select an Application
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -162,7 +198,7 @@ export function ApplicationSelector({
           <Button
             type="button"
             onClick={() => setIsModalOpen(true)}
-            className="h-10 cursor-pointer rounded-lg border border-foreground bg-foreground px-4 text-sm font-medium text-canvas transition-colors hover:bg-foreground/90 self-start sm:self-auto shrink-0 shadow-xs"
+            className="h-10 cursor-pointer rounded-lg border border-foreground bg-foreground px-4 text-sm font-medium text-canvas hover:bg-foreground/90 transition-all duration-150 self-start sm:self-auto shrink-0 shadow-xs"
           >
             <Plus className="h-4 w-4" />
             <span>Create Application</span>
@@ -227,11 +263,11 @@ export function ApplicationSelector({
                           setDropdownOpen(false);
                         }}
                         className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors cursor-pointer ${
-                          isSelected ? "bg-secondary" : "hover:bg-secondary/60"
+                          isSelected ? "bg-secondary2" : "hover:bg-secondary2/60"
                         }`}
                       >
                         {/* Square Badge with First Letter */}
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary text-xs font-bold text-muted-foreground shrink-0 select-none">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary2 text-xs font-bold text-muted-foreground shrink-0 select-none">
                           {app.name[0]?.toUpperCase()}
                         </div>
 
@@ -276,9 +312,9 @@ export function ApplicationSelector({
 
         {/* Showcase the selected application's complete data (visible when dropdown is closed) */}
         {!dropdownOpen && selectedApp && (
-          <div className="mt-6 rounded-xl border border-border bg-secondary/40 p-5 animate-in fade-in">
+          <div className="mt-6 rounded-xl border border-border bg-secondary2/40 p-5 animate-in fade-in">
             <div className="flex items-start justify-between">
-              <div className="flex items-start gap-3 relative">
+              <div className="flex items-start gap-3 relative w-full">
                 {selectedApp.logo_url ? (
                   // biome-ignore lint/performance/noImgElement: dynamic application logo URL
                   <img
@@ -287,16 +323,16 @@ export function ApplicationSelector({
                     className="h-10 w-10 rounded-[5px] border border-border object-cover"
                   />
                 ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-[5px] bg-primary text-sm font-bold text-primary-foreground shadow-xs">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-[5px] bg-foreground text-sm font-bold text-background shadow-xs">
                     {selectedApp.name[0]?.toUpperCase()}
                   </div>
                 )}
-                <div>
+                <div className="w-full">
                   <div className="flex items-center gap-2">
                     <h2 className="text-base font-semibold text-foreground">
                       {selectedApp.name}
                     </h2>
-                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                    <span className="rounded-full border border-border bg-secondary2 px-2 py-0.5 text-[10px] font-semibold text-foreground">
                       Active
                     </span>
                   </div>
@@ -304,7 +340,15 @@ export function ApplicationSelector({
                     {selectedApp.description}
                   </p>
                 </div>
-                <Trash size={15} className="text-destructive cursor-pointer" />
+                <button
+                  type="button"
+                  onClick={() => setIsDeleteDialogOpen(true)}
+                  className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+                  title="Delete application"
+                  aria-label="Delete application"
+                >
+                  <Trash size={15} />
+                </button>
               </div>
             </div>
 
@@ -353,19 +397,15 @@ export function ApplicationSelector({
                 type="button"
                 onClick={handleEnterApplication}
                 disabled={isEntering}
-                variant="outline"
-                className="h-fit py-1.5 px-3 cursor-pointer border-border bg-canvas text-sm font-medium text-foreground hover:bg-secondary transition-colors disabled:opacity-50"
+                className="h-fit py-1.5 px-4 text-sm font-medium disabled:opacity-50"
               >
                 {isEntering ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  <Loader2 className="h-4 w-4 animate-spin text-secondary-foreground" />
                 ) : (
-                  <ExternalLink className="h-4 w-4 text-primary" />
+                  <ExternalLink className="h-4 w-4" />
                 )}
                 <span className="font-medium text-sm">
-                  Enter{" "}
-                  <span className="font-extrabold text-sm text-primary">
-                    {selectedApp.name}
-                  </span>
+                  Enter {selectedApp.name}
                 </span>
               </Button>
             </div>
@@ -373,12 +413,22 @@ export function ApplicationSelector({
         )}
       </div>
 
-      {/* Modal Dialog (only mounted when open so form state is always fresh) */}
+      {/* Create Modal Dialog */}
       {isModalOpen && (
         <CreateApplicationModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onSuccess={handleAppCreated}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {isDeleteDialogOpen && selectedApp && (
+        <DeleteApplicationDialog
+          isOpen={isDeleteDialogOpen}
+          application={selectedApp}
+          onClose={() => setIsDeleteDialogOpen(false)}
+          onSuccess={handleAppDeleted}
         />
       )}
     </div>

@@ -3,6 +3,7 @@
 import { AlertTriangle, Loader2, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { XButton } from "@/components/ui/x-button";
 import { useDeleteEventTypeMutation } from "@/modules/event-types/hooks/useEventTypes";
 import type { EventType } from "@/modules/event-types/types";
 
@@ -76,15 +77,17 @@ export function DeleteEventTypeDialog({
               </p>
             </div>
           </div>
-          <button
-            type="button"
+          <XButton
+            width={32}
+            height={32}
             onClick={handleClose}
             disabled={mutation.isPending}
-            className="rounded-lg p-1 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors cursor-pointer"
+            borderStyle="none"
             aria-label="Close dialog"
+            title="Close"
           >
             <X className="h-5 w-5" />
-          </button>
+          </XButton>
         </div>
 
         {errorMessage && (
@@ -98,7 +101,7 @@ export function DeleteEventTypeDialog({
 
         <div className="mt-4 text-xs leading-relaxed text-muted-foreground">
           Are you sure you want to delete the event identifier{" "}
-          <span className="font-mono font-semibold text-foreground bg-secondary px-1.5 py-0.5 rounded border border-border">
+          <span className="font-mono font-semibold text-foreground bg-secondary2 px-1.5 py-0.5 rounded border border-border">
             {eventType.name}
           </span>
           ? Any active webhooks listening exclusively to this event type will no
@@ -111,7 +114,7 @@ export function DeleteEventTypeDialog({
             variant="outline"
             disabled={mutation.isPending}
             onClick={handleClose}
-            className="h-9 px-4 text-xs font-medium text-muted-foreground border-border hover:bg-secondary hover:text-foreground"
+            className="h-9 px-4 text-xs font-medium text-muted-foreground border-border hover:bg-secondary2 hover:text-foreground"
           >
             Cancel
           </Button>

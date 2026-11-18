@@ -2,8 +2,8 @@
 
 ## Authentication (`/api/v1/auth`)
 
-### Register
-- **Path**: `POST /api/v1/auth/register` (or `/auth/register`)
+### SignUp
+- **Path**: `POST /api/v1/auth/signup` (or `/auth/signup`)
 - **Body**:
   ```json
   {
@@ -16,7 +16,7 @@
   ```json
   {
     "status": 201,
-    "message": "User registered successfully",
+    "message": "User signed up successfully",
     "data": {
       "user": {
         "id": "uuid",
@@ -30,8 +30,8 @@
   }
   ```
 
-### Login
-- **Path**: `POST /api/v1/auth/login` (or `/auth/login`)
+### SignIn
+- **Path**: `POST /api/v1/auth/signin` (or `/auth/signin`)
 - **Body**:
   ```json
   {
@@ -240,8 +240,8 @@
 
 ## Admin (`/api/v1/admin`)
 
-### Admin Login
-- **Path**: `POST /api/v1/admin/login` (or `/admin/login`)
+### Admin SignIn
+- **Path**: `POST /api/v1/admin/signin` (or `/admin/signin`)
 - **Body**:
   ```json
   {

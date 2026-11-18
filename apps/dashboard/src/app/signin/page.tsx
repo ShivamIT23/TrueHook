@@ -1,20 +1,20 @@
 import { redirect } from "next/navigation";
 import { BackgroundSVG } from "@/components/background/BackgroundSVG";
 import { getAuthToken } from "@/lib/session";
-import { RegisterForm } from "@/modules/auth/RegisterForm";
+import { SignInForm } from "@/modules/auth/SignInForm";
 
 export const dynamic = "force-dynamic";
 
-export default async function RegisterPage() {
+export default async function SignInPage() {
   const token = await getAuthToken();
   if (token) {
     redirect("/");
   }
 
   return (
-    <main className="dark relative isolate min-h-screen overflow-hidden bg-[#141412] px-4 text-[#f2f2e8]">
+    <main className="dark relative isolate min-h-screen overflow-hidden bg-[#111111] px-4 text-[#F3EEE3]">
       <BackgroundSVG />
-      <RegisterForm />
+      <SignInForm />
     </main>
   );
 }

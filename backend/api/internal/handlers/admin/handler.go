@@ -17,20 +17,20 @@ func NewHandler(service adminTypes.Service) *Handler {
 	return &Handler{service: service}
 }
 
-// LoginHandler handles administrator authentication.
-// POST /api/v1/admin/login
-// POST /admin/login
-func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
+// SignInHandler handles administrator authentication.
+// POST /api/v1/admin/signin
+// POST /admin/signin
+func (h *Handler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	// Limit request body to 1 MB
 	r.Body = http.MaxBytesReader(w, r.Body, 1024*1024)
 
-	var req adminTypes.LoginRequest
+	var req adminTypes.SignInRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		response.Fail(w, http.StatusBadRequest, "Invalid request payload", err.Error(), "INVALID_REQUEST_BODY")
 		return
 	}
 
-	authResp, err := h.service.Login(r.Context(), req)
+	authResp, err := h.service.SignIn(r.Context(), req)
 	if err != nil {
 		switch {
 		case errors.Is(err, adminTypes.ErrInvalidCredentials):

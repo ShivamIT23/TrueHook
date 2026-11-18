@@ -10,12 +10,14 @@ export interface ProtectedLayoutShellProps {
   children: React.ReactNode;
   user: AuthUser | null;
   application: Application | null;
+  applications?: Application[];
 }
 
 export function ProtectedLayoutShell({
   children,
   user,
   application,
+  applications,
 }: ProtectedLayoutShellProps) {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false);
@@ -46,6 +48,7 @@ export function ProtectedLayoutShell({
         <DashboardHeader
           user={user}
           application={application}
+          applications={applications}
           onToggleMobileSidebar={() => setIsMobileOpen(true)}
           showLogo={false}
         />

@@ -16,7 +16,9 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { XButton } from "@/components/ui/x-button";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import type { Application } from "@/modules/applications/types";
 import type { EventType } from "@/modules/event-types/types";
 import { EventDetailModal } from "@/modules/events/components/EventDetailModal";
@@ -53,6 +55,19 @@ export function EventsManager({
   const [isPublishOpen, setIsPublishOpen] = useState(false);
   const [inspectingEvent, setInspectingEvent] = useState<EventItem | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const filterOptions = [
+    { value: "", label: "All Event Types" },
+    ...eventTypes.map((et) => ({
+      value: et.name,
+      label: et.name,
+      description: et.description,
+    })),
+  ];
+
+  const selectedFilterOption =
+    filterOptions.find((opt) => opt.value === selectedEventTypeFilter) ||
+    filterOptions[0];
 
   const events = data.events || [];
 
@@ -160,20 +175,19 @@ export function EventsManager({
             size="sm"
             onClick={() => refetch()}
             disabled={isFetching || !applicationId}
-            className="h-9 gap-1.5 text-xs text-muted-foreground hover:text-foreground bg-canvas"
+            className="h-9 gap-1.5 text-xs text-muted-foreground hover:text-foreground bg-canvas transition-all duration-150 cursor-pointer"
             title="Refresh events"
           >
             <RefreshCw
               className={`h-3.5 w-3.5 ${isFetching ? "animate-spin text-primary" : ""}`}
             />
-            <span className="hidden sm:inline">Refresh</span>
           </Button>
 
           <Button
             size="sm"
             onClick={() => setIsPublishOpen(true)}
             disabled={!applicationId}
-            className="h-9 gap-1.5 text-xs bg-primary text-primary-foreground hover:bg-primary/90"
+            className="h-9 gap-1.5 text-xs transition-all duration-150 cursor-pointer"
           >
             <Plus className="h-4 w-4" />
             <span>Publish Event</span>
@@ -183,8 +197,8 @@ export function EventsManager({
 
       {/* No Application Warning Banner */}
       {!application && (
-        <div className="mt-6 rounded-xl border border-brass/40 bg-brass/10 p-4 text-sm text-foreground">
-          <div className="flex items-center gap-2 font-semibold text-brass">
+        <div className="mt-6 rounded-xl border border-border bg-secondary2/50 p-4 text-sm text-foreground">
+          <div className="flex items-center gap-2 font-semibold text-foreground">
             <Layers className="h-4 w-4" />
             <span>No Application Context</span>
           </div>
@@ -218,9 +232,9 @@ export function EventsManager({
               <span className="text-xs font-medium text-muted-foreground">
                 Dispatched Deliveries
               </span>
-              <Layers className="h-4 w-4 text-primary" />
+              <Layers className="h-4 w-4 text-muted-foreground" />
             </div>
-            <p className="mt-2 text-2xl font-bold tracking-tight text-primary">
+            <p className="mt-2 text-2xl font-bold tracking-tight text-foreground">
               {totalDeliveriesDispatched}
             </p>
             <span className="text-[11px] text-muted-foreground">
@@ -248,7 +262,7 @@ export function EventsManager({
               <span className="text-xs font-medium text-muted-foreground">
                 Fanout Ratio
               </span>
-              <Activity className="h-4 w-4 text-brass" />
+              <Activity className="h-4 w-4 text-muted-foreground" />
             </div>
             <p className="mt-2 text-2xl font-bold tracking-tight text-foreground">
               {avgFanout}
@@ -287,19 +301,17 @@ export function EventsManager({
           </div>
 
           {eventTypes.length > 0 && (
-            <select
-              value={selectedEventTypeFilter}
-              onChange={(e) => setSelectedEventTypeFilter(e.target.value)}
-              aria-label="Filter events by type"
-              className="rounded-xl border border-input bg-canvas px-3 py-2 text-xs text-foreground shadow-xs focus:border-primary focus:outline-hidden focus:ring-1 focus:ring-primary"
-            >
-              <option value="">All Event Types</option>
-              {eventTypes.map((et) => (
-                <option key={et.id} value={et.name}>
-                  {et.name}
-                </option>
-              ))}
-            </select>
+            <div className="w-48">
+              <Select
+                size="sm"
+                options={filterOptions}
+                value={selectedFilterOption}
+                onChange={(opt) => setSelectedEventTypeFilter(opt?.value || "")}
+                placeholder="All Event Types"
+                isSearchable
+                aria-label="Filter events by type"
+              />
+            </div>
           )}
 
           {(searchQuery || selectedEventTypeFilter) && (
@@ -330,7 +342,7 @@ export function EventsManager({
       <div className="mt-4">
         {filteredEvents.length === 0 ? (
           <div className="flex min-h-[320px] flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-canvas p-8 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-secondary/80 text-muted-foreground">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-secondary2/80 text-muted-foreground">
               <Send className="h-6 w-6" />
             </div>
             <h3 className="mt-4 text-base font-semibold text-foreground">
@@ -347,7 +359,7 @@ export function EventsManager({
               <Button
                 onClick={() => setIsPublishOpen(true)}
                 disabled={!applicationId}
-                className="mt-6 gap-2 bg-primary text-primary-foreground hover:bg-primary/90 text-xs"
+                className="mt-6 gap-2 text-xs"
               >
                 <Plus className="h-4 w-4" />
                 <span>Publish First Event</span>
@@ -371,7 +383,7 @@ export function EventsManager({
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-border bg-secondary/30 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <tr className="border-b border-border bg-secondary2/30 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                     <th className="py-3 px-4">Event ID</th>
                     <th className="py-3 px-4">Event Type</th>
                     <th className="py-3 px-4">Payload Preview</th>
@@ -388,7 +400,7 @@ export function EventsManager({
                     return (
                       <tr
                         key={evt.id}
-                        className="hover:bg-secondary/25 transition-colors cursor-pointer group"
+                        className="hover:bg-secondary2/25 transition-colors cursor-pointer group"
                         onClick={() => setInspectingEvent(evt)}
                       >
                         <td className="py-3.5 px-4 font-mono text-foreground font-medium whitespace-nowrap">
@@ -414,20 +426,20 @@ export function EventsManager({
                         </td>
 
                         <td className="py-3.5 px-4">
-                          <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                          <span className="inline-flex items-center rounded-full border border-border bg-secondary2/80 px-2.5 py-0.5 text-xs font-semibold text-foreground">
                             {evt.event_type_name || "event"}
                           </span>
                         </td>
 
                         <td className="py-3.5 px-4 max-w-xs sm:max-w-md">
-                          <div className="rounded-md bg-secondary/50 border border-border/60 px-2.5 py-1 font-mono text-[11px] text-muted-foreground truncate select-all">
+                          <div className="rounded-md bg-secondary2/50 border border-border/60 px-2.5 py-1 font-mono text-[11px] text-muted-foreground truncate select-all">
                             {JSON.stringify(evt.payload)}
                           </div>
                         </td>
 
                         <td className="py-3.5 px-4 whitespace-nowrap">
-                          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/40 px-2.5 py-0.5 text-xs font-medium text-foreground">
-                            <Layers className="h-3 w-3 text-primary" />
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary2/40 px-2.5 py-0.5 text-xs font-medium text-foreground">
+                            <Layers className="h-3 w-3 text-muted-foreground" />
                             <span>
                               {evt.deliveries_count ?? 0}{" "}
                               {evt.deliveries_count === 1
@@ -451,19 +463,18 @@ export function EventsManager({
                         </td>
 
                         <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
+                          <XButton
+                            height={32}
+                            mainColor="#D9541E"
+                            secondaryColor="#F3EEE3"
                             onClick={(e) => {
                               e.stopPropagation();
                               setInspectingEvent(evt);
                             }}
-                            className="h-8 gap-1.5 text-xs text-primary hover:text-primary hover:bg-secondary font-medium"
                           >
                             <Eye className="h-3.5 w-3.5" />
                             <span>Inspect</span>
-                          </Button>
+                          </XButton>
                         </td>
                       </tr>
                     );

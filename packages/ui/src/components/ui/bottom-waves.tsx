@@ -27,8 +27,8 @@ export function BottomWaves() {
           y2="450"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stopColor="#EAF2FF" stopOpacity="0.65" />
-          <stop offset="1" stopColor="#DCE9FF" stopOpacity="0.2" />
+          <stop stopColor="#111111" stopOpacity="0.04" />
+          <stop offset="1" stopColor="#111111" stopOpacity="0.01" />
         </linearGradient>
 
         <linearGradient
@@ -39,8 +39,8 @@ export function BottomWaves() {
           y2="450"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stopColor="#DCE9FF" stopOpacity="0.5" />
-          <stop offset="1" stopColor="#EEF4FF" stopOpacity="0.3" />
+          <stop stopColor="#111111" stopOpacity="0.03" />
+          <stop offset="1" stopColor="#111111" stopOpacity="0.01" />
         </linearGradient>
 
         <linearGradient
@@ -51,8 +51,8 @@ export function BottomWaves() {
           y2="450"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stopColor="#C9DCFF" stopOpacity="0.35" />
-          <stop offset="1" stopColor="#EAF2FF" stopOpacity="0.15" />
+          <stop stopColor="#111111" stopOpacity="0.02" />
+          <stop offset="1" stopColor="#111111" stopOpacity="0.005" />
         </linearGradient>
       </defs>
 

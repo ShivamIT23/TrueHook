@@ -156,7 +156,7 @@ export function EndpointsManager({
             size="sm"
             onClick={() => refetch()}
             disabled={isFetching || !applicationId}
-            className="h-9 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+            className="h-9 gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-all duration-150 cursor-pointer"
             title="Refresh endpoints"
           >
             <RefreshCw
@@ -168,7 +168,7 @@ export function EndpointsManager({
             size="sm"
             onClick={() => setIsCreateOpen(true)}
             disabled={!applicationId}
-            className="h-9 gap-1.5 text-xs"
+            className="h-9 gap-1.5 text-xs transition-all duration-150 cursor-pointer"
           >
             <Plus className="h-4 w-4" />
             <span>Register Endpoint</span>
@@ -178,8 +178,8 @@ export function EndpointsManager({
 
       {/* No Application Warning Banner */}
       {!application && (
-        <div className="mt-6 rounded-xl border border-brass/40 bg-brass/10 p-4 text-sm text-foreground">
-          <div className="flex items-center gap-2 font-semibold text-brass">
+        <div className="mt-6 rounded-xl border border-border bg-secondary2/50 p-4 text-sm text-foreground">
+          <div className="flex items-center gap-2 font-semibold text-foreground">
             <Layers className="h-4 w-4" />
             <span>No Application Context</span>
           </div>
@@ -205,7 +205,7 @@ export function EndpointsManager({
             <p className="text-xs font-medium text-muted-foreground">
               Active Delivery
             </p>
-            <p className="mt-1 text-2xl font-bold text-primary">
+            <p className="mt-1 text-2xl font-bold text-foreground">
               {activeCount}
             </p>
           </div>
@@ -264,7 +264,7 @@ export function EndpointsManager({
             </div>
           ) : filteredEndpoints.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-12 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-secondary text-muted-foreground">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-secondary2 text-muted-foreground">
                 <Globe className="h-6 w-6" />
               </div>
               <h3 className="mt-4 text-sm font-semibold text-foreground">
@@ -303,7 +303,7 @@ export function EndpointsManager({
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-border bg-secondary/40 text-muted-foreground">
+                  <tr className="border-b border-border bg-secondary2/40 text-muted-foreground">
                     <th className="py-3 px-4 font-semibold">Destination URL</th>
                     <th className="py-3 px-4 font-semibold">Subscribed Events</th>
                     <th className="py-3 px-4 font-semibold">Status</th>
@@ -323,18 +323,12 @@ export function EndpointsManager({
                     return (
                       <tr
                         key={ep.id}
-                        className="hover:bg-secondary/30 transition-colors"
+                        className="hover:bg-secondary2/30 transition-colors"
                       >
                         {/* Destination URL */}
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-2">
-                            <span
-                              className={`rounded px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider ${
-                                isHttps
-                                  ? "bg-primary/10 text-primary border border-primary/20"
-                                  : "bg-brass/10 text-brass border border-brass/20"
-                              }`}
-                            >
+                            <span className="rounded px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider bg-secondary2 text-foreground border border-border">
                               {isHttps ? "HTTPS" : "HTTP"}
                             </span>
                             <span className="font-mono text-xs font-semibold text-foreground max-w-md truncate">
@@ -343,7 +337,7 @@ export function EndpointsManager({
                             <button
                               type="button"
                               onClick={() => handleCopyUrl(ep.url, ep.id)}
-                              className="rounded p-1 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                              className="rounded p-1 text-muted-foreground hover:bg-secondary2 hover:text-foreground transition-colors"
                               title="Copy URL"
                             >
                               {copiedUrlId === ep.id ? (
@@ -394,14 +388,14 @@ export function EndpointsManager({
                                 {typesList.slice(0, 2).map((et, idx) => (
                                   <span
                                     key={et.id || et.name || idx}
-                                    className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary"
+                                    className="inline-flex items-center rounded-full border border-border bg-secondary2/80 px-2 py-0.5 text-[10px] font-semibold text-foreground"
                                   >
                                     {et.name}
                                   </span>
                                 ))}
                                 {typesList.length > 2 && (
                                   <HoverCard>
-                                    <HoverCardTrigger className="inline-flex items-center rounded-full bg-secondary hover:bg-secondary/80 border border-border px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground hover:text-foreground cursor-pointer transition-colors select-none">
+                                    <HoverCardTrigger className="inline-flex items-center rounded-full bg-secondary2 hover:bg-secondary2/80 border border-border px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground hover:text-foreground cursor-pointer transition-colors select-none">
                                       +{typesList.length - 2}
                                     </HoverCardTrigger>
                                     <HoverCardContent
@@ -421,7 +415,7 @@ export function EndpointsManager({
                                           {typesList.slice(2).map((et, idx) => (
                                             <span
                                               key={et.id || et.name || idx}
-                                              className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary"
+                                              className="inline-flex items-center rounded-full border border-border bg-secondary2/80 px-2 py-0.5 text-[10px] font-semibold text-foreground"
                                             >
                                               {et.name}
                                             </span>
@@ -439,8 +433,8 @@ export function EndpointsManager({
                         {/* Status */}
                         <td className="py-3.5 px-4">
                           {ep.enabled ? (
-                            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary border border-primary/20">
-                              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary2 px-2 py-0.5 text-[11px] font-medium text-foreground border border-border">
+                              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                               Active
                             </span>
                           ) : (
@@ -464,7 +458,7 @@ export function EndpointsManager({
                               <button
                                 type="button"
                                 onClick={() => toggleRevealSecret(ep.id)}
-                                className="rounded p-1 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                                className="rounded p-1 text-muted-foreground hover:bg-secondary2 hover:text-foreground transition-colors"
                                 title={
                                   isSecretRevealed
                                     ? "Hide Secret"
@@ -487,7 +481,7 @@ export function EndpointsManager({
                                     ep.id,
                                   )
                                 }
-                                className="rounded p-1 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                                className="rounded p-1 text-muted-foreground hover:bg-secondary2 hover:text-foreground transition-colors"
                                 title="Copy Secret"
                               >
                                 {copiedSecretId === ep.id ? (
@@ -512,7 +506,7 @@ export function EndpointsManager({
                               variant="ghost"
                               size="sm"
                               onClick={() => setEditingEndpoint(ep)}
-                              className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-secondary"
+                              className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-secondary2"
                               title="Edit Endpoint"
                             >
                               <Pencil className="h-3.5 w-3.5" />

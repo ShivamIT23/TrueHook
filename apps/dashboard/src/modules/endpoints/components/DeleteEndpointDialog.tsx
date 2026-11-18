@@ -74,7 +74,7 @@ export function DeleteEndpointDialog({
               Are you sure you want to delete this endpoint? TrueHook will
               immediately stop sending webhook dispatches to:
             </p>
-            <div className="mt-2 rounded-md border border-border bg-secondary/50 p-2 font-mono text-xs text-foreground break-all">
+            <div className="mt-2 rounded-md border border-border bg-secondary2/50 p-2 font-mono text-xs text-foreground break-all">
               {endpoint.url}
             </div>
             <p className="mt-2 text-xs text-destructive font-medium">

@@ -10,7 +10,7 @@ TrueHook/
 │   └── skills/               # Reusable skills (frontend-components, go-backend, etc.)
 │
 ├── apps/                     # Frontend Next.js applications (pnpm workspace)
-│   ├── web/                  # Public website, marketing, documentation, auth entry (login/register)
+│   ├── web/                  # Public website, marketing, documentation, auth entry (signin/signup)
 │   ├── dashboard/            # Customer portal for logged-in users (webhooks, endpoints, logs)
 │   └── admin/                # Internal administration console for TrueHook company operators
 │
@@ -43,7 +43,7 @@ TrueHook/
 
 | Application | Audience | Purpose & Key Features |
 | :--- | :--- | :--- |
-| **`apps/web`** | Public & Anonymous | Landing page, product overview, documentation, user registration, and authentication login. |
+| **`apps/web`** | Public & Anonymous | Landing page, product overview, documentation, user signup, and authentication signin. |
 | **`apps/dashboard`** | Authenticated Customers | Organization workspace, webhook endpoint registration, event payload inspection, delivery attempt monitoring, manual delivery replay, and webhook secret rotation. |
 | **`apps/admin`** | Internal Company Staff | TrueHook team back-office: platform-wide observability, cross-tenant management, frontend configuration/flag updates, and internal operations. |
 

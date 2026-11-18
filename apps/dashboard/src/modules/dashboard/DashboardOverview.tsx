@@ -1,7 +1,10 @@
+"use client"
 import {
   Activity,
   ArrowUpRight,
   CheckCircle2,
+  Layers,
+  LayoutDashboard,
   Radio,
   Send,
   ShieldCheck,
@@ -12,6 +15,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import type { AuthUser } from "@/lib/types";
 import type { Application } from "@/modules/applications/types";
 import Link from "next/link";
+import { toast } from "@/components/ui/toast";
 
 export interface DashboardOverviewProps {
   user?: AuthUser | null;
@@ -22,18 +26,31 @@ export function DashboardOverview({
   user: _user,
   application,
 }: DashboardOverviewProps) {
+
+  const checkingToaster = () => {
+    toast({
+            message: `Currently Not Available`,
+            state: "info",
+            // lifetime : 8900000
+          });
+  }
   return (
     <div className="relative isolate min-h-[calc(100vh-5rem)] overflow-hidden overflow-y-auto">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 pb-32">
         {/* Welcome Section */}
         <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary">
+              <LayoutDashboard className="h-4 w-4" />
+              <span>System Overview</span>
+            </div>
+            <div className="mt-1 flex items-center gap-2.5">
               <h1 className="text-2xl font-semibold tracking-tight text-foreground">
                 Dashboard Overview
               </h1>
               {application && (
-                <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                <span className="flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                  <Layers className="h-3 w-3" />
                   {application.name}
                 </span>
               )}
@@ -44,11 +61,11 @@ export function DashboardOverview({
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Link href="/endpoints" >
-            <Button className="h-9 border border-primary bg-primary px-4 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90">
-              <Webhook className="h-3.5 w-3.5" />
-              <span>Add Endpoint</span>
-            </Button>
+            <Link href="/endpoints">
+              <Button className="h-9 px-4 text-xs transition-all duration-150 cursor-pointer bg-secondary">
+                <Webhook className="h-3.5 w-3.5" />
+                <span>Add Endpoint</span>
+              </Button>
             </Link>
           </div>
         </div>
@@ -60,7 +77,7 @@ export function DashboardOverview({
               <span className="text-xs font-medium text-muted-foreground">
                 Active Endpoints
               </span>
-              <Radio className="h-4 w-4 text-primary" />
+              <Radio className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent className="mt-3 p-0">
               <div className="text-2xl font-bold text-foreground">0</div>
@@ -75,7 +92,7 @@ export function DashboardOverview({
               <span className="text-xs font-medium text-muted-foreground">
                 Events Streamed
               </span>
-              <Send className="h-4 w-4 text-brass" />
+              <Send className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent className="mt-3 p-0">
               <div className="text-2xl font-bold text-foreground">0</div>
@@ -90,7 +107,7 @@ export function DashboardOverview({
               <span className="text-xs font-medium text-muted-foreground">
                 Delivery Success
               </span>
-              <CheckCircle2 className="h-4 w-4 text-primary" />
+              <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent className="mt-3 p-0">
               <div className="text-2xl font-bold text-foreground">100%</div>
@@ -105,7 +122,7 @@ export function DashboardOverview({
               <span className="text-xs font-medium text-muted-foreground">
                 HMAC Signing
               </span>
-              <ShieldCheck className="h-4 w-4 text-primary" />
+              <ShieldCheck className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent className="mt-3 p-0">
               <div className="text-2xl font-bold text-foreground">SHA-256</div>
@@ -117,8 +134,8 @@ export function DashboardOverview({
         </div>
 
         {/* Quick Start Guide Card */}
-        <div className="mt-8 rounded-xl border border-border bg-secondary/50 p-6">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-brass">
+        <div className="mt-8 rounded-xl border border-border bg-secondary2/50 p-6">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             <Activity className="h-4 w-4" />
             <span>Getting Started with TrueHook</span>
           </div>
@@ -132,14 +149,15 @@ export function DashboardOverview({
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link href="/events" >
-            <Button className="h-8 cursor-pointer border border-primary bg-primary px-3 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90">
+            <Button className="h-8 px-3 text-xs">
               <span>Register Events</span>
               <ArrowUpRight className="h-3.5 w-3.5" />
             </Button>
             </Link>
             <Button
+            onClick={checkingToaster}
               variant="outline"
-              className="h-8 cursor-pointer border-border bg-canvas px-3 text-xs text-foreground transition-colors hover:bg-secondary"
+              className="h-8 cursor-pointer border-border bg-canvas px-3 text-xs text-foreground transition-colors hover:bg-secondary2"
             >
               <span>View API Documentation</span>
             </Button>
