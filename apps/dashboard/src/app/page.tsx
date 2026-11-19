@@ -11,34 +11,28 @@ import { ApplicationSelector } from "@/modules/applications/components/Applicati
 
 export const dynamic = "force-dynamic";
 
-export default async function HomePage({
-  searchParams,
-}: {
-  searchParams: Promise<{ switch?: string }>;
-}) {
+export default async function HomePage() {
   const token = await getAuthToken();
   if (!token) {
     redirect("/signin");
   }
 
-  const params = await searchParams;
-  const isSwitching = params?.switch === "true";
-
-  // If user already has a saved application, send to dashboard page
-  const selectedApp = await getSelectedAppSession();
-  if (selectedApp && !isSwitching) {
-    redirect("/dashboard");
-  }
-
-  const user = await getSessionUser();
-  const applications = await getApplicationsAction();
+  const [user, applications, selectedApp] = await Promise.all([
+    getSessionUser(),
+    getApplicationsAction(),
+    getSelectedAppSession(),
+  ]);
 
   return (
     <div className="relative isolate flex min-h-screen flex-col overflow-hidden bg-canvas text-foreground">
-      {/* Top Header: Logo on left, user avatar with first letter on right */}
-      <DashboardHeader user={user} />
+      {/* Top Header: Logo on left, application switcher, theme toggle & user avatar */}
+      <DashboardHeader
+        user={user}
+        application={selectedApp}
+        applications={applications}
+      />
 
-      {/* Main Content: Application Selector Card matching user's design */}
+      {/* Main Content: Application Selector Card */}
       <main className="flex flex-1 items-center justify-center p-4">
         <ApplicationSelector initialApplications={applications} />
       </main>

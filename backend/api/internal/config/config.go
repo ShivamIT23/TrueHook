@@ -59,12 +59,14 @@ func LoadConfig() *Config {
 	goProdStr := strings.ToLower(GetEnv("GO_PROD", "false"))
 	goProd := goProdStr == "true" || goProdStr == "1" || goProdStr == "yes"
 
-	// Base local origins for frontend dev
+	// Base local origins for frontend dev (apps/web: 3000, apps/dashboard: 3001, apps/admin: 3004)
 	devOrigins := []string{
 		"http://localhost:3000",
 		"http://localhost:3001",
+		"http://localhost:3004",
 		"http://127.0.0.1:3000",
 		"http://127.0.0.1:3001",
+		"http://127.0.0.1:3004",
 	}
 
 	var rawOrigins []string

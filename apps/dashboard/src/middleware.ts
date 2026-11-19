@@ -6,7 +6,7 @@ export const SELECTED_APP_COOKIE_NAME = "truehook_selected_app";
 export const SELECTED_APP_ID_COOKIE_NAME = "truehook_selected_app_id";
 
 export function middleware(request: NextRequest) {
-  const { pathname, searchParams } = request.nextUrl;
+  const { pathname } = request.nextUrl;
 
   const hasToken = request.cookies.has(AUTH_COOKIE_NAME);
   const hasApp =
@@ -14,8 +14,7 @@ export function middleware(request: NextRequest) {
     request.cookies.has(SELECTED_APP_ID_COOKIE_NAME);
 
   const isAuthRoute =
-    pathname.startsWith("/signin") ||
-    pathname.startsWith("/signup");
+    pathname.startsWith("/signin") || pathname.startsWith("/signup");
   const isRootRoute = pathname === "/";
   const isProtectedRoute =
     pathname.startsWith("/dashboard") || pathname.startsWith("/event-type");
@@ -41,13 +40,10 @@ export function middleware(request: NextRequest) {
   }
 
   // 4. Handle root route (/)
-  // After selecting application, all visits to / redirect to /dashboard
+  // Allow authenticated users to access the application panel on /
   if (isRootRoute) {
     if (!hasToken) {
       return NextResponse.redirect(new URL("/signin", request.url));
-    }
-    if (hasApp && searchParams.get("switch") !== "true") {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }
 

@@ -5,7 +5,7 @@ export default function Home() {
     <div className="flex flex-col flex-1 items-center justify-center bg-background font-sans text-foreground">
       <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-24 px-8 sm:px-16 sm:items-start">
         <Image
-          className="h-5 w-25"
+          className="dark:invert h-5 w-25 transition-all duration-200"
           src="/next.svg"
           alt="Next.js logo"
           width={100}

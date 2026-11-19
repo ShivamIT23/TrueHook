@@ -2,30 +2,30 @@
 @source "../../../packages/ui/src";
 
 :root {
-  --background: #F3EEE3;
+  --background: #f3eee3;
   --foreground: #111111;
-  --canvas: #F3EEE3;
-  --card: #F3EEE3;
+  --canvas: #f3eee3;
+  --card: #f3eee3;
   --card-foreground: #111111;
-  --popover: #F3EEE3;
+  --popover: #f3eee3;
   --popover-foreground: #111111;
-  --primary: #D9541E;
-  --primary-foreground: #F3EEE3;
-  --secondary: #D9541E;
-  --secondary2: #F3EEE3;
-  --secondary-foreground: #F3EEE3;
-  --muted: #F3EEE3;
+  --primary: #d9541e;
+  --primary-foreground: #f3eee3;
+  --secondary: #d9541e;
+  --secondary2: #e8e2d5;
+  --secondary-foreground: #f3eee3;
+  --muted: #f3eee3;
   --muted-foreground: #111111a6;
-  --accent: #D9541E;
-  --accent-foreground: #F3EEE3;
-  --destructive: #D9541E;
-  --destructive-foreground: #F3EEE3;
+  --accent: #d9541e;
+  --accent-foreground: #f3eee3;
+  --destructive: #d9541e;
+  --destructive-foreground: #f3eee3;
   --border: #11111126;
   --input: #11111126;
-  --ring: #D9541E;
-  --error: #D9541E;
-  --warning: #C38B22;
-  --success: #2D6A4F;
+  --ring: #d9541e;
+  --error: #d9541e;
+  --warning: #c38b22;
+  --success: #2d6a4f;
   --info: #124060;
   --toast-morph-duration: 300ms;
   --toast-morph-ease: cubic-bezier(0.32, 0.72, 0, 1);
@@ -33,30 +33,30 @@
 
 .dark {
   --background: #111111;
-  --foreground: #F3EEE3;
+  --foreground: #f3eee3;
   --canvas: #111111;
-  --card: #111111;
-  --card-foreground: #F3EEE3;
-  --popover: #111111;
-  --popover-foreground: #F3EEE3;
-  --primary: #D9541E;
-  --primary-foreground: #F3EEE3;
-  --secondary: #D9541E;
-  --secondary2: #111111;
-  --secondary-foreground: #F3EEE3;
-  --muted: #111111;
-  --muted-foreground: #F3EEE3a6;
-  --accent: #D9541E;
-  --accent-foreground: #F3EEE3;
-  --destructive: #D9541E;
-  --destructive-foreground: #F3EEE3;
-  --border: #F3EEE326;
-  --input: #F3EEE326;
-  --ring: #D9541E;
-  --error: #E05E28;
-  --warning: #E5A93C;
-  --success: #4EBA6F;
-  --info: #4A90E2;
+  --card: #181818;
+  --card-foreground: #f3eee3;
+  --popover: #181818;
+  --popover-foreground: #f3eee3;
+  --primary: #d9541e;
+  --primary-foreground: #f3eee3;
+  --secondary: #d9541e;
+  --secondary2: #1e1e1e;
+  --secondary-foreground: #f3eee3;
+  --muted: #181818;
+  --muted-foreground: #f3eee3a6;
+  --accent: #d9541e;
+  --accent-foreground: #f3eee3;
+  --destructive: #d9541e;
+  --destructive-foreground: #f3eee3;
+  --border: #f3eee326;
+  --input: #f3eee326;
+  --ring: #d9541e;
+  --error: #e05e28;
+  --warning: #e5a93c;
+  --success: #4eba6f;
+  --info: #4a90e2;
 }
 
 @theme inline {
@@ -118,7 +118,7 @@ h1 {
 }
 
 button {
-  border-radius: 0px ;
+  border-radius: 0px;
 }
 
 .xbutton-root {
@@ -156,7 +156,7 @@ button:not(:disabled):active,
 /* XButton custom interactive styling */
 .xbutton-root {
   border-radius: 999px;
-  color: var(--xbtn-main, #D9541E);
+  color: var(--xbtn-main, #d9541e);
   background-color: transparent;
   transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -168,8 +168,8 @@ button:not(:disabled):active,
 
 .xbutton-root:hover {
   border-radius: 999px;
-  background-color: var(--xbtn-main, #D9541E) !important;
-  color: var(--xbtn-sec, #F3EEE3) !important;
+  background-color: var(--xbtn-main, #d9541e) !important;
+  color: var(--xbtn-sec, #f3eee3) !important;
 }
 
 .xbutton-root:hover svg {
@@ -179,7 +179,12 @@ button:not(:disabled):active,
 
 a {
   cursor: pointer;
-  transition: color 120ms ease, opacity 120ms ease, background-color 120ms ease, border-color 120ms ease, text-decoration-color 120ms ease;
+  transition:
+    color 120ms ease,
+    opacity 120ms ease,
+    background-color 120ms ease,
+    border-color 120ms ease,
+    text-decoration-color 120ms ease;
 }
 
 a:hover {
@@ -234,7 +239,9 @@ a:active {
   background-color: var(--card) !important;
   color: var(--card-foreground) !important;
   border: 1px solid var(--border) !important;
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04) !important;
+  box-shadow:
+    0 4px 20px -2px rgba(0, 0, 0, 0.08),
+    0 2px 6px -1px rgba(0, 0, 0, 0.04) !important;
   backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
 }
@@ -251,7 +258,7 @@ a:active {
 }
 
 @media (prefers-reduced-transparency: reduce) {
-.toast-pill {
+  .toast-pill {
     background: var(--popover);
     backdrop-filter: none;
   }

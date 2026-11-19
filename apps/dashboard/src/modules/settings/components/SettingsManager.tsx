@@ -6,6 +6,7 @@ import {
   Check,
   Copy,
   Layers,
+  Palette,
   Save,
   Settings2,
   ShieldCheck,
@@ -16,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { toast } from "@/components/ui/toast";
 import type { AuthUser } from "@/lib/types";
 import type { Application } from "@/modules/applications/types";
@@ -135,6 +137,35 @@ export function SettingsManager({
             </div>
           </Card>
 
+          {/* Appearance & Theme Mode */}
+          <Card className="rounded-xl border border-border bg-canvas p-6 shadow-xs">
+            <CardHeader className="p-0 mb-4 flex flex-row items-center justify-between">
+              <div>
+                <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+                  <Palette className="h-4 w-4 text-primary" />
+                  Appearance & Theme
+                </h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Customize the interface theme mode across your TrueHook
+                  workspace.
+                </p>
+              </div>
+            </CardHeader>
+
+            <div className="flex items-center justify-between rounded-lg border border-border bg-secondary2/50 p-4">
+              <div>
+                <span className="text-xs font-semibold text-foreground block">
+                  Interface Theme
+                </span>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Toggle between clean Cream mode (light) and Obsidian mode
+                  (dark).
+                </p>
+              </div>
+              <ThemeToggle showLabel />
+            </div>
+          </Card>
+
           {/* Webhook Delivery & Retry Policy */}
           <Card className="rounded-xl border border-border bg-canvas p-6 shadow-xs">
             <CardHeader className="p-0 mb-5">
@@ -223,53 +254,54 @@ export function SettingsManager({
             <CardHeader className="p-0 mb-4">
               <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4 text-primary" />
-                Security & Network Isolation
+                Security & SSRF Protections
               </h2>
               <p className="text-xs text-muted-foreground mt-0.5">
-                TrueHook protects your backend by enforcing strict egress
-                guardrails on all outgoing webhooks.
+                Active security safeguards protecting internal networks and
+                infrastructure.
               </p>
             </CardHeader>
 
-            <div className="space-y-3">
+            <div className="space-y-3 pt-1">
               <div className="flex items-start gap-3 rounded-lg border border-border bg-secondary2 p-3">
-                <div className="h-2 w-2 rounded-full bg-primary mt-1.5 shrink-0" />
-                <div className="text-xs">
-                  <span className="font-semibold text-foreground">
-                    SSRF & Metadata Blocking:
-                  </span>{" "}
-                  <span className="text-muted-foreground">
-                    Destination addresses matching loopback (127.0.0.0/8),
-                    RFC1918 private ranges (10.0.0.0/8, 172.16.0.0/12,
-                    192.168.0.0/16), link-local, and cloud metadata
-                    (169.254.169.254) are rejected immediately.
+                <ShieldCheck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <div>
+                  <span className="text-xs font-semibold text-foreground block">
+                    SSRF Filter Active
                   </span>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    Private IPv4/IPv6 ranges (RFC 1918, RFC 4193), loopback
+                    (127.0.0.0/8), link-local, and cloud metadata
+                    (169.254.169.254) are rejected at both DNS resolution and
+                    socket connection time.
+                  </p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3 rounded-lg border border-border bg-secondary2 p-3">
-                <div className="h-2 w-2 rounded-full bg-primary mt-1.5 shrink-0" />
-                <div className="text-xs">
-                  <span className="font-semibold text-foreground">
-                    DNS Destination Verification:
-                  </span>{" "}
-                  <span className="text-muted-foreground">
-                    DNS resolutions are evaluated at socket connect time to
-                    prevent DNS rebinding attacks.
+                <ShieldCheck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <div>
+                  <span className="text-xs font-semibold text-foreground block">
+                    TLS & Scheme Validation
                   </span>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    Production endpoints require valid HTTPS schemes. HTTP is
+                    only allowed in local development environments.
+                  </p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3 rounded-lg border border-border bg-secondary2 p-3">
-                <div className="h-2 w-2 rounded-full bg-primary mt-1.5 shrink-0" />
-                <div className="text-xs">
-                  <span className="font-semibold text-foreground">
-                    Payload & Response Protection:
-                  </span>{" "}
-                  <span className="text-muted-foreground">
-                    Incoming and outgoing HTTP bodies are restricted to a
-                    maximum of 1MB to protect server memory.
+                <ShieldCheck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <div>
+                  <span className="text-xs font-semibold text-foreground block">
+                    Payload Protection & Size Limits
                   </span>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    Requests larger than 1 MB and response bodies over 256 KB
+                    are safely truncated. Signing secrets are never logged or
+                    exposed.
+                  </p>
                 </div>
               </div>
             </div>
@@ -280,15 +312,15 @@ export function SettingsManager({
             <CardHeader className="p-0 mb-4">
               <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
                 <Bell className="h-4 w-4 text-primary" />
-                Alerts & Notifications
+                Operational Alerts
               </h2>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Configure notifications for delivery failures and endpoint
-                downtime.
+                Notifications dispatched when endpoint failure thresholds are
+                exceeded.
               </p>
             </CardHeader>
 
-            <div className="space-y-4">
+            <div className="space-y-4 pt-1">
               <label className="flex items-center justify-between cursor-pointer">
                 <div>
                   <span className="text-xs font-semibold text-foreground block">

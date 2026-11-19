@@ -20,6 +20,7 @@ import {
   selectApplicationAction,
 } from "@/actions/applications";
 import { logoutAction } from "@/actions/auth";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import type { AuthUser } from "@/lib/types";
 import type { Application } from "@/modules/applications/types";
 import { TrueHookLogo } from "@/modules/auth/TrueHookLogo";
@@ -198,7 +199,7 @@ export function DashboardHeader({
               </div>
 
               <Link
-                href="/applications"
+                href="/"
                 className="text-[11px] font-medium text-foreground hover:text-primary hover:underline whitespace-nowrap"
               >
                 Open application panel
@@ -207,9 +208,10 @@ export function DashboardHeader({
           )}
         </div>
 
-        {/* Top-Right: User Avatar with First Letter if no logo_url */}
+        {/* Top-Right: Theme Toggle, Notifications, User Avatar */}
         <div className="flex items-center gap-2 h-full">
-          <div className="relative flex items-center p-1">
+          <div className="relative flex items-center gap-1.5 p-1">
+            <ThemeToggle />
             <button
               type="button"
               className="p-1.5 rounded-lg text-foreground hover:bg-secondary2 active:scale-95 transition-all cursor-pointer"

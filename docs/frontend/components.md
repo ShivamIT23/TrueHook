@@ -57,19 +57,40 @@ When creating or modifying components, register them below:
 ### `Header` (Public Web Navigation Header)
 - **Path**: `apps/web/src/components/layout/Header.tsx`, re-exported via `apps/web/src/components/layout/index.ts`
 - **Layer**: Shared Cross-Page Layout Component
-- **Description**: Global sticky navigation header rendered across all pages in `apps/web`. Features an obsidian black background using the `--foreground` token from `globals.css`, high-contrast parchment cream brand logo (`/small-logo-white.png`) and title, navigation links (`Features`, `Docs`, `Pricing`, `Changelog`), primary and secondary auth action CTAs (`Sign In` and `Get Started`), and a responsive mobile hamburger drawer toggle.
+- **Description**: Global sticky navigation header rendered across all pages in `apps/web`. Matches the body background color dynamically (`bg-background/90 text-foreground border-b border-border backdrop-blur-md`) in both light cream and dark obsidian modes. Features brand logo (`/logo1.png`), desktop navigation links (`Features`, `Docs`, `Pricing`, `Changelog`), embedded `ThemeToggle` button, primary and secondary auth action CTAs (`Sign In` and `Get Started`), and a responsive mobile drawer menu with integrated theme toggle.
 - **Color Usage (Strict Semantic Classes from `globals.css`)**:
-  - Container Background: `bg-foreground` (`#111111`, Obsidian black token from `:root`)
-  - Typography: `text-background` (`#F3EEE3`, Cream token) for brand and active elements; `text-background/80` for muted nav links
-  - Hover Interactions: `hover:text-primary` (`#D9541E`) and `hover:bg-background/10`
+  - Container Background: `bg-background/90` with `backdrop-blur-md` and `text-foreground`
+  - Typography: `text-foreground` for brand and active elements; `text-muted-foreground` for nav links
+  - Hover Interactions: `hover:text-primary` (`#D9541E`) and `hover:bg-secondary2`
   - Primary Action Button: `bg-primary text-primary-foreground hover:bg-primary/90` (`#D9541E` terracotta accent)
-  - Dividing Borders: `border-b border-background/15`
+  - Dividing Borders: `border-b border-border`
   - Keyboard Focus Ring: `focus-visible:ring-ring` (`#D9541E`)
 - **Props**:
   - `className?: string`: Optional custom styling wrapper classes.
   - `links?: HeaderNavLink[]`: Custom navigation items (`label`, `href`, `external?`).
-  - `signInHref?: string`: URL for sign-in action (defaults to `/signin`).
-  - `signUpHref?: string`: URL for primary CTA (defaults to `/signup`).
+  - `signInHref?: string`: URL for sign-in action (defaults to `http://localhost:3001/signin`).
+  - `signUpHref?: string`: URL for primary CTA (defaults to `http://localhost:3001/signup`).
+
+### `ThemeToggle` (Theme Switcher Primitive & Provider)
+- **Path**: `packages/ui/src/components/ui/theme-toggle.tsx`, adapters at `apps/web/src/components/ui/theme-toggle.tsx` and `apps/dashboard/src/components/ui/theme-toggle.tsx`
+- **Layer**: Tier 1 UI Primitive & Global Provider
+- **Description**: Robust theme toggle component and context provider supporting instant switching between light (Cream `#F3EEE3`) and dark (Obsidian `#111111`) modes. Features zero-flash inline script (`ThemeScript`), persistent storage in `localStorage` (`truehook_theme`) and `document.cookie`, cross-tab synchronization via `storage` events, smooth animated Sun/Moon icon states, and accessible ARIA attributes.
+- **Exported Symbols**:
+  - `ThemeToggle`: Interactive button with Sun/Moon icons, optional label (`showLabel`), and `data-sound="click"` feedback.
+  - `ThemeProvider`: Context provider maintaining theme state and synchronization across the application.
+  - `ThemeScript`: Non-blocking `<head>` inline script preventing FOUT (flash of unstyled theme).
+  - `useTheme`: React hook exposing `{ theme, setTheme, toggleTheme, mounted }`.
+- **Color & Styling**:
+  - Control Box: `bg-canvas text-foreground border-border hover:bg-secondary2 hover:text-primary`
+  - Focus Ring: `focus-visible:ring-2 focus-visible:ring-ring` (`#D9541E`)
+
+### `Sidebar` (Dashboard Navigation Sidebar)
+- **Path**: `apps/dashboard/src/components/layout/Sidebar.tsx`
+- **Layer**: Shared Cross-Page Layout Component
+- **Description**: Collapsible and responsive navigation sidebar for the authenticated customer dashboard with dedicated light and dark mode palette styling:
+  - **Light Mode**: `#F3EEE3` cream surface (`bg-[#F3EEE3]`), `#111111` dark typography (`text-[#111111]`), subtle borders (`border-r border-[#111111]/15`), hover feedback (`hover:bg-[#111111]/10`), and `logo1.png` (or `small-logo-black.png` when collapsed).
+  - **Dark Mode**: `#111111` obsidian surface (`dark:bg-[#111111]`), `#F3EEE3` cream typography (`dark:text-[#F3EEE3]`), borders (`dark:border-[#F3EEE3]/15`), hover feedback (`dark:hover:bg-[#F3EEE3]/10`), and transparent white mark + typography (or `small-logo-white.png` when collapsed).
+  - **Navigation Links**: Active link uses brand terracotta (`bg-primary text-primary-foreground font-semibold shadow-xs`), with inactive links styled responsively in `text-[#111111]/70 dark:text-[#F3EEE3]/70`.
 
 
 ### `Select` (Dashboard Adapter & Base Primitive)
@@ -414,6 +435,79 @@ When creating or modifying components, register them below:
 - **Description**: Developer documentation and support interface. Features an operational system status indicator with pulsing beacon, quickstart and signature verification resource cards, an interactive FAQ accordion covering at-least-once delivery, retry backoff, and SSRF protections, and a direct support ticket submission form with reference ID generation.
 - **Props Interface**:
   - None (Self-contained presentation and ticket submission state)
+
+### `AdminHeader`
+- **Path**: `apps/admin/src/components/layout/AdminHeader.tsx`
+- **Layer**: Layout Adapter / Navigation
+- **Description**: Sticky operator header featuring TrueHook ADMIN branding badge, active navigation links (Fleet & Health), current operator email and name, and sign-out form invoking BFF Server Action `signOutAction`.
+- **Props Interface**:
+  - `user: AdminUser | null`
+
+### `OverviewManager`
+- **Path**: `apps/admin/src/modules/overview/OverviewManager.tsx`
+- **Layer**: Feature Domain Module (`modules/overview`)
+- **Description**: Central telemetry and operator control panel for TrueHook fleet. Displays real-time database connection status, API gateway health and latency, registered tenant counters, and cross-tenant directory with live search, account UUID copying, and registration timestamps.
+- **Props Interface**:
+  - `initialUsers: TenantUser[]`
+  - `initialHealth: SystemHealthStatus`
+  - `adminUser: AdminUser | null`
+  - `error?: string`
+
+### `AdminSignInForm`
+- **Path**: `apps/admin/src/modules/auth/AdminSignInForm.tsx`
+- **Layer**: Feature Domain Module (`modules/auth`)
+- **Description**: Operator authentication card powered by React `useActionState` and BFF `signInAction`. Validates email and password, displays server error diagnostics, supports dev credentials quick-fill, and sets secure HTTP-only cookies on successful login.
+- **Props Interface**:
+  - None (Self-contained auth state)
+
+### `Footer`
+- **Path**: `apps/web/src/components/layout/Footer.tsx`
+- **Layer**: Layout Component (`components/layout`)
+- **Description**: Universal public footer for `apps/web`. Composes brand logo, dynamic theme support, "Systems Operational" status pill, structured navigation links (Platform, Company, Legal), and copyright notices.
+- **Props Interface**:
+  - None (Self-contained presentation)
+
+### `ContactSection`
+- **Path**: `apps/web/src/modules/contact/ContactSection.tsx`
+- **Layer**: Feature Domain Module (`modules/contact`)
+- **Description**: Technical support and inquiry interface. Features direct email channels with response SLAs (Technical Support, Security, Enterprise/Billing), interactive message submission form with inline confirmation, and quick documentation FAQs.
+- **Props Interface**:
+  - None (Self-contained state)
+
+### `AboutContent`
+- **Path**: `apps/web/src/modules/about/AboutContent.tsx`
+- **Layer**: Feature Domain Module (`modules/about`)
+- **Description**: TrueHook origin story and technical architecture overview. Features 6 architectural pillars (At-Least-Once Delivery, Durable Jitter & Backoff, HMAC-SHA256, SSRF Shield, Attempt Telemetry, Battle-Tested Stack) and core engineering principles.
+- **Props Interface**:
+  - None (Self-contained presentation)
+
+### `LegalNav`
+- **Path**: `apps/web/src/modules/legal/LegalNav.tsx`
+- **Layer**: Sub-navigation Primitive (`modules/legal`)
+- **Description**: Tab navigation bar switching between Terms & Conditions (`/terms`), Privacy Policy (`/privacy`), and Refund Policy (`/refund`).
+- **Props Interface**:
+  - None (Reads Next.js pathname)
+
+### `TermsContent`
+- **Path**: `apps/web/src/modules/legal/TermsContent.tsx`
+- **Layer**: Feature Domain Module (`modules/legal`)
+- **Description**: Legal terms of service detailing at-least-once delivery semantics, endpoint idempotency requirements, Acceptable Use Policy, credential security, 30-day telemetry retention, and liability limits.
+- **Props Interface**:
+  - None (Self-contained presentation)
+
+### `PrivacyContent`
+- **Path**: `apps/web/src/modules/legal/PrivacyContent.tsx`
+- **Layer**: Feature Domain Module (`modules/legal`)
+- **Description**: Privacy policy outlining TrueHook's zero payload monetization guarantee, ephemeral webhook payload processing, TLS 1.3 / AES-256 encryption standards, and GDPR/CCPA data rights.
+- **Props Interface**:
+  - None (Self-contained presentation)
+
+### `RefundContent`
+- **Path**: `apps/web/src/modules/legal/RefundContent.tsx`
+- **Layer**: Feature Domain Module (`modules/legal`)
+- **Description**: Billing and refund policy detailing the 14-day 100% money-back guarantee on paid plans, tiered monthly SLA downtime credits (<99.95%), cancellation policies, and refund submission instructions.
+- **Props Interface**:
+  - None (Self-contained presentation)
 
 ---
 

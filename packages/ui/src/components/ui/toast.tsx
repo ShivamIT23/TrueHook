@@ -266,7 +266,7 @@ export function Toasts({
   const [mounted, setMounted] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
   const hidden = useDocumentHidden();
-  const timeoutsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const timeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   useEffect(() => {
     setMounted(true);

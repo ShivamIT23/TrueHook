@@ -6,6 +6,13 @@ CREATE TABLE IF NOT EXISTS admins (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Seed initial operators (password: adminSecretPass123)
+INSERT INTO admins (name, email, password_hash)
+VALUES 
+    ('Platform Operator', 'operator@truehook.internal', '$2a$10$Xthop8dIzaeKOcazMdgRxOvvcUrHi6obRk0gMeNHKAjKB.xSJO.h.'),
+    ('Super Admin', 'admin@truehook.internal', '$2a$10$Xthop8dIzaeKOcazMdgRxOvvcUrHi6obRk0gMeNHKAjKB.xSJO.h.')
+ON CONFLICT (email) DO NOTHING;
+
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     logo_url VARCHAR(500),

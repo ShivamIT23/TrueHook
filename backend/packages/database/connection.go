@@ -46,6 +46,27 @@ var Migrations = []Migration{
 			CREATE INDEX IF NOT EXISTS idx_api_api_key ON api(api_key);
 		`,
 	},
+	{
+		Version:     "20261119_000002_create_and_seed_admins_table",
+		Description: "Create admins table, index, and seed initial operators",
+		SQL: `
+			CREATE TABLE IF NOT EXISTS admins (
+				id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+				name VARCHAR(255) NOT NULL DEFAULT 'Admin',
+				email VARCHAR(255) UNIQUE NOT NULL,
+				password_hash TEXT NOT NULL,
+				created_at TIMESTAMPTZ DEFAULT NOW()
+			);
+
+			CREATE INDEX IF NOT EXISTS idx_admins_email ON admins(email);
+
+			INSERT INTO admins (name, email, password_hash)
+			VALUES 
+				('Platform Operator', 'operator@truehook.internal', '$2a$10$Xthop8dIzaeKOcazMdgRxOvvcUrHi6obRk0gMeNHKAjKB.xSJO.h.'),
+				('Super Admin', 'admin@truehook.internal', '$2a$10$Xthop8dIzaeKOcazMdgRxOvvcUrHi6obRk0gMeNHKAjKB.xSJO.h.')
+			ON CONFLICT (email) DO NOTHING;
+		`,
+	},
 }
 
 // Connect establishes a connection to the PostgreSQL database using the provided connection string.

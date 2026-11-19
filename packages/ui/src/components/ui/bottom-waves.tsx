@@ -1,24 +1,24 @@
-
 "use client";
 
 export function BottomWaves() {
   return (
     <svg
-  style={{
-    position: "fixed",
-    bottom: 0,
-    left: 0,
-    width: "100%",
-    height: "420px",
-    zIndex: -1,
-    pointerEvents: "none",
-  }}
-  viewBox="0 0 1440 420"
-  preserveAspectRatio="none"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-       <defs>
+      style={{
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        width: "100%",
+        height: "420px",
+        zIndex: -1,
+        pointerEvents: "none",
+      }}
+      className="text-foreground transition-colors duration-200"
+      viewBox="0 0 1440 420"
+      preserveAspectRatio="none"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <defs>
         <linearGradient
           id="waveGradient1"
           x1="720"
@@ -27,8 +27,8 @@ export function BottomWaves() {
           y2="450"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stopColor="#111111" stopOpacity="0.04" />
-          <stop offset="1" stopColor="#111111" stopOpacity="0.01" />
+          <stop stopColor="currentColor" stopOpacity="0.04" />
+          <stop offset="1" stopColor="currentColor" stopOpacity="0.01" />
         </linearGradient>
 
         <linearGradient
@@ -39,8 +39,8 @@ export function BottomWaves() {
           y2="450"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stopColor="#111111" stopOpacity="0.03" />
-          <stop offset="1" stopColor="#111111" stopOpacity="0.01" />
+          <stop stopColor="currentColor" stopOpacity="0.03" />
+          <stop offset="1" stopColor="currentColor" stopOpacity="0.01" />
         </linearGradient>
 
         <linearGradient
@@ -51,8 +51,8 @@ export function BottomWaves() {
           y2="450"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stopColor="#111111" stopOpacity="0.02" />
-          <stop offset="1" stopColor="#111111" stopOpacity="0.005" />
+          <stop stopColor="currentColor" stopOpacity="0.02" />
+          <stop offset="1" stopColor="currentColor" stopOpacity="0.005" />
         </linearGradient>
       </defs>
 
